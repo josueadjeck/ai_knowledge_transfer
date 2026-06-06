@@ -1,0 +1,70 @@
+@page "/"
+
+<PageTitle>AI Knowledge Transfer</PageTitle>
+
+<section class="workspace-header">
+    <div>
+        <p class="eyebrow">Knowledge Transfer Platform</p>
+        <h1>Projektwissen aufnehmen, pruefen und in Einarbeitung verwandeln.</h1>
+        <p class="header-copy">
+            Der erste MVP-Kern steht: Projekte, Dokumentquellen und Roadmap-Erzeugung sind als Backend-Use-Cases vorbereitet.
+        </p>
+    </div>
+    <div class="status-panel">
+        <span class="status-label">Implementierungsstand</span>
+        <strong>Phase 1 gestartet</strong>
+        <span>Modularer Monolith mit .NET 10, Blazor und API-Fundament.</span>
+    </div>
+</section>
+
+<section class="metric-grid" aria-label="MVP Status">
+    <div class="metric-card">
+        <span>Module</span>
+        <strong>4</strong>
+        <p>Domain, Application, Infrastructure und Contracts sind angelegt.</p>
+    </div>
+    <div class="metric-card">
+        <span>API-Endpunkte</span>
+        <strong>5</strong>
+        <p>Health, Projektliste, Projektanlage, Dokumentregistrierung und Roadmap-Generierung.</p>
+    </div>
+    <div class="metric-card">
+        <span>Naechster Schritt</span>
+        <strong>Upload</strong>
+        <p>Dateispeicherung, Parsing Pipeline und Quellenanzeige.</p>
+    </div>
+</section>
+
+<section class="work-board">
+    <div>
+        <h2>MVP Ablauf</h2>
+        <ol class="flow-list">
+            <li>
+                <strong>Projekt anlegen</strong>
+                <span>Name, Beschreibung und Owner erfassen.</span>
+            </li>
+            <li>
+                <strong>Dokument registrieren</strong>
+                <span>Quelle, Version und Metadaten nachvollziehbar speichern.</span>
+            </li>
+            <li>
+                <strong>Roadmap erzeugen</strong>
+                <span>Zielrolle und Dauer waehlen, Lernwochen generieren.</span>
+            </li>
+            <li>
+                <strong>Review vorbereiten</strong>
+                <span>Freigabeprozess und Quellenpflicht als naechstes ausbauen.</span>
+            </li>
+        </ol>
+    </div>
+    <div>
+        <h2>API Startpunkte</h2>
+        <div class="endpoint-list">
+            <code>GET /health</code>
+            <code>GET /api/projects</code>
+            <code>POST /api/projects</code>
+            <code>POST /api/projects/{projectId}/documents</code>
+            <code>POST /api/projects/{projectId}/roadmaps</code>
+        </div>
+    </div>
+</section>

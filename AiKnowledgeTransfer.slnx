@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AiKnowledgeTransfer.Api/AiKnowledgeTransfer.Api.csproj" />
+    <Project Path="src/AiKnowledgeTransfer.Application/AiKnowledgeTransfer.Application.csproj" />
+    <Project Path="src/AiKnowledgeTransfer.Contracts/AiKnowledgeTransfer.Contracts.csproj" />
+    <Project Path="src/AiKnowledgeTransfer.Domain/AiKnowledgeTransfer.Domain.csproj" />
+    <Project Path="src/AiKnowledgeTransfer.Infrastructure/AiKnowledgeTransfer.Infrastructure.csproj" />
+    <Project Path="src/AiKnowledgeTransfer.Web/AiKnowledgeTransfer.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AiKnowledgeTransfer.ArchitectureTests/AiKnowledgeTransfer.ArchitectureTests.csproj" />
+    <Project Path="tests/AiKnowledgeTransfer.UnitTests/AiKnowledgeTransfer.UnitTests.csproj" />
+  </Folder>
+</Solution>
