@@ -117,6 +117,7 @@ Aktueller Implementierungsstand:
 - Phase 9 ist gestartet: Projekte werden lokal als JSON-Datei persistiert; Upload-Dateien bleiben im lokalen Storage.
 - Security-Grundlage ist gestartet: MVP-Rollenmatrix fuer Admin, Senior Engineer, Contributor und Viewer ist vorhanden und in der UI sichtbar.
 - Audit-Grundlage ist gestartet: zentrale Aktionen werden als JSON-basiertes Audit Log gespeichert und per API/UI abrufbar gemacht.
+- UX-/Fehlerbehandlungs-Grundlage ist gestartet: kritische Blazor-Workflow-Aktionen zeigen kontrollierte Status- und Fehlermeldungen statt ungefangener UI-Fehler.
 
 ### Phase 0: Produktklaerung
 

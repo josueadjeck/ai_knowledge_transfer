@@ -6,6 +6,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 
 - .NET 10 solution with modular monolith structure.
 - Blazor Web project with an interactive MVP workflow.
+- User-facing error feedback for failed workflow operations.
 - ASP.NET Core API with project, document and roadmap endpoints.
 - Multipart document upload with local file storage.
 - Text and Markdown parsing into document chunks.

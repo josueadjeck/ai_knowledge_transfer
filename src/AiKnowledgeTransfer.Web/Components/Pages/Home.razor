@@ -40,7 +40,7 @@
     <div class="status-panel">
         <span class="status-label">Status</span>
         <strong>@StatusText</strong>
-        <span>@StatusDetail</span>
+        <span class="@StatusCssClass">@StatusDetail</span>
         <label class="role-select">
             Rolle
             <select @bind="_currentRole">
@@ -233,6 +233,7 @@
     private UserRole _currentRole = UserRole.Admin;
     private string StatusText { get; set; } = "Bereit";
     private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
+    private bool HasError { get; set; }
     private TraceabilityMatrixResponse? _traceability;
     private ExportProjectMarkdownResponse? _export;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
@@ -257,18 +258,21 @@
     {
         if (!Can(Permission.CreateProject))
         {
-            SetStatus("Keine Berechtigung", "Diese Rolle darf keine Projekte anlegen.");
+            SetStatus("Keine Berechtigung", "Diese Rolle darf keine Projekte anlegen.", isError: true);
             return;
         }
 
-        var created = await Projects.CreateAsync(
-            new CreateProjectRequest(_newProject.Name, _newProject.Description, _newProject.Owner),
-            CancellationToken.None);
+        await RunSafelyAsync("Projekt anlegen", async () =>
+        {
+            var created = await Projects.CreateAsync(
+                new CreateProjectRequest(_newProject.Name, _newProject.Description, _newProject.Owner),
+                CancellationToken.None);
 
-        _selectedProjectId = created.Id;
-        await LoadProjectsAsync();
-        await LoadSelectedProjectAsync();
-        SetStatus("Projekt angelegt", created.Name);
+            _selectedProjectId = created.Id;
+            await LoadProjectsAsync();
+            await LoadSelectedProjectAsync();
+            SetStatus("Projekt angelegt", created.Name);
+        });
     }
 
     private async Task SelectProjectAsync(ChangeEventArgs args)
@@ -287,15 +291,18 @@
             return;
         }
 
-        var file = args.File;
-        await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-        var upload = await Projects.UploadDocumentAsync(
-            _selectedProject.Id,
-            new UploadDocumentCommand(file.Name, file.ContentType, _uploadSource, stream),
-            CancellationToken.None);
+        await RunSafelyAsync("Dokument hochladen", async () =>
+        {
+            var file = args.File;
+            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var upload = await Projects.UploadDocumentAsync(
+                _selectedProject.Id,
+                new UploadDocumentCommand(file.Name, file.ContentType, _uploadSource, stream),
+                CancellationToken.None);
 
-        await LoadSelectedProjectAsync();
-        SetStatus("Dokument hochgeladen", upload?.Document.FileName ?? file.Name);
+            await LoadSelectedProjectAsync();
+            SetStatus("Dokument hochgeladen", upload?.Document.FileName ?? file.Name);
+        });
     }
 
     private async Task AnalyzeLatestDocumentAsync()
@@ -306,9 +313,12 @@
             return;
         }
 
-        await Analysis.AnalyzeAsync(_selectedProject.Id, document.Id, CancellationToken.None);
-        await LoadSelectedProjectAsync();
-        SetStatus("Analyse abgeschlossen", document.FileName);
+        await RunSafelyAsync("Dokument analysieren", async () =>
+        {
+            await Analysis.AnalyzeAsync(_selectedProject.Id, document.Id, CancellationToken.None);
+            await LoadSelectedProjectAsync();
+            SetStatus("Analyse abgeschlossen", document.FileName);
+        });
     }
 
     private async Task ExtractKnowledgeAsync()
@@ -319,48 +329,60 @@
             return;
         }
 
-        var extraction = await Extraction.ExtractAsync(_selectedProject.Id, document.Id, CancellationToken.None);
-        await LoadSelectedProjectAsync();
-        SetStatus("Wissen extrahiert", $"{extraction?.CreatedItemCount ?? 0} Elemente");
+        await RunSafelyAsync("Wissen extrahieren", async () =>
+        {
+            var extraction = await Extraction.ExtractAsync(_selectedProject.Id, document.Id, CancellationToken.None);
+            await LoadSelectedProjectAsync();
+            SetStatus("Wissen extrahiert", $"{extraction?.CreatedItemCount ?? 0} Elemente");
+        });
     }
 
     private async Task SubmitReviewAsync(Guid knowledgeItemId)
     {
         if (!Can(Permission.SubmitKnowledgeReview))
         {
-            SetStatus("Keine Berechtigung", "Diese Rolle darf keinen Review starten.");
+            SetStatus("Keine Berechtigung", "Diese Rolle darf keinen Review starten.", isError: true);
             return;
         }
 
-        await Review.SubmitForReviewAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Review requested from UI."), CancellationToken.None);
-        await LoadSelectedProjectAsync();
-        SetStatus("Review gestartet", knowledgeItemId.ToString());
+        await RunSafelyAsync("Review starten", async () =>
+        {
+            await Review.SubmitForReviewAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Review requested from UI."), CancellationToken.None);
+            await LoadSelectedProjectAsync();
+            SetStatus("Review gestartet", knowledgeItemId.ToString());
+        });
     }
 
     private async Task ApproveAsync(Guid knowledgeItemId)
     {
         if (!Can(Permission.ApproveKnowledge))
         {
-            SetStatus("Keine Berechtigung", "Diese Rolle darf kein Wissen freigeben.");
+            SetStatus("Keine Berechtigung", "Diese Rolle darf kein Wissen freigeben.", isError: true);
             return;
         }
 
-        await Review.ApproveAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Approved from UI."), CancellationToken.None);
-        await LoadSelectedProjectAsync();
-        SetStatus("Wissen freigegeben", knowledgeItemId.ToString());
+        await RunSafelyAsync("Wissen freigeben", async () =>
+        {
+            await Review.ApproveAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Approved from UI."), CancellationToken.None);
+            await LoadSelectedProjectAsync();
+            SetStatus("Wissen freigegeben", knowledgeItemId.ToString());
+        });
     }
 
     private async Task RejectAsync(Guid knowledgeItemId)
     {
         if (!Can(Permission.RejectKnowledge))
         {
-            SetStatus("Keine Berechtigung", "Diese Rolle darf kein Wissen ablehnen.");
+            SetStatus("Keine Berechtigung", "Diese Rolle darf kein Wissen ablehnen.", isError: true);
             return;
         }
 
-        await Review.RejectAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Rejected from UI."), CancellationToken.None);
-        await LoadSelectedProjectAsync();
-        SetStatus("Wissen abgelehnt", knowledgeItemId.ToString());
+        await RunSafelyAsync("Wissen ablehnen", async () =>
+        {
+            await Review.RejectAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Rejected from UI."), CancellationToken.None);
+            await LoadSelectedProjectAsync();
+            SetStatus("Wissen abgelehnt", knowledgeItemId.ToString());
+        });
     }
 
     private async Task GenerateRoadmapAsync()
@@ -370,9 +392,12 @@
             return;
         }
 
-        await Roadmaps.GenerateAsync(_selectedProject.Id, new GenerateRoadmapRequest(_roadmapRole, _roadmapWeeks), CancellationToken.None);
-        await LoadSelectedProjectAsync();
-        SetStatus("Roadmap erzeugt", _roadmapRole);
+        await RunSafelyAsync("Roadmap erzeugen", async () =>
+        {
+            await Roadmaps.GenerateAsync(_selectedProject.Id, new GenerateRoadmapRequest(_roadmapRole, _roadmapWeeks), CancellationToken.None);
+            await LoadSelectedProjectAsync();
+            SetStatus("Roadmap erzeugt", _roadmapRole);
+        });
     }
 
     private async Task LoadTraceabilityAsync()
@@ -382,8 +407,11 @@
             return;
         }
 
-        _traceability = await Traceability.GetMatrixAsync(_selectedProject.Id, CancellationToken.None);
-        SetStatus("Traceability geladen", $"{_traceability?.Rows.Count ?? 0} Zeilen");
+        await RunSafelyAsync("Traceability laden", async () =>
+        {
+            _traceability = await Traceability.GetMatrixAsync(_selectedProject.Id, CancellationToken.None);
+            SetStatus("Traceability geladen", $"{_traceability?.Rows.Count ?? 0} Zeilen");
+        });
     }
 
     private async Task ExportMarkdownAsync()
@@ -393,8 +421,11 @@
             return;
         }
 
-        _export = await MarkdownExports.ExportProjectAsync(_selectedProject.Id, CancellationToken.None);
-        SetStatus("Markdown Export erzeugt", _export?.FileName ?? "Export");
+        await RunSafelyAsync("Markdown exportieren", async () =>
+        {
+            _export = await MarkdownExports.ExportProjectAsync(_selectedProject.Id, CancellationToken.None);
+            SetStatus("Markdown Export erzeugt", _export?.FileName ?? "Export");
+        });
     }
 
     private async Task LoadAuditAsync()
@@ -404,8 +435,11 @@
             return;
         }
 
-        _auditEvents = await Audit.ListAsync(_selectedProject.Id, CancellationToken.None);
-        SetStatus("Audit Log geladen", $"{_auditEvents.Count} Events");
+        await RunSafelyAsync("Audit Log laden", async () =>
+        {
+            _auditEvents = await Audit.ListAsync(_selectedProject.Id, CancellationToken.None);
+            SetStatus("Audit Log geladen", $"{_auditEvents.Count} Events");
+        });
     }
 
     private async Task LoadProjectsAsync()
@@ -427,10 +461,38 @@
         _auditEvents = [];
     }
 
-    private void SetStatus(string status, string detail)
+    private async Task RunSafelyAsync(string action, Func<Task> work)
+    {
+        try
+        {
+            await work();
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            SetStatus($"{action} fehlgeschlagen", ToUserMessage(exception), isError: true);
+        }
+    }
+
+    private void SetStatus(string status, string detail, bool isError = false)
     {
         StatusText = status;
         StatusDetail = detail;
+        HasError = isError;
+    }
+
+    private string StatusCssClass => HasError ? "status-error" : "status-ok";
+
+    private static string ToUserMessage(Exception exception)
+    {
+        return exception switch
+        {
+            NotSupportedException => exception.Message,
+            InvalidOperationException => exception.Message,
+            IOException => "Datei oder lokaler Speicher ist gerade nicht verfuegbar.",
+            HttpRequestException => "AI Provider oder Netzwerk ist nicht erreichbar. Fallback/Retry pruefen.",
+            ArgumentException => exception.Message,
+            _ => "Unerwarteter Fehler. Details stehen im Server-Log oder Audit-Kontext."
+        };
     }
 
     private sealed class CreateProjectRequestModel

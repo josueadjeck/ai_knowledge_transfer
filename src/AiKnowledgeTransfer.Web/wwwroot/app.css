@@ -71,6 +71,15 @@ a, .btn-link {
     font-size: 1.05rem;
 }
 
+.status-ok {
+    color: #23704a;
+}
+
+.status-error {
+    color: #b42318;
+    font-weight: 700;
+}
+
 .role-select {
     margin-top: .4rem;
 }
