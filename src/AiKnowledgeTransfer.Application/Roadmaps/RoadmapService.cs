@@ -2,6 +2,8 @@ namespace AiKnowledgeTransfer.Application.Roadmaps;
 
 using AiKnowledgeTransfer.Application.Abstractions;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
+using AiKnowledgeTransfer.Domain.Knowledge;
+using AiKnowledgeTransfer.Domain.Projects;
 using AiKnowledgeTransfer.Domain.Roadmaps;
 
 public sealed class RoadmapService(IProjectRepository projects)
@@ -15,8 +17,9 @@ public sealed class RoadmapService(IProjectRepository projects)
         }
 
         var duration = Math.Clamp(request.DurationInWeeks, 1, 8);
+        var context = RoadmapKnowledgeContext.FromProject(project);
         var weeks = Enumerable.Range(1, duration)
-            .Select(week => CreateWeek(week, request.TargetRole, project.Documents.Count))
+            .Select(week => CreateWeek(week, request.TargetRole, project.Documents.Count, context))
             .ToArray();
 
         var roadmap = new OnboardingRoadmap(request.TargetRole, duration, weeks);
@@ -26,18 +29,19 @@ public sealed class RoadmapService(IProjectRepository projects)
         return RoadmapMapper.ToResponse(roadmap);
     }
 
-    private static RoadmapWeek CreateWeek(int weekNumber, string targetRole, int documentCount)
+    private static RoadmapWeek CreateWeek(int weekNumber, string targetRole, int documentCount, RoadmapKnowledgeContext context)
     {
         return weekNumber switch
         {
             1 => new RoadmapWeek(
                 weekNumber,
                 "Systemueberblick und Quellenlage",
+                AddApprovedItems(
                 [
                     $"Rolle {targetRole} im Projektkontext verstehen.",
                     $"Verfuegbare Quellen sichten ({documentCount} Dokumente registriert).",
                     "Wichtige Begriffe und offene Fragen erfassen."
-                ],
+                ], context.GlossaryTerms, "Freigegebenen Begriff verstehen"),
                 [
                     "Projektsteckbrief erstellen.",
                     "Top-10-Begriffe fuer das Glossar markieren."
@@ -45,37 +49,44 @@ public sealed class RoadmapService(IProjectRepository projects)
                 [
                     "Systemzweck kann erklaert werden.",
                     "Offene Fragen sind dokumentiert."
-                ]),
+                ],
+                context.ReviewNotes),
             2 => new RoadmapWeek(
                 weekNumber,
                 "Architektur, Komponenten und Schnittstellen",
+                AddApprovedItems(
                 [
                     "Zentrale Komponenten und Verantwortlichkeiten verstehen.",
                     "Kommunikationswege und Datenfluesse nachvollziehen."
-                ],
+                ], context.Components, "Freigegebene Komponente einordnen"),
+                AddApprovedItems(
                 [
                     "Komponentenliste pruefen.",
                     "Ein einfaches Architekturdiagramm aus den Quellen ableiten."
-                ],
+                ], context.Components, "Komponente im Diagramm verorten"),
                 [
                     "Komponentenmodell ist reviewfaehig.",
                     "Unklare Schnittstellen sind markiert."
-                ]),
+                ],
+                context.ReviewNotes),
             3 => new RoadmapWeek(
                 weekNumber,
                 "Workflows, Betrieb und Troubleshooting",
+                AddApprovedItems(
                 [
                     "Wichtige Betriebsablaeufe Schritt fuer Schritt nachvollziehen.",
                     "Risiken und Kontrollpunkte je Workflow erkennen."
-                ],
+                ], context.Workflows, "Freigegebenen Workflow nachvollziehen"),
+                AddApprovedItems(
                 [
                     "Einen Workflow als Runbook beschreiben.",
                     "Troubleshooting-Fragen aus offenen Punkten ableiten."
-                ],
+                ], context.Workflows, "Workflow als Checkliste ueben"),
                 [
                     "Mindestens ein Workflow ist als Checkliste formuliert.",
                     "Risiken sind mit Quellen verknuepft."
-                ]),
+                ],
+                context.ReviewNotes),
             _ => new RoadmapWeek(
                 weekNumber,
                 "Review, Uebung und Freigabe",
@@ -91,7 +102,56 @@ public sealed class RoadmapService(IProjectRepository projects)
                 [
                     "Review-Kommentare sind eingearbeitet.",
                     "Abschlusskriterien sind erfuellt oder begruendet offen."
-                ])
+                ],
+                context.ReviewNotes)
         };
+    }
+
+    private static IReadOnlyCollection<string> AddApprovedItems(
+        IReadOnlyCollection<string> baseItems,
+        IReadOnlyCollection<string> approvedItems,
+        string prefix)
+    {
+        return baseItems
+            .Concat(approvedItems.Select(item => $"{prefix}: {item}."))
+            .ToArray();
+    }
+
+    private sealed record RoadmapKnowledgeContext(
+        IReadOnlyCollection<string> GlossaryTerms,
+        IReadOnlyCollection<string> Components,
+        IReadOnlyCollection<string> Workflows,
+        IReadOnlyCollection<string> ReviewNotes)
+    {
+        public static RoadmapKnowledgeContext FromProject(KnowledgeProject project)
+        {
+            var approvedItems = project.KnowledgeItems
+                .Where(item => item.ReviewStatus == KnowledgeReviewStatus.Approved)
+                .ToArray();
+
+            var reviewNotes = project.KnowledgeItems
+                .Where(item => item.ReviewStatus != KnowledgeReviewStatus.Approved)
+                .Select(item => $"{item.Title} ({item.ReviewStatus}) muss vor finaler Nutzung geprueft werden.")
+                .Take(10)
+                .ToArray();
+
+            return new RoadmapKnowledgeContext(
+                approvedItems
+                    .Where(item => item.Type == KnowledgeItemType.GlossaryTerm)
+                    .Select(item => item.Title)
+                    .Take(5)
+                    .ToArray(),
+                approvedItems
+                    .Where(item => item.Type == KnowledgeItemType.Component)
+                    .Select(item => item.Title)
+                    .Take(5)
+                    .ToArray(),
+                approvedItems
+                    .Where(item => item.Type == KnowledgeItemType.Workflow)
+                    .Select(item => item.Title)
+                    .Take(5)
+                    .ToArray(),
+                reviewNotes);
+        }
     }
 }

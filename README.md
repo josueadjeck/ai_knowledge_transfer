@@ -11,6 +11,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Text and Markdown parsing into document chunks.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
 - Review workflow for extracted knowledge items.
+- Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -140,3 +141,5 @@ Content-Type: application/json
   "durationInWeeks": 4
 }
 ```
+
+Generated roadmap weeks include `reviewNotes`. Approved knowledge items are added to learning goals and exercises where they fit; draft, in-review or rejected items remain visible as review notes.

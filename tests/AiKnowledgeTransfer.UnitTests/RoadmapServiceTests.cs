@@ -210,4 +210,54 @@ public sealed class RoadmapServiceTests
         Assert.Equal(4, roadmap.Weeks.Count);
         Assert.Equal([1, 2, 3, 4], roadmap.Weeks.Select(week => week.WeekNumber));
     }
+
+    [Fact]
+    public async Task GenerateAsync_includes_approved_knowledge_and_review_notes()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+        var reviewService = new KnowledgeReviewService(repository);
+        var roadmapService = new RoadmapService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Roadmap Review Project", "Approved knowledge roadmap test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("""
+            CTU communication is unknown.
+
+            Deployment workflow must be reviewed by senior engineers.
+            """u8.ToArray());
+
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("roadmap.md", "text/markdown", "Manual upload", content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        var workflow = extraction.KnowledgeItems.First(item => item.Type == "Workflow");
+        await reviewService.ApproveAsync(
+            project.Id,
+            workflow.Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Workflow confirmed."),
+            CancellationToken.None);
+
+        var roadmap = await roadmapService.GenerateAsync(
+            project.Id,
+            new GenerateRoadmapRequest("Support Engineer", 3),
+            CancellationToken.None);
+
+        Assert.NotNull(roadmap);
+        Assert.Contains(roadmap.Weeks.Single(week => week.WeekNumber == 3).LearningGoals, goal => goal.Contains(workflow.Title, StringComparison.Ordinal));
+        Assert.Contains(roadmap.Weeks.SelectMany(week => week.ReviewNotes), note => note.Contains("Draft", StringComparison.Ordinal));
+    }
 }

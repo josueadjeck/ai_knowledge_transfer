@@ -5,4 +5,5 @@ public sealed record RoadmapWeekResponse(
     string Theme,
     IReadOnlyCollection<string> LearningGoals,
     IReadOnlyCollection<string> Exercises,
-    IReadOnlyCollection<string> AcceptanceCriteria);
+    IReadOnlyCollection<string> AcceptanceCriteria,
+    IReadOnlyCollection<string> ReviewNotes);

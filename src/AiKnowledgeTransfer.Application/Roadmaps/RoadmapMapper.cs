@@ -23,6 +23,7 @@ public static class RoadmapMapper
             week.Theme,
             week.LearningGoals,
             week.Exercises,
-            week.AcceptanceCriteria);
+            week.AcceptanceCriteria,
+            week.ReviewNotes);
     }
 }
