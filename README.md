@@ -13,6 +13,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Review workflow for extracted knowledge items.
 - Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
 - Markdown export for project handover documents.
+- Traceability matrix for source, knowledge, review and roadmap/export usage.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -149,4 +150,10 @@ Export a project handover document as Markdown:
 
 ```http
 GET http://localhost:5256/api/projects/{projectId}/exports/markdown
+```
+
+Get the traceability matrix:
+
+```http
+GET http://localhost:5256/api/projects/{projectId}/traceability
 ```

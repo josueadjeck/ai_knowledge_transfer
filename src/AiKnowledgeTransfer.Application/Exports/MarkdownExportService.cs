@@ -41,6 +41,7 @@ public sealed class MarkdownExportService(IProjectRepository projects)
 
         AppendDocuments(builder, project);
         AppendKnowledge(builder, project);
+        AppendTraceability(builder, project);
         AppendRoadmaps(builder, project);
 
         return builder.ToString();
@@ -152,6 +153,53 @@ public sealed class MarkdownExportService(IProjectRepository projects)
         }
     }
 
+    private static void AppendTraceability(StringBuilder builder, KnowledgeProject project)
+    {
+        builder.AppendLine("## Traceability Matrix");
+        builder.AppendLine();
+        builder.AppendLine("| Source | Chunks | Knowledge Item | Type | Review Status | Reviewed By | Roadmap Usage | Exported |");
+        builder.AppendLine("| --- | ---: | --- | --- | --- | --- | ---: | --- |");
+
+        if (project.Documents.Count == 0)
+        {
+            builder.AppendLine("| - | 0 | - | - | - | - | 0 | No |");
+            builder.AppendLine();
+            return;
+        }
+
+        foreach (var document in project.Documents.OrderBy(document => document.FileName).ThenBy(document => document.VersionNumber))
+        {
+            var linkedItems = project.KnowledgeItems
+                .Where(item => item.SourceDocumentId == document.Id)
+                .OrderBy(item => item.Type)
+                .ThenBy(item => item.Title)
+                .ToArray();
+
+            if (linkedItems.Length == 0)
+            {
+                builder.AppendLine($"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | - | - | - | - | 0 | No |");
+                continue;
+            }
+
+            foreach (var item in linkedItems)
+            {
+                var roadmapUsage = project.Roadmaps
+                    .SelectMany(roadmap => roadmap.Weeks)
+                    .Count(week =>
+                        ContainsTitle(week.LearningGoals, item.Title)
+                        || ContainsTitle(week.Exercises, item.Title)
+                        || ContainsTitle(week.ReviewNotes, item.Title));
+
+                var exported = item.ReviewStatus == KnowledgeReviewStatus.Approved ? "Yes" : "No";
+
+                builder.AppendLine(
+                    $"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | {EscapeTable(item.Title)} | {item.Type} | {item.ReviewStatus} | {EscapeTable(item.ReviewedBy ?? "-")} | {roadmapUsage} | {exported} |");
+            }
+        }
+
+        builder.AppendLine();
+    }
+
     private static void AppendList(StringBuilder builder, string title, IReadOnlyCollection<string> items)
     {
         builder.AppendLine($"**{title}**");
@@ -177,5 +225,15 @@ public sealed class MarkdownExportService(IProjectRepository projects)
         var invalidChars = Path.GetInvalidFileNameChars();
         var safeName = new string(name.Select(character => invalidChars.Contains(character) ? '-' : character).ToArray());
         return string.IsNullOrWhiteSpace(safeName) ? "knowledge-transfer" : safeName.Trim();
+    }
+
+    private static bool ContainsTitle(IEnumerable<string> values, string title)
+    {
+        return values.Any(value => value.Contains(title, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string EscapeTable(string value)
+    {
+        return value.Replace("|", "\\|", StringComparison.Ordinal);
     }
 }

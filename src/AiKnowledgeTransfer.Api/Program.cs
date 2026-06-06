@@ -4,6 +4,7 @@ using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Roadmaps;
+using AiKnowledgeTransfer.Application.Traceability;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
 using AiKnowledgeTransfer.Infrastructure;
@@ -169,6 +170,15 @@ projects.MapGet("/{projectId:guid}/exports/markdown", async (
     CancellationToken cancellationToken) =>
 {
     var result = await service.ExportProjectAsync(projectId, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
+
+projects.MapGet("/{projectId:guid}/traceability", async (
+    Guid projectId,
+    TraceabilityService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.GetMatrixAsync(projectId, cancellationToken);
     return result is null ? Results.NotFound() : Results.Ok(result);
 });
 

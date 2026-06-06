@@ -5,6 +5,7 @@ using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Roadmaps;
+using AiKnowledgeTransfer.Application.Traceability;
 using Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
@@ -17,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<KnowledgeExtractionService>();
         services.AddScoped<KnowledgeReviewService>();
         services.AddScoped<RoadmapService>();
+        services.AddScoped<TraceabilityService>();
 
         return services;
     }
