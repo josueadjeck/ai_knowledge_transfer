@@ -119,6 +119,39 @@ projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/extract-knowledg
     }
 });
 
+projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/submit-review", async (
+    Guid projectId,
+    Guid knowledgeItemId,
+    ReviewKnowledgeItemRequest request,
+    KnowledgeReviewService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.SubmitForReviewAsync(projectId, knowledgeItemId, request, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
+
+projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/approve", async (
+    Guid projectId,
+    Guid knowledgeItemId,
+    ReviewKnowledgeItemRequest request,
+    KnowledgeReviewService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.ApproveAsync(projectId, knowledgeItemId, request, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
+
+projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/reject", async (
+    Guid projectId,
+    Guid knowledgeItemId,
+    ReviewKnowledgeItemRequest request,
+    KnowledgeReviewService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.RejectAsync(projectId, knowledgeItemId, request, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
+
 projects.MapPost("/{projectId:guid}/roadmaps", async (
     Guid projectId,
     GenerateRoadmapRequest request,

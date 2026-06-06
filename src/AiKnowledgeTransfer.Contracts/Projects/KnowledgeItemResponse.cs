@@ -7,4 +7,7 @@ public sealed record KnowledgeItemResponse(
     string Summary,
     Guid? SourceDocumentId,
     string ReviewStatus,
+    string? ReviewedBy,
+    string? ReviewComment,
+    DateTimeOffset? ReviewedAt,
     DateTimeOffset CreatedAt);

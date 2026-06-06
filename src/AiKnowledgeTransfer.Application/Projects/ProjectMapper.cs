@@ -70,6 +70,9 @@ public static class ProjectMapper
             item.Summary,
             item.SourceDocumentId,
             item.ReviewStatus.ToString(),
+            item.ReviewedBy,
+            item.ReviewComment,
+            item.ReviewedAt,
             item.CreatedAt);
     }
 }

@@ -87,6 +87,62 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task KnowledgeReviewService_updates_status_and_review_metadata()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+        var reviewService = new KnowledgeReviewService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Review Project", "Knowledge review test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("""
+            CTU communication is unknown.
+
+            Deployment workflow must be reviewed by senior engineers.
+            """u8.ToArray());
+
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("review.md", "text/markdown", "Manual upload", content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        var itemId = extraction.KnowledgeItems.First().Id;
+
+        var inReview = await reviewService.SubmitForReviewAsync(
+            project.Id,
+            itemId,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Needs technical confirmation."),
+            CancellationToken.None);
+
+        Assert.NotNull(inReview);
+        Assert.Equal("InReview", inReview.ReviewStatus);
+
+        var approved = await reviewService.ApproveAsync(
+            project.Id,
+            itemId,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Confirmed against source."),
+            CancellationToken.None);
+
+        Assert.NotNull(approved);
+        Assert.Equal("Approved", approved.ReviewStatus);
+        Assert.Equal("Senior Engineer", approved.ReviewedBy);
+        Assert.Equal("Confirmed against source.", approved.ReviewComment);
+        Assert.NotNull(approved.ReviewedAt);
+    }
+
+    [Fact]
     public async Task AnalyzeAsync_parses_uploaded_text_document_into_chunks()
     {
         var repository = new InMemoryProjectRepository();

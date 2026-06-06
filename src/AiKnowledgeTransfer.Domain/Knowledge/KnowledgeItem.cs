@@ -32,8 +32,43 @@ public sealed class KnowledgeItem
 
     public DateTimeOffset CreatedAt { get; }
 
-    public void Approve()
+    public string? ReviewedBy { get; private set; }
+
+    public string? ReviewComment { get; private set; }
+
+    public DateTimeOffset? ReviewedAt { get; private set; }
+
+    public void SubmitForReview(string reviewer, string comment)
+    {
+        ReviewStatus = KnowledgeReviewStatus.InReview;
+        ReviewedBy = RequireReviewer(reviewer);
+        ReviewComment = comment.Trim();
+        ReviewedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void Approve(string reviewer, string comment)
     {
         ReviewStatus = KnowledgeReviewStatus.Approved;
+        ReviewedBy = RequireReviewer(reviewer);
+        ReviewComment = comment.Trim();
+        ReviewedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void Reject(string reviewer, string comment)
+    {
+        ReviewStatus = KnowledgeReviewStatus.Rejected;
+        ReviewedBy = RequireReviewer(reviewer);
+        ReviewComment = comment.Trim();
+        ReviewedAt = DateTimeOffset.UtcNow;
+    }
+
+    private static string RequireReviewer(string reviewer)
+    {
+        if (string.IsNullOrWhiteSpace(reviewer))
+        {
+            throw new ArgumentException("Reviewer must not be empty.", nameof(reviewer));
+        }
+
+        return reviewer.Trim();
     }
 }

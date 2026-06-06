@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<ProjectService>();
         services.AddScoped<DocumentAnalysisService>();
         services.AddScoped<KnowledgeExtractionService>();
+        services.AddScoped<KnowledgeReviewService>();
         services.AddScoped<RoadmapService>();
 
         return services;

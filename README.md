@@ -10,6 +10,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Multipart document upload with local file storage.
 - Text and Markdown parsing into document chunks.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
+- Review workflow for extracted knowledge items.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -112,6 +113,20 @@ Extract first knowledge items from an analyzed document:
 
 ```http
 POST http://localhost:5256/api/projects/{projectId}/documents/{documentId}/extract-knowledge
+```
+
+Submit, approve or reject a knowledge item:
+
+```http
+POST http://localhost:5256/api/projects/{projectId}/knowledge-items/{knowledgeItemId}/submit-review
+POST http://localhost:5256/api/projects/{projectId}/knowledge-items/{knowledgeItemId}/approve
+POST http://localhost:5256/api/projects/{projectId}/knowledge-items/{knowledgeItemId}/reject
+Content-Type: application/json
+
+{
+  "reviewer": "Senior Engineer",
+  "comment": "Confirmed against source."
+}
 ```
 
 Generate a roadmap:
