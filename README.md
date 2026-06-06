@@ -5,7 +5,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 ## Current implementation
 
 - .NET 10 solution with modular monolith structure.
-- Blazor Web project with MVP dashboard.
+- Blazor Web project with an interactive MVP workflow.
 - ASP.NET Core API with project, document and roadmap endpoints.
 - Multipart document upload with local file storage.
 - Text and Markdown parsing into document chunks.
@@ -45,6 +45,16 @@ Web URL:
 ```text
 http://localhost:5280
 ```
+
+The web UI can run the MVP workflow directly:
+
+- Create or select a project.
+- Upload a text or Markdown document.
+- Analyze the document into chunks.
+- Extract knowledge items.
+- Submit, approve or reject knowledge items.
+- Generate a review-aware roadmap.
+- Load traceability and Markdown export output.
 
 ## Verify
 

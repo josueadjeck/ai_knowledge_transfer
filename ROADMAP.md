@@ -107,6 +107,7 @@ Aktueller Implementierungsstand:
 
 - Phase 1 ist gestartet: Solution-Struktur, Schichten, Dependency Injection, API und Tests sind vorhanden.
 - Phase 2 ist gestartet: Blazor-Dashboard als erster MVP-Prototyp ist vorhanden.
+- Phase 2 ist erweitert: Blazor bietet einen interaktiven MVP-Workflow fuer Projekt, Upload, Analyse, Extraction, Review, Roadmap, Traceability und Export.
 - Phase 3 ist gestartet: Projektanlage, Dokumentregistrierung, echter Datei-Upload und lokale Dateispeicherung sind vorhanden.
 - Phase 4 ist gestartet: Text-/Markdown-Parsing, Dokument-Chunks, Analyse-Endpunkt, heuristische Knowledge Extraction und OpenAI als erster provider-unabhaengiger AI-Provider sind vorhanden; Azure OpenAI, Kunden-AI und lokale Modelle koennen spaeter als weitere Provider folgen.
 - Phase 5 ist gestartet: Roadmaps verwenden freigegebenes Wissen bevorzugt und markieren nicht freigegebene Wissenselemente als Review-Hinweise.

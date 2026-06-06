@@ -104,6 +104,132 @@ a, .btn-link {
     margin: 0 0 .75rem;
 }
 
+.workflow-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.workflow-panel {
+    background: #ffffff;
+    border: 1px solid #d9dee5;
+    border-radius: 8px;
+    display: grid;
+    gap: .9rem;
+    padding: 1rem;
+}
+
+.workflow-panel h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.span-2 {
+    grid-column: span 2;
+}
+
+.form-grid {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+label,
+.select-label {
+    color: #394756;
+    display: grid;
+    font-size: .86rem;
+    font-weight: 700;
+    gap: .3rem;
+}
+
+input,
+select,
+textarea {
+    background: #ffffff;
+    border: 1px solid #c8d0da;
+    border-radius: 6px;
+    color: #1f2933;
+    font: inherit;
+    min-height: 2.35rem;
+    padding: .45rem .6rem;
+    width: 100%;
+}
+
+textarea {
+    min-height: 4.5rem;
+    resize: vertical;
+}
+
+button,
+.primary-action {
+    background: #244f8f;
+    border: 1px solid #1f467f;
+    border-radius: 6px;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 700;
+    min-height: 2.35rem;
+    padding: .45rem .75rem;
+}
+
+button:disabled {
+    background: #d6dce4;
+    border-color: #c6ced8;
+    color: #6a7684;
+    cursor: not-allowed;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.compact-list,
+.knowledge-table {
+    display: grid;
+    gap: .55rem;
+}
+
+.compact-list > div,
+.knowledge-row {
+    background: #f8fafc;
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .65rem;
+}
+
+.compact-list strong,
+.compact-list span,
+.knowledge-row strong,
+.knowledge-row span {
+    display: block;
+}
+
+.compact-list span,
+.knowledge-row span,
+.muted {
+    color: #617080;
+}
+
+.knowledge-row {
+    align-items: start;
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.knowledge-row p {
+    margin: .35rem 0 0;
+}
+
+.export-preview {
+    font-family: Consolas, 'Courier New', monospace;
+    min-height: 18rem;
+    white-space: pre;
+}
+
 .flow-list {
     display: grid;
     gap: .75rem;
@@ -138,7 +264,17 @@ a, .btn-link {
 @media (max-width: 900px) {
     .workspace-header,
     .metric-grid,
-    .work-board {
+    .work-board,
+    .workflow-grid,
+    .knowledge-row {
+        grid-template-columns: 1fr;
+    }
+
+    .span-2 {
+        grid-column: span 1;
+    }
+
+    .form-grid {
         grid-template-columns: 1fr;
     }
 }

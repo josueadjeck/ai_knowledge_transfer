@@ -1,10 +1,16 @@
+using AiKnowledgeTransfer.Application;
+using AiKnowledgeTransfer.Infrastructure;
 using AiKnowledgeTransfer.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+var storageRootPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "uploads");
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services
+    .AddApplication()
+    .AddInfrastructure(storageRootPath);
 
 var app = builder.Build();
 

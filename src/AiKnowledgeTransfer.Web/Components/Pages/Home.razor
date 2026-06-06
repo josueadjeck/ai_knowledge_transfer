@@ -1,70 +1,370 @@
 @page "/"
+@rendermode InteractiveServer
+
+@using AiKnowledgeTransfer.Application.Documents
+@using AiKnowledgeTransfer.Application.Exports
+@using AiKnowledgeTransfer.Application.Knowledge
+@using AiKnowledgeTransfer.Application.Projects
+@using AiKnowledgeTransfer.Application.Roadmaps
+@using AiKnowledgeTransfer.Application.Traceability
+@using AiKnowledgeTransfer.Contracts.Exports
+@using AiKnowledgeTransfer.Contracts.Projects
+@using AiKnowledgeTransfer.Contracts.Roadmaps
+@using AiKnowledgeTransfer.Contracts.Traceability
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject ProjectService Projects
+@inject DocumentAnalysisService Analysis
+@inject KnowledgeExtractionService Extraction
+@inject KnowledgeReviewService Review
+@inject RoadmapService Roadmaps
+@inject MarkdownExportService MarkdownExports
+@inject TraceabilityService Traceability
 
 <PageTitle>AI Knowledge Transfer</PageTitle>
 
 <section class="workspace-header">
     <div>
-        <p class="eyebrow">Knowledge Transfer Platform</p>
+        <p class="eyebrow">MVP Workflow</p>
         <h1>Projektwissen aufnehmen, pruefen und in Einarbeitung verwandeln.</h1>
         <p class="header-copy">
-            Der erste MVP-Kern steht: Projekte, Dokumentquellen und Roadmap-Erzeugung sind als Backend-Use-Cases vorbereitet.
+            Ein durchgaengiger Arbeitsfluss fuer Upload, Analyse, Knowledge Extraction, Review, Roadmap, Traceability und Markdown Export.
         </p>
     </div>
     <div class="status-panel">
-        <span class="status-label">Implementierungsstand</span>
-        <strong>Phase 1 gestartet</strong>
-        <span>Modularer Monolith mit .NET 10, Blazor und API-Fundament.</span>
+        <span class="status-label">Status</span>
+        <strong>@StatusText</strong>
+        <span>@StatusDetail</span>
     </div>
 </section>
 
 <section class="metric-grid" aria-label="MVP Status">
     <div class="metric-card">
-        <span>Module</span>
-        <strong>4</strong>
-        <p>Domain, Application, Infrastructure und Contracts sind angelegt.</p>
+        <span>Projekte</span>
+        <strong>@_projects.Count</strong>
+        <p>Im aktuellen In-Memory Workspace.</p>
     </div>
     <div class="metric-card">
-        <span>API-Endpunkte</span>
-        <strong>5</strong>
-        <p>Health, Projektliste, Projektanlage, Dokumentregistrierung und Roadmap-Generierung.</p>
+        <span>Dokumente</span>
+        <strong>@(_selectedProject?.Documents.Count ?? 0)</strong>
+        <p>Hochgeladen oder registriert.</p>
     </div>
     <div class="metric-card">
-        <span>Naechster Schritt</span>
-        <strong>Upload</strong>
-        <p>Dateispeicherung, Parsing Pipeline und Quellenanzeige.</p>
+        <span>Wissen</span>
+        <strong>@(_selectedProject?.KnowledgeItems.Count ?? 0)</strong>
+        <p>Extrahierte und reviewbare Elemente.</p>
     </div>
 </section>
 
-<section class="work-board">
-    <div>
-        <h2>MVP Ablauf</h2>
-        <ol class="flow-list">
-            <li>
-                <strong>Projekt anlegen</strong>
-                <span>Name, Beschreibung und Owner erfassen.</span>
-            </li>
-            <li>
-                <strong>Dokument registrieren</strong>
-                <span>Quelle, Version und Metadaten nachvollziehbar speichern.</span>
-            </li>
-            <li>
-                <strong>Roadmap erzeugen</strong>
-                <span>Zielrolle und Dauer waehlen, Lernwochen generieren.</span>
-            </li>
-            <li>
-                <strong>Review vorbereiten</strong>
-                <span>Freigabeprozess und Quellenpflicht als naechstes ausbauen.</span>
-            </li>
-        </ol>
-    </div>
-    <div>
-        <h2>API Startpunkte</h2>
-        <div class="endpoint-list">
-            <code>GET /health</code>
-            <code>GET /api/projects</code>
-            <code>POST /api/projects</code>
-            <code>POST /api/projects/{projectId}/documents</code>
-            <code>POST /api/projects/{projectId}/roadmaps</code>
+<section class="workflow-grid">
+    <div class="workflow-panel">
+        <h2>Projekt</h2>
+        <div class="form-grid">
+            <label>
+                Name
+                <input @bind="_newProject.Name" />
+            </label>
+            <label>
+                Owner
+                <input @bind="_newProject.Owner" />
+            </label>
+            <label class="span-2">
+                Beschreibung
+                <textarea @bind="_newProject.Description"></textarea>
+            </label>
         </div>
+        <button class="primary-action" @onclick="CreateProjectAsync">Projekt anlegen</button>
+
+        @if (_projects.Count > 0)
+        {
+            <label class="select-label">
+                Aktives Projekt
+                <select value="@_selectedProjectId" @onchange="SelectProjectAsync">
+                    @foreach (var project in _projects)
+                    {
+                        <option value="@project.Id">@project.Name</option>
+                    }
+                </select>
+            </label>
+        }
+    </div>
+
+    <div class="workflow-panel">
+        <h2>Dokument</h2>
+        <label>
+            Quelle
+            <input @bind="_uploadSource" />
+        </label>
+        <InputFile OnChange="UploadDocumentAsync" disabled="@(_selectedProject is null)" />
+        <div class="button-row">
+            <button @onclick="AnalyzeLatestDocumentAsync" disabled="@(!CanAnalyze)">Analysieren</button>
+            <button @onclick="ExtractKnowledgeAsync" disabled="@(!CanExtract)">Wissen extrahieren</button>
+        </div>
+
+        @if (_selectedProject?.Documents.Count > 0)
+        {
+            <div class="compact-list">
+                @foreach (var document in _selectedProject.Documents)
+                {
+                    <div>
+                        <strong>@document.FileName</strong>
+                        <span>@document.Status, @document.ChunkCount Chunks</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="workflow-panel span-2">
+        <h2>Knowledge Review</h2>
+        @if (_selectedProject?.KnowledgeItems.Count > 0)
+        {
+            <div class="knowledge-table">
+                @foreach (var item in _selectedProject.KnowledgeItems.OrderBy(item => item.ReviewStatus).ThenBy(item => item.Title))
+                {
+                    <div class="knowledge-row">
+                        <div>
+                            <strong>@item.Title</strong>
+                            <span>@item.Type | @item.ReviewStatus</span>
+                            <p>@item.Summary</p>
+                        </div>
+                        <div class="button-row">
+                            <button @onclick="() => SubmitReviewAsync(item.Id)">Review</button>
+                            <button @onclick="() => ApproveAsync(item.Id)">Freigeben</button>
+                            <button @onclick="() => RejectAsync(item.Id)">Ablehnen</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="muted">Noch keine Wissenselemente vorhanden.</p>
+        }
+    </div>
+
+    <div class="workflow-panel">
+        <h2>Roadmap</h2>
+        <div class="form-grid">
+            <label>
+                Zielrolle
+                <input @bind="_roadmapRole" />
+            </label>
+            <label>
+                Wochen
+                <input type="number" min="1" max="8" @bind="_roadmapWeeks" />
+            </label>
+        </div>
+        <button class="primary-action" @onclick="GenerateRoadmapAsync" disabled="@(_selectedProject is null)">Roadmap erzeugen</button>
+
+        @if (_selectedProject?.Roadmaps.Count > 0)
+        {
+            <div class="compact-list">
+                @foreach (var roadmap in _selectedProject.Roadmaps)
+                {
+                    <div>
+                        <strong>@roadmap.TargetRole</strong>
+                        <span>@roadmap.DurationInWeeks Wochen, @roadmap.Status</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="workflow-panel">
+        <h2>Export & Traceability</h2>
+        <div class="button-row">
+            <button @onclick="LoadTraceabilityAsync" disabled="@(_selectedProject is null)">Traceability laden</button>
+            <button @onclick="ExportMarkdownAsync" disabled="@(_selectedProject is null)">Markdown Export</button>
+        </div>
+        @if (_traceability is not null)
+        {
+            <p class="muted">@_traceability.Rows.Count Matrix-Zeilen generiert.</p>
+        }
+        @if (_export is not null)
+        {
+            <textarea class="export-preview" readonly>@_export.Markdown</textarea>
+        }
     </div>
 </section>
+
+@code {
+    private readonly CreateProjectRequestModel _newProject = new()
+    {
+        Name = "M3 Platform",
+        Description = "Technical onboarding and knowledge transfer workspace.",
+        Owner = "Engineering"
+    };
+
+    private IReadOnlyCollection<ProjectSummaryResponse> _projects = [];
+    private ProjectDetailsResponse? _selectedProject;
+    private Guid _selectedProjectId;
+    private string _uploadSource = "Manual upload";
+    private string _roadmapRole = "Support Engineer";
+    private int _roadmapWeeks = 4;
+    private string StatusText { get; set; } = "Bereit";
+    private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
+    private TraceabilityMatrixResponse? _traceability;
+    private ExportProjectMarkdownResponse? _export;
+
+    private bool CanAnalyze => _selectedProject?.Documents.Any(document => document.Status == "Registered") == true;
+    private bool CanExtract => _selectedProject?.Documents.Any(document => document.Status == "Analyzed") == true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProjectsAsync();
+    }
+
+    private async Task CreateProjectAsync()
+    {
+        var created = await Projects.CreateAsync(
+            new CreateProjectRequest(_newProject.Name, _newProject.Description, _newProject.Owner),
+            CancellationToken.None);
+
+        _selectedProjectId = created.Id;
+        await LoadProjectsAsync();
+        await LoadSelectedProjectAsync();
+        SetStatus("Projekt angelegt", created.Name);
+    }
+
+    private async Task SelectProjectAsync(ChangeEventArgs args)
+    {
+        if (Guid.TryParse(args.Value?.ToString(), out var projectId))
+        {
+            _selectedProjectId = projectId;
+            await LoadSelectedProjectAsync();
+        }
+    }
+
+    private async Task UploadDocumentAsync(InputFileChangeEventArgs args)
+    {
+        if (_selectedProject is null)
+        {
+            return;
+        }
+
+        var file = args.File;
+        await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+        var upload = await Projects.UploadDocumentAsync(
+            _selectedProject.Id,
+            new UploadDocumentCommand(file.Name, file.ContentType, _uploadSource, stream),
+            CancellationToken.None);
+
+        await LoadSelectedProjectAsync();
+        SetStatus("Dokument hochgeladen", upload?.Document.FileName ?? file.Name);
+    }
+
+    private async Task AnalyzeLatestDocumentAsync()
+    {
+        var document = _selectedProject?.Documents.LastOrDefault(candidate => candidate.Status == "Registered");
+        if (_selectedProject is null || document is null)
+        {
+            return;
+        }
+
+        await Analysis.AnalyzeAsync(_selectedProject.Id, document.Id, CancellationToken.None);
+        await LoadSelectedProjectAsync();
+        SetStatus("Analyse abgeschlossen", document.FileName);
+    }
+
+    private async Task ExtractKnowledgeAsync()
+    {
+        var document = _selectedProject?.Documents.LastOrDefault(candidate => candidate.Status == "Analyzed");
+        if (_selectedProject is null || document is null)
+        {
+            return;
+        }
+
+        var extraction = await Extraction.ExtractAsync(_selectedProject.Id, document.Id, CancellationToken.None);
+        await LoadSelectedProjectAsync();
+        SetStatus("Wissen extrahiert", $"{extraction?.CreatedItemCount ?? 0} Elemente");
+    }
+
+    private async Task SubmitReviewAsync(Guid knowledgeItemId)
+    {
+        await Review.SubmitForReviewAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Review requested from UI."), CancellationToken.None);
+        await LoadSelectedProjectAsync();
+        SetStatus("Review gestartet", knowledgeItemId.ToString());
+    }
+
+    private async Task ApproveAsync(Guid knowledgeItemId)
+    {
+        await Review.ApproveAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Approved from UI."), CancellationToken.None);
+        await LoadSelectedProjectAsync();
+        SetStatus("Wissen freigegeben", knowledgeItemId.ToString());
+    }
+
+    private async Task RejectAsync(Guid knowledgeItemId)
+    {
+        await Review.RejectAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Rejected from UI."), CancellationToken.None);
+        await LoadSelectedProjectAsync();
+        SetStatus("Wissen abgelehnt", knowledgeItemId.ToString());
+    }
+
+    private async Task GenerateRoadmapAsync()
+    {
+        if (_selectedProject is null)
+        {
+            return;
+        }
+
+        await Roadmaps.GenerateAsync(_selectedProject.Id, new GenerateRoadmapRequest(_roadmapRole, _roadmapWeeks), CancellationToken.None);
+        await LoadSelectedProjectAsync();
+        SetStatus("Roadmap erzeugt", _roadmapRole);
+    }
+
+    private async Task LoadTraceabilityAsync()
+    {
+        if (_selectedProject is null)
+        {
+            return;
+        }
+
+        _traceability = await Traceability.GetMatrixAsync(_selectedProject.Id, CancellationToken.None);
+        SetStatus("Traceability geladen", $"{_traceability?.Rows.Count ?? 0} Zeilen");
+    }
+
+    private async Task ExportMarkdownAsync()
+    {
+        if (_selectedProject is null)
+        {
+            return;
+        }
+
+        _export = await MarkdownExports.ExportProjectAsync(_selectedProject.Id, CancellationToken.None);
+        SetStatus("Markdown Export erzeugt", _export?.FileName ?? "Export");
+    }
+
+    private async Task LoadProjectsAsync()
+    {
+        _projects = await Projects.ListAsync(CancellationToken.None);
+        if (_selectedProjectId == Guid.Empty && _projects.Count > 0)
+        {
+            _selectedProjectId = _projects.First().Id;
+        }
+    }
+
+    private async Task LoadSelectedProjectAsync()
+    {
+        _selectedProject = _selectedProjectId == Guid.Empty
+            ? null
+            : await Projects.GetAsync(_selectedProjectId, CancellationToken.None);
+        _traceability = null;
+        _export = null;
+    }
+
+    private void SetStatus(string status, string detail)
+    {
+        StatusText = status;
+        StatusDetail = detail;
+    }
+
+    private sealed class CreateProjectRequestModel
+    {
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
+        public string Owner { get; set; } = string.Empty;
+    }
+}

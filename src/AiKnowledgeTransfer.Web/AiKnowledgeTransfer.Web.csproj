@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <ProjectReference Include="..\AiKnowledgeTransfer.Application\AiKnowledgeTransfer.Application.csproj" />
     <ProjectReference Include="..\AiKnowledgeTransfer.Contracts\AiKnowledgeTransfer.Contracts.csproj" />
+    <ProjectReference Include="..\AiKnowledgeTransfer.Infrastructure\AiKnowledgeTransfer.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
