@@ -12,7 +12,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string storageRootPath)
     {
-        services.AddSingleton<IProjectRepository, InMemoryProjectRepository>();
+        var projectStorePath = Path.Combine(storageRootPath, "..", "projects.json");
+
+        services.AddSingleton<IProjectRepository>(_ => new JsonProjectRepository(projectStorePath));
         services.AddSingleton<IFileStorage>(_ => new LocalFileStorage(storageRootPath));
         services.AddSingleton<IDocumentParser, PlainTextDocumentParser>();
         services.AddHttpClient();

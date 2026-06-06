@@ -4,6 +4,30 @@ public sealed class DocumentVersion
 {
     private readonly List<DocumentChunk> _chunks = [];
 
+    private DocumentVersion(
+        Guid id,
+        string fileName,
+        string contentType,
+        string source,
+        long sizeInBytes,
+        int versionNumber,
+        string storagePath,
+        DateTimeOffset uploadedAt,
+        DocumentStatus status,
+        IEnumerable<DocumentChunk> chunks)
+    {
+        Id = id;
+        FileName = fileName;
+        ContentType = contentType;
+        Source = source;
+        SizeInBytes = sizeInBytes;
+        VersionNumber = versionNumber;
+        StoragePath = storagePath;
+        UploadedAt = uploadedAt;
+        Status = status;
+        _chunks.AddRange(chunks);
+    }
+
     public DocumentVersion(string fileName, string contentType, string source, long sizeInBytes, int versionNumber, string storagePath)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -57,5 +81,30 @@ public sealed class DocumentVersion
     public void MarkAnalyzed()
     {
         Status = DocumentStatus.Analyzed;
+    }
+
+    public static DocumentVersion Rehydrate(
+        Guid id,
+        string fileName,
+        string contentType,
+        string source,
+        long sizeInBytes,
+        int versionNumber,
+        string storagePath,
+        DateTimeOffset uploadedAt,
+        DocumentStatus status,
+        IEnumerable<DocumentChunk> chunks)
+    {
+        return new DocumentVersion(
+            id,
+            fileName,
+            contentType,
+            source,
+            sizeInBytes,
+            versionNumber,
+            storagePath,
+            uploadedAt,
+            status,
+            chunks);
     }
 }

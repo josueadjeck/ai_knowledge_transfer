@@ -18,6 +18,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
 - In-memory repository for local development.
+- JSON file persistence for projects in local MVP runs.
 - Unit and architecture tests.
 
 ## Run locally
@@ -55,6 +56,8 @@ The web UI can run the MVP workflow directly:
 - Submit, approve or reject knowledge items.
 - Generate a review-aware roadmap.
 - Load traceability and Markdown export output.
+
+Local project data is persisted as JSON under the app's `App_Data` folder. Uploaded files are stored under `App_Data/uploads`.
 
 ## Verify
 

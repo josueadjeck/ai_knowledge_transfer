@@ -2,6 +2,30 @@ namespace AiKnowledgeTransfer.Domain.Knowledge;
 
 public sealed class KnowledgeItem
 {
+    private KnowledgeItem(
+        Guid id,
+        KnowledgeItemType type,
+        string title,
+        string summary,
+        Guid? sourceDocumentId,
+        KnowledgeReviewStatus reviewStatus,
+        DateTimeOffset createdAt,
+        string? reviewedBy,
+        string? reviewComment,
+        DateTimeOffset? reviewedAt)
+    {
+        Id = id;
+        Type = type;
+        Title = title;
+        Summary = summary;
+        SourceDocumentId = sourceDocumentId;
+        ReviewStatus = reviewStatus;
+        CreatedAt = createdAt;
+        ReviewedBy = reviewedBy;
+        ReviewComment = reviewComment;
+        ReviewedAt = reviewedAt;
+    }
+
     public KnowledgeItem(KnowledgeItemType type, string title, string summary, Guid? sourceDocumentId)
     {
         if (string.IsNullOrWhiteSpace(title))
@@ -70,5 +94,30 @@ public sealed class KnowledgeItem
         }
 
         return reviewer.Trim();
+    }
+
+    public static KnowledgeItem Rehydrate(
+        Guid id,
+        KnowledgeItemType type,
+        string title,
+        string summary,
+        Guid? sourceDocumentId,
+        KnowledgeReviewStatus reviewStatus,
+        DateTimeOffset createdAt,
+        string? reviewedBy,
+        string? reviewComment,
+        DateTimeOffset? reviewedAt)
+    {
+        return new KnowledgeItem(
+            id,
+            type,
+            title,
+            summary,
+            sourceDocumentId,
+            reviewStatus,
+            createdAt,
+            reviewedBy,
+            reviewComment,
+            reviewedAt);
     }
 }

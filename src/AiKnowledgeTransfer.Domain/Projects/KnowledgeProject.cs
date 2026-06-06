@@ -19,6 +19,26 @@ public sealed class KnowledgeProject
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
+    private KnowledgeProject(
+        Guid id,
+        string name,
+        string description,
+        string owner,
+        DateTimeOffset createdAt,
+        IEnumerable<DocumentVersion> documents,
+        IEnumerable<KnowledgeItem> knowledgeItems,
+        IEnumerable<OnboardingRoadmap> roadmaps)
+    {
+        Id = id;
+        Name = name;
+        Description = description;
+        Owner = owner;
+        CreatedAt = createdAt;
+        _documents.AddRange(documents);
+        _knowledgeItems.AddRange(knowledgeItems);
+        _roadmaps.AddRange(roadmaps);
+    }
+
     public Guid Id { get; }
 
     public string Name { get; private set; }
@@ -64,5 +84,26 @@ public sealed class KnowledgeProject
         }
 
         return value.Trim();
+    }
+
+    public static KnowledgeProject Rehydrate(
+        Guid id,
+        string name,
+        string description,
+        string owner,
+        DateTimeOffset createdAt,
+        IEnumerable<DocumentVersion> documents,
+        IEnumerable<KnowledgeItem> knowledgeItems,
+        IEnumerable<OnboardingRoadmap> roadmaps)
+    {
+        return new KnowledgeProject(
+            id,
+            name,
+            description,
+            owner,
+            createdAt,
+            documents,
+            knowledgeItems,
+            roadmaps);
     }
 }

@@ -4,6 +4,22 @@ public sealed class OnboardingRoadmap
 {
     private readonly List<RoadmapWeek> _weeks;
 
+    private OnboardingRoadmap(
+        Guid id,
+        string targetRole,
+        int durationInWeeks,
+        DateTimeOffset createdAt,
+        RoadmapStatus status,
+        IEnumerable<RoadmapWeek> weeks)
+    {
+        Id = id;
+        TargetRole = targetRole;
+        DurationInWeeks = durationInWeeks;
+        CreatedAt = createdAt;
+        Status = status;
+        _weeks = weeks.ToList();
+    }
+
     public OnboardingRoadmap(string targetRole, int durationInWeeks, IEnumerable<RoadmapWeek> weeks)
     {
         if (string.IsNullOrWhiteSpace(targetRole))
@@ -40,4 +56,21 @@ public sealed class OnboardingRoadmap
     public RoadmapStatus Status { get; private set; }
 
     public IReadOnlyCollection<RoadmapWeek> Weeks => _weeks;
+
+    public static OnboardingRoadmap Rehydrate(
+        Guid id,
+        string targetRole,
+        int durationInWeeks,
+        DateTimeOffset createdAt,
+        RoadmapStatus status,
+        IEnumerable<RoadmapWeek> weeks)
+    {
+        return new OnboardingRoadmap(
+            id,
+            targetRole,
+            durationInWeeks,
+            createdAt,
+            status,
+            weeks);
+    }
 }
