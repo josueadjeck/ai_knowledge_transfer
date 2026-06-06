@@ -1,5 +1,6 @@
 using AiKnowledgeTransfer.Application;
 using AiKnowledgeTransfer.Application.Documents;
+using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Roadmaps;
@@ -160,6 +161,15 @@ projects.MapPost("/{projectId:guid}/roadmaps", async (
 {
     var result = await service.GenerateAsync(projectId, request, cancellationToken);
     return result is null ? Results.NotFound() : Results.Created($"/api/projects/{projectId}/roadmaps/{result.Id}", result);
+});
+
+projects.MapGet("/{projectId:guid}/exports/markdown", async (
+    Guid projectId,
+    MarkdownExportService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.ExportProjectAsync(projectId, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
 });
 
 app.MapGet("/health", () =>

@@ -12,6 +12,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
 - Review workflow for extracted knowledge items.
 - Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
+- Markdown export for project handover documents.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -143,3 +144,9 @@ Content-Type: application/json
 ```
 
 Generated roadmap weeks include `reviewNotes`. Approved knowledge items are added to learning goals and exercises where they fit; draft, in-review or rejected items remain visible as review notes.
+
+Export a project handover document as Markdown:
+
+```http
+GET http://localhost:5256/api/projects/{projectId}/exports/markdown
+```

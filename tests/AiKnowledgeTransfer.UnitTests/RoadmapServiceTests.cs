@@ -2,6 +2,7 @@ namespace AiKnowledgeTransfer.UnitTests;
 
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Documents;
+using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Contracts.Projects;
@@ -259,5 +260,59 @@ public sealed class RoadmapServiceTests
         Assert.NotNull(roadmap);
         Assert.Contains(roadmap.Weeks.Single(week => week.WeekNumber == 3).LearningGoals, goal => goal.Contains(workflow.Title, StringComparison.Ordinal));
         Assert.Contains(roadmap.Weeks.SelectMany(week => week.ReviewNotes), note => note.Contains("Draft", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task ExportProjectAsync_creates_markdown_with_sources_knowledge_and_roadmap()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+        var reviewService = new KnowledgeReviewService(repository);
+        var roadmapService = new RoadmapService(repository);
+        var exportService = new MarkdownExportService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Export Project", "Markdown export test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("""
+            CTU communication is unknown.
+
+            Deployment workflow must be reviewed by senior engineers.
+            """u8.ToArray());
+
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("export.md", "text/markdown", "Manual upload", content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        var item = extraction.KnowledgeItems.First();
+        await reviewService.ApproveAsync(
+            project.Id,
+            item.Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Confirmed for export."),
+            CancellationToken.None);
+
+        await roadmapService.GenerateAsync(project.Id, new GenerateRoadmapRequest("Support Engineer", 3), CancellationToken.None);
+
+        var export = await exportService.ExportProjectAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(export);
+        Assert.Equal("text/markdown", export.ContentType);
+        Assert.Contains("# Export Project Knowledge Transfer", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("## Sources", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("## Knowledge Items", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("## Roadmaps", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("Support Engineer", export.Markdown, StringComparison.Ordinal);
     }
 }
