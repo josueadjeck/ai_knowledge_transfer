@@ -5,8 +5,12 @@ using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Domain.Knowledge;
 
-public sealed class KnowledgeReviewService(IProjectRepository projects)
+public sealed class KnowledgeReviewService(
+    IProjectRepository projects,
+    IAuditLog? auditLog = null)
 {
+    private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+
     public Task<KnowledgeItemResponse?> SubmitForReviewAsync(
         Guid projectId,
         Guid knowledgeItemId,
@@ -17,6 +21,8 @@ public sealed class KnowledgeReviewService(IProjectRepository projects)
             projectId,
             knowledgeItemId,
             item => item.SubmitForReview(request.Reviewer, request.Comment),
+            "KnowledgeReviewSubmitted",
+            request.Reviewer,
             cancellationToken);
     }
 
@@ -30,6 +36,8 @@ public sealed class KnowledgeReviewService(IProjectRepository projects)
             projectId,
             knowledgeItemId,
             item => item.Approve(request.Reviewer, request.Comment),
+            "KnowledgeApproved",
+            request.Reviewer,
             cancellationToken);
     }
 
@@ -43,6 +51,8 @@ public sealed class KnowledgeReviewService(IProjectRepository projects)
             projectId,
             knowledgeItemId,
             item => item.Reject(request.Reviewer, request.Comment),
+            "KnowledgeRejected",
+            request.Reviewer,
             cancellationToken);
     }
 
@@ -50,17 +60,22 @@ public sealed class KnowledgeReviewService(IProjectRepository projects)
         Guid projectId,
         Guid knowledgeItemId,
         Action<KnowledgeItem> update,
+        string action,
+        string actor,
         CancellationToken cancellationToken)
     {
         var project = await projects.GetAsync(projectId, cancellationToken);
         var item = project?.KnowledgeItems.FirstOrDefault(candidate => candidate.Id == knowledgeItemId);
-        if (item is null)
+        if (project is null || item is null)
         {
             return null;
         }
 
         update(item);
         await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, action, actor, "KnowledgeItem", item.Id, $"Knowledge item '{item.Title}' changed to {item.ReviewStatus}."),
+            cancellationToken);
 
         return ProjectMapper.ToResponse(item);
     }

@@ -6,8 +6,12 @@ using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
 using AiKnowledgeTransfer.Domain.Roadmaps;
 
-public sealed class RoadmapService(IProjectRepository projects)
+public sealed class RoadmapService(
+    IProjectRepository projects,
+    IAuditLog? auditLog = null)
 {
+    private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+
     public async Task<RoadmapResponse?> GenerateAsync(Guid projectId, GenerateRoadmapRequest request, CancellationToken cancellationToken)
     {
         var project = await projects.GetAsync(projectId, cancellationToken);
@@ -26,6 +30,9 @@ public sealed class RoadmapService(IProjectRepository projects)
         project.AddRoadmap(roadmap);
 
         await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "RoadmapGenerated", "system", "Roadmap", roadmap.Id, $"Roadmap for '{roadmap.TargetRole}' was generated."),
+            cancellationToken);
         return RoadmapMapper.ToResponse(roadmap);
     }
 

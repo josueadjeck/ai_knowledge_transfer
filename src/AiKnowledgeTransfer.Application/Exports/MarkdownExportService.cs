@@ -6,8 +6,12 @@ using AiKnowledgeTransfer.Contracts.Exports;
 using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
 
-public sealed class MarkdownExportService(IProjectRepository projects)
+public sealed class MarkdownExportService(
+    IProjectRepository projects,
+    IAuditLog? auditLog = null)
 {
+    private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+
     public async Task<ExportProjectMarkdownResponse?> ExportProjectAsync(Guid projectId, CancellationToken cancellationToken)
     {
         var project = await projects.GetAsync(projectId, cancellationToken);
@@ -18,6 +22,9 @@ public sealed class MarkdownExportService(IProjectRepository projects)
 
         var generatedAt = DateTimeOffset.UtcNow;
         var markdown = BuildMarkdown(project, generatedAt);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "ProjectExported", "system", "Project", project.Id, $"Markdown export for '{project.Name}' was generated."),
+            cancellationToken);
 
         return new ExportProjectMarkdownResponse(
             project.Id,

@@ -6,8 +6,11 @@ using AiKnowledgeTransfer.Contracts.Projects;
 
 public sealed class KnowledgeExtractionService(
     IProjectRepository projects,
-    IKnowledgeExtractor extractor)
+    IKnowledgeExtractor extractor,
+    IAuditLog? auditLog = null)
 {
+    private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+
     public async Task<ExtractKnowledgeResponse?> ExtractAsync(Guid projectId, Guid documentId, CancellationToken cancellationToken)
     {
         var project = await projects.GetAsync(projectId, cancellationToken);
@@ -28,6 +31,9 @@ public sealed class KnowledgeExtractionService(
             .ToArray();
 
         await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "KnowledgeExtracted", "system", "Document", document.Id, $"{createdItems.Length} knowledge items were extracted."),
+            cancellationToken);
 
         return new ExtractKnowledgeResponse(
             document.Id,

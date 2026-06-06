@@ -1,4 +1,5 @@
 using AiKnowledgeTransfer.Application;
+using AiKnowledgeTransfer.Application.Audit;
 using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
@@ -183,6 +184,15 @@ projects.MapGet("/{projectId:guid}/traceability", async (
     return result is null ? Results.NotFound() : Results.Ok(result);
 });
 
+projects.MapGet("/{projectId:guid}/audit", async (
+    Guid projectId,
+    AuditLogService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.ListAsync(projectId, cancellationToken);
+    return Results.Ok(result);
+});
+
 app.MapGet("/health", () =>
 {
     return Results.Ok(new
@@ -197,6 +207,14 @@ app.MapGet("/health", () =>
 app.MapGet("/api/security/roles", (RolePermissionService service) =>
 {
     return Results.Ok(service.GetMatrix());
+});
+
+app.MapGet("/api/audit", async (
+    AuditLogService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.ListAsync(projectId: null, cancellationToken);
+    return Results.Ok(result);
 });
 
 app.Run();

@@ -5,8 +5,12 @@ using AiKnowledgeTransfer.Contracts.Traceability;
 using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
 
-public sealed class TraceabilityService(IProjectRepository projects)
+public sealed class TraceabilityService(
+    IProjectRepository projects,
+    IAuditLog? auditLog = null)
 {
+    private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+
     public async Task<TraceabilityMatrixResponse?> GetMatrixAsync(Guid projectId, CancellationToken cancellationToken)
     {
         var project = await projects.GetAsync(projectId, cancellationToken);
@@ -15,11 +19,16 @@ public sealed class TraceabilityService(IProjectRepository projects)
             return null;
         }
 
-        return new TraceabilityMatrixResponse(
+        var matrix = new TraceabilityMatrixResponse(
             project.Id,
             project.Name,
             DateTimeOffset.UtcNow,
             BuildRows(project));
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "TraceabilityViewed", "system", "Project", project.Id, $"Traceability matrix with {matrix.Rows.Count} rows was generated."),
+            cancellationToken);
+
+        return matrix;
     }
 
     private static IReadOnlyCollection<TraceabilityRowResponse> BuildRows(KnowledgeProject project)

@@ -5,8 +5,13 @@ using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
 
-public sealed class ProjectService(IProjectRepository projects, IFileStorage fileStorage)
+public sealed class ProjectService(
+    IProjectRepository projects,
+    IFileStorage fileStorage,
+    IAuditLog? auditLog = null)
 {
+    private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+
     public async Task<IReadOnlyCollection<ProjectSummaryResponse>> ListAsync(CancellationToken cancellationToken)
     {
         var result = await projects.ListAsync(cancellationToken);
@@ -26,6 +31,9 @@ public sealed class ProjectService(IProjectRepository projects, IFileStorage fil
 
         await projects.AddAsync(project, cancellationToken);
         await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "ProjectCreated", project.Owner, "Project", project.Id, $"Project '{project.Name}' was created."),
+            cancellationToken);
 
         return ProjectMapper.ToSummary(project);
     }
@@ -46,6 +54,9 @@ public sealed class ProjectService(IProjectRepository projects, IFileStorage fil
             storagePath: string.Empty);
 
         await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "DocumentRegistered", "system", "Document", document.Id, $"Document '{document.FileName}' was registered."),
+            cancellationToken);
         return ProjectMapper.ToResponse(document);
     }
 
@@ -72,6 +83,9 @@ public sealed class ProjectService(IProjectRepository projects, IFileStorage fil
             storedFile.StoragePath);
 
         await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "DocumentUploaded", "system", "Document", document.Id, $"Document '{document.FileName}' was uploaded."),
+            cancellationToken);
 
         return new UploadDocumentResponse(
             ProjectMapper.ToResponse(document),

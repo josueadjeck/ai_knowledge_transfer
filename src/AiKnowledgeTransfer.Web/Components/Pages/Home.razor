@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 
 @using AiKnowledgeTransfer.Application.Documents
+@using AiKnowledgeTransfer.Application.Audit
 @using AiKnowledgeTransfer.Application.Exports
 @using AiKnowledgeTransfer.Application.Knowledge
 @using AiKnowledgeTransfer.Application.Projects
@@ -9,6 +10,7 @@
 @using AiKnowledgeTransfer.Application.Security
 @using AiKnowledgeTransfer.Application.Traceability
 @using AiKnowledgeTransfer.Contracts.Exports
+@using AiKnowledgeTransfer.Contracts.Audit
 @using AiKnowledgeTransfer.Contracts.Projects
 @using AiKnowledgeTransfer.Contracts.Roadmaps
 @using AiKnowledgeTransfer.Contracts.Security
@@ -23,6 +25,7 @@
 @inject MarkdownExportService MarkdownExports
 @inject TraceabilityService Traceability
 @inject RolePermissionService Permissions
+@inject AuditLogService Audit
 
 <PageTitle>AI Knowledge Transfer</PageTitle>
 
@@ -188,10 +191,23 @@
         <div class="button-row">
             <button @onclick="LoadTraceabilityAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Traceability laden</button>
             <button @onclick="ExportMarkdownAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Markdown Export</button>
+            <button @onclick="LoadAuditAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Audit Log</button>
         </div>
         @if (_traceability is not null)
         {
             <p class="muted">@_traceability.Rows.Count Matrix-Zeilen generiert.</p>
+        }
+        @if (_auditEvents.Count > 0)
+        {
+            <div class="compact-list">
+                @foreach (var auditEvent in _auditEvents.Take(6))
+                {
+                    <div>
+                        <strong>@auditEvent.Action</strong>
+                        <span>@auditEvent.OccurredAt.LocalDateTime.ToString("g") | @auditEvent.Summary</span>
+                    </div>
+                }
+            </div>
         }
         @if (_export is not null)
         {
@@ -219,6 +235,7 @@
     private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
     private TraceabilityMatrixResponse? _traceability;
     private ExportProjectMarkdownResponse? _export;
+    private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
 
     private bool CanAnalyze => Can(Permission.AnalyzeDocument)
         && _selectedProject?.Documents.Any(document => document.Status == "Registered") == true;
@@ -380,6 +397,17 @@
         SetStatus("Markdown Export erzeugt", _export?.FileName ?? "Export");
     }
 
+    private async Task LoadAuditAsync()
+    {
+        if (_selectedProject is null || !Can(Permission.ViewTraceability))
+        {
+            return;
+        }
+
+        _auditEvents = await Audit.ListAsync(_selectedProject.Id, CancellationToken.None);
+        SetStatus("Audit Log geladen", $"{_auditEvents.Count} Events");
+    }
+
     private async Task LoadProjectsAsync()
     {
         _projects = await Projects.ListAsync(CancellationToken.None);
@@ -396,6 +424,7 @@
             : await Projects.GetAsync(_selectedProjectId, CancellationToken.None);
         _traceability = null;
         _export = null;
+        _auditEvents = [];
     }
 
     private void SetStatus(string status, string detail)

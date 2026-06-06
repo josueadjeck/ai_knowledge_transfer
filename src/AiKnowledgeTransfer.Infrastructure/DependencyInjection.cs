@@ -1,6 +1,7 @@
 namespace AiKnowledgeTransfer.Infrastructure;
 
 using AiKnowledgeTransfer.Application.Abstractions;
+using AiKnowledgeTransfer.Infrastructure.Audit;
 using AiKnowledgeTransfer.Infrastructure.Knowledge;
 using AiKnowledgeTransfer.Infrastructure.Parsing;
 using AiKnowledgeTransfer.Infrastructure.Persistence;
@@ -13,8 +14,10 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string storageRootPath)
     {
         var projectStorePath = Path.Combine(storageRootPath, "..", "projects.json");
+        var auditLogPath = Path.Combine(storageRootPath, "..", "audit-log.json");
 
         services.AddSingleton<IProjectRepository>(_ => new JsonProjectRepository(projectStorePath));
+        services.AddSingleton<IAuditLog>(_ => new JsonAuditLog(auditLogPath));
         services.AddSingleton<IFileStorage>(_ => new LocalFileStorage(storageRootPath));
         services.AddSingleton<IDocumentParser, PlainTextDocumentParser>();
         services.AddHttpClient();

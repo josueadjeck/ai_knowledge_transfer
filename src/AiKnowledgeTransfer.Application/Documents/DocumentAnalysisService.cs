@@ -8,13 +8,16 @@ using AiKnowledgeTransfer.Domain.Documents;
 public sealed class DocumentAnalysisService(
     IProjectRepository projects,
     IFileStorage fileStorage,
-    IEnumerable<IDocumentParser> parsers)
+    IEnumerable<IDocumentParser> parsers,
+    IAuditLog? auditLog = null)
 {
+    private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+
     public async Task<AnalyzeDocumentResponse?> AnalyzeAsync(Guid projectId, Guid documentId, CancellationToken cancellationToken)
     {
         var project = await projects.GetAsync(projectId, cancellationToken);
         var document = project?.Documents.FirstOrDefault(candidate => candidate.Id == documentId);
-        if (document is null)
+        if (project is null || document is null)
         {
             return null;
         }
@@ -40,6 +43,9 @@ public sealed class DocumentAnalysisService(
         document.ReplaceChunks(parsedDocument.Chunks.Select(ToDomainChunk));
 
         await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "DocumentAnalyzed", "system", "Document", document.Id, $"Document '{document.FileName}' was analyzed into {document.Chunks.Count} chunks."),
+            cancellationToken);
 
         return new AnalyzeDocumentResponse(
             document.Id,
