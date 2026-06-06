@@ -4,6 +4,7 @@ using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Roadmaps;
+using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Application.Traceability;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
@@ -192,5 +193,10 @@ app.MapGet("/health", () =>
     });
 })
 .WithName("Health");
+
+app.MapGet("/api/security/roles", (RolePermissionService service) =>
+{
+    return Results.Ok(service.GetMatrix());
+});
 
 app.Run();

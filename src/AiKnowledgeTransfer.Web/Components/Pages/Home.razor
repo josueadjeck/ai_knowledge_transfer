@@ -6,10 +6,12 @@
 @using AiKnowledgeTransfer.Application.Knowledge
 @using AiKnowledgeTransfer.Application.Projects
 @using AiKnowledgeTransfer.Application.Roadmaps
+@using AiKnowledgeTransfer.Application.Security
 @using AiKnowledgeTransfer.Application.Traceability
 @using AiKnowledgeTransfer.Contracts.Exports
 @using AiKnowledgeTransfer.Contracts.Projects
 @using AiKnowledgeTransfer.Contracts.Roadmaps
+@using AiKnowledgeTransfer.Contracts.Security
 @using AiKnowledgeTransfer.Contracts.Traceability
 @using Microsoft.AspNetCore.Components.Forms
 
@@ -20,6 +22,7 @@
 @inject RoadmapService Roadmaps
 @inject MarkdownExportService MarkdownExports
 @inject TraceabilityService Traceability
+@inject RolePermissionService Permissions
 
 <PageTitle>AI Knowledge Transfer</PageTitle>
 
@@ -35,6 +38,15 @@
         <span class="status-label">Status</span>
         <strong>@StatusText</strong>
         <span>@StatusDetail</span>
+        <label class="role-select">
+            Rolle
+            <select @bind="_currentRole">
+                @foreach (var role in Enum.GetValues<UserRole>())
+                {
+                    <option value="@role">@role</option>
+                }
+            </select>
+        </label>
     </div>
 </section>
 
@@ -42,7 +54,7 @@
     <div class="metric-card">
         <span>Projekte</span>
         <strong>@_projects.Count</strong>
-        <p>Im aktuellen In-Memory Workspace.</p>
+        <p>Im lokalen JSON-persistierten Workspace.</p>
     </div>
     <div class="metric-card">
         <span>Dokumente</span>
@@ -73,7 +85,7 @@
                 <textarea @bind="_newProject.Description"></textarea>
             </label>
         </div>
-        <button class="primary-action" @onclick="CreateProjectAsync">Projekt anlegen</button>
+        <button class="primary-action" @onclick="CreateProjectAsync" disabled="@(!Can(Permission.CreateProject))">Projekt anlegen</button>
 
         @if (_projects.Count > 0)
         {
@@ -95,7 +107,7 @@
             Quelle
             <input @bind="_uploadSource" />
         </label>
-        <InputFile OnChange="UploadDocumentAsync" disabled="@(_selectedProject is null)" />
+        <InputFile OnChange="UploadDocumentAsync" disabled="@(_selectedProject is null || !Can(Permission.UploadDocument))" />
         <div class="button-row">
             <button @onclick="AnalyzeLatestDocumentAsync" disabled="@(!CanAnalyze)">Analysieren</button>
             <button @onclick="ExtractKnowledgeAsync" disabled="@(!CanExtract)">Wissen extrahieren</button>
@@ -129,9 +141,9 @@
                             <p>@item.Summary</p>
                         </div>
                         <div class="button-row">
-                            <button @onclick="() => SubmitReviewAsync(item.Id)">Review</button>
-                            <button @onclick="() => ApproveAsync(item.Id)">Freigeben</button>
-                            <button @onclick="() => RejectAsync(item.Id)">Ablehnen</button>
+                            <button @onclick="() => SubmitReviewAsync(item.Id)" disabled="@(!Can(Permission.SubmitKnowledgeReview))">Review</button>
+                            <button @onclick="() => ApproveAsync(item.Id)" disabled="@(!Can(Permission.ApproveKnowledge))">Freigeben</button>
+                            <button @onclick="() => RejectAsync(item.Id)" disabled="@(!Can(Permission.RejectKnowledge))">Ablehnen</button>
                         </div>
                     </div>
                 }
@@ -155,7 +167,7 @@
                 <input type="number" min="1" max="8" @bind="_roadmapWeeks" />
             </label>
         </div>
-        <button class="primary-action" @onclick="GenerateRoadmapAsync" disabled="@(_selectedProject is null)">Roadmap erzeugen</button>
+        <button class="primary-action" @onclick="GenerateRoadmapAsync" disabled="@(_selectedProject is null || !Can(Permission.GenerateRoadmap))">Roadmap erzeugen</button>
 
         @if (_selectedProject?.Roadmaps.Count > 0)
         {
@@ -174,8 +186,8 @@
     <div class="workflow-panel">
         <h2>Export & Traceability</h2>
         <div class="button-row">
-            <button @onclick="LoadTraceabilityAsync" disabled="@(_selectedProject is null)">Traceability laden</button>
-            <button @onclick="ExportMarkdownAsync" disabled="@(_selectedProject is null)">Markdown Export</button>
+            <button @onclick="LoadTraceabilityAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Traceability laden</button>
+            <button @onclick="ExportMarkdownAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Markdown Export</button>
         </div>
         @if (_traceability is not null)
         {
@@ -202,13 +214,22 @@
     private string _uploadSource = "Manual upload";
     private string _roadmapRole = "Support Engineer";
     private int _roadmapWeeks = 4;
+    private UserRole _currentRole = UserRole.Admin;
     private string StatusText { get; set; } = "Bereit";
     private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
     private TraceabilityMatrixResponse? _traceability;
     private ExportProjectMarkdownResponse? _export;
 
-    private bool CanAnalyze => _selectedProject?.Documents.Any(document => document.Status == "Registered") == true;
-    private bool CanExtract => _selectedProject?.Documents.Any(document => document.Status == "Analyzed") == true;
+    private bool CanAnalyze => Can(Permission.AnalyzeDocument)
+        && _selectedProject?.Documents.Any(document => document.Status == "Registered") == true;
+
+    private bool CanExtract => Can(Permission.ExtractKnowledge)
+        && _selectedProject?.Documents.Any(document => document.Status == "Analyzed") == true;
+
+    private bool Can(Permission permission)
+    {
+        return Permissions.HasPermission(_currentRole, permission);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -217,6 +238,12 @@
 
     private async Task CreateProjectAsync()
     {
+        if (!Can(Permission.CreateProject))
+        {
+            SetStatus("Keine Berechtigung", "Diese Rolle darf keine Projekte anlegen.");
+            return;
+        }
+
         var created = await Projects.CreateAsync(
             new CreateProjectRequest(_newProject.Name, _newProject.Description, _newProject.Owner),
             CancellationToken.None);
@@ -238,7 +265,7 @@
 
     private async Task UploadDocumentAsync(InputFileChangeEventArgs args)
     {
-        if (_selectedProject is null)
+        if (_selectedProject is null || !Can(Permission.UploadDocument))
         {
             return;
         }
@@ -282,6 +309,12 @@
 
     private async Task SubmitReviewAsync(Guid knowledgeItemId)
     {
+        if (!Can(Permission.SubmitKnowledgeReview))
+        {
+            SetStatus("Keine Berechtigung", "Diese Rolle darf keinen Review starten.");
+            return;
+        }
+
         await Review.SubmitForReviewAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Review requested from UI."), CancellationToken.None);
         await LoadSelectedProjectAsync();
         SetStatus("Review gestartet", knowledgeItemId.ToString());
@@ -289,6 +322,12 @@
 
     private async Task ApproveAsync(Guid knowledgeItemId)
     {
+        if (!Can(Permission.ApproveKnowledge))
+        {
+            SetStatus("Keine Berechtigung", "Diese Rolle darf kein Wissen freigeben.");
+            return;
+        }
+
         await Review.ApproveAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Approved from UI."), CancellationToken.None);
         await LoadSelectedProjectAsync();
         SetStatus("Wissen freigegeben", knowledgeItemId.ToString());
@@ -296,6 +335,12 @@
 
     private async Task RejectAsync(Guid knowledgeItemId)
     {
+        if (!Can(Permission.RejectKnowledge))
+        {
+            SetStatus("Keine Berechtigung", "Diese Rolle darf kein Wissen ablehnen.");
+            return;
+        }
+
         await Review.RejectAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Rejected from UI."), CancellationToken.None);
         await LoadSelectedProjectAsync();
         SetStatus("Wissen abgelehnt", knowledgeItemId.ToString());
@@ -303,7 +348,7 @@
 
     private async Task GenerateRoadmapAsync()
     {
-        if (_selectedProject is null)
+        if (_selectedProject is null || !Can(Permission.GenerateRoadmap))
         {
             return;
         }
@@ -315,7 +360,7 @@
 
     private async Task LoadTraceabilityAsync()
     {
-        if (_selectedProject is null)
+        if (_selectedProject is null || !Can(Permission.ViewTraceability))
         {
             return;
         }
@@ -326,7 +371,7 @@
 
     private async Task ExportMarkdownAsync()
     {
-        if (_selectedProject is null)
+        if (_selectedProject is null || !Can(Permission.ExportProject))
         {
             return;
         }

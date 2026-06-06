@@ -19,6 +19,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Application services for project creation, document registration and deterministic roadmap generation.
 - In-memory repository for local development.
 - JSON file persistence for projects in local MVP runs.
+- MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
 - Unit and architecture tests.
 
 ## Run locally
@@ -49,6 +50,7 @@ http://localhost:5280
 
 The web UI can run the MVP workflow directly:
 
+- Select an MVP role and see actions enabled or disabled by permission.
 - Create or select a project.
 - Upload a text or Markdown document.
 - Analyze the document into chunks.
@@ -169,4 +171,10 @@ Get the traceability matrix:
 
 ```http
 GET http://localhost:5256/api/projects/{projectId}/traceability
+```
+
+Get the MVP role permission matrix:
+
+```http
+GET http://localhost:5256/api/security/roles
 ```

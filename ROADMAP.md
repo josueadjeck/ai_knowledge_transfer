@@ -115,6 +115,7 @@ Aktueller Implementierungsstand:
 - Phase 7 ist gestartet: Traceability Matrix verknuepft Quellen, Chunks, Wissenselemente, Review-Status und Roadmap-/Export-Nutzung.
 - Phase 8 ist gestartet: Projektuebergaben koennen als Markdown exportiert werden.
 - Phase 9 ist gestartet: Projekte werden lokal als JSON-Datei persistiert; Upload-Dateien bleiben im lokalen Storage.
+- Security-Grundlage ist gestartet: MVP-Rollenmatrix fuer Admin, Senior Engineer, Contributor und Viewer ist vorhanden und in der UI sichtbar.
 
 ### Phase 0: Produktklaerung
 
