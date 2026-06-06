@@ -1,11 +1,26 @@
 namespace AiKnowledgeTransfer.Application.Projects;
 
 using AiKnowledgeTransfer.Contracts.Projects;
+using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Domain.Documents;
+using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
 
 internal static class ProjectMapper
 {
+    public static ProjectDetailsResponse ToDetails(KnowledgeProject project)
+    {
+        return new ProjectDetailsResponse(
+            project.Id,
+            project.Name,
+            project.Description,
+            project.Owner,
+            project.CreatedAt,
+            project.Documents.Select(ToResponse).ToArray(),
+            project.KnowledgeItems.Select(ToResponse).ToArray(),
+            project.Roadmaps.Select(RoadmapMapper.ToResponse).ToArray());
+    }
+
     public static ProjectSummaryResponse ToSummary(KnowledgeProject project)
     {
         return new ProjectSummaryResponse(
@@ -28,7 +43,20 @@ internal static class ProjectMapper
             document.Source,
             document.SizeInBytes,
             document.VersionNumber,
+            document.StoragePath,
             document.Status.ToString(),
             document.UploadedAt);
+    }
+
+    private static KnowledgeItemResponse ToResponse(KnowledgeItem item)
+    {
+        return new KnowledgeItemResponse(
+            item.Id,
+            item.Type.ToString(),
+            item.Title,
+            item.Summary,
+            item.SourceDocumentId,
+            item.ReviewStatus.ToString(),
+            item.CreatedAt);
     }
 }

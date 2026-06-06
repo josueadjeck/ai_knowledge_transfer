@@ -2,7 +2,7 @@ namespace AiKnowledgeTransfer.Domain.Documents;
 
 public sealed class DocumentVersion
 {
-    public DocumentVersion(string fileName, string contentType, string source, long sizeInBytes, int versionNumber)
+    public DocumentVersion(string fileName, string contentType, string source, long sizeInBytes, int versionNumber, string storagePath)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
@@ -20,6 +20,7 @@ public sealed class DocumentVersion
         Source = source.Trim();
         SizeInBytes = sizeInBytes;
         VersionNumber = versionNumber;
+        StoragePath = storagePath.Trim();
         UploadedAt = DateTimeOffset.UtcNow;
         Status = DocumentStatus.Registered;
     }
@@ -35,6 +36,8 @@ public sealed class DocumentVersion
     public long SizeInBytes { get; }
 
     public int VersionNumber { get; }
+
+    public string StoragePath { get; }
 
     public DateTimeOffset UploadedAt { get; }
 

@@ -7,5 +7,6 @@ public sealed record DocumentResponse(
     string Source,
     long SizeInBytes,
     int VersionNumber,
+    string StoragePath,
     string Status,
     DateTimeOffset UploadedAt);

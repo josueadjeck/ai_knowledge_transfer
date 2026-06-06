@@ -35,10 +35,10 @@ public sealed class KnowledgeProject
 
     public IReadOnlyCollection<OnboardingRoadmap> Roadmaps => _roadmaps;
 
-    public DocumentVersion RegisterDocument(string fileName, string contentType, string source, long sizeInBytes)
+    public DocumentVersion RegisterDocument(string fileName, string contentType, string source, long sizeInBytes, string storagePath)
     {
         var versionNumber = _documents.Count(document => document.FileName.Equals(fileName, StringComparison.OrdinalIgnoreCase)) + 1;
-        var document = new DocumentVersion(fileName, contentType, source, sizeInBytes, versionNumber);
+        var document = new DocumentVersion(fileName, contentType, source, sizeInBytes, versionNumber, storagePath);
 
         _documents.Add(document);
         return document;

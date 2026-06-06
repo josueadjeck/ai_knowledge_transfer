@@ -1,0 +1,10 @@
+namespace AiKnowledgeTransfer.Contracts.Projects;
+
+public sealed record KnowledgeItemResponse(
+    Guid Id,
+    string Type,
+    string Title,
+    string Summary,
+    Guid? SourceDocumentId,
+    string ReviewStatus,
+    DateTimeOffset CreatedAt);

@@ -4,12 +4,14 @@ using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
 using AiKnowledgeTransfer.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
+var storageRootPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "uploads");
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure();
+    .AddInfrastructure(storageRootPath);
 
 var app = builder.Build();
 
@@ -21,6 +23,15 @@ projects.MapGet("/", async (ProjectService service, CancellationToken cancellati
 {
     var result = await service.ListAsync(cancellationToken);
     return Results.Ok(result);
+});
+
+projects.MapGet("/{projectId:guid}", async (
+    Guid projectId,
+    ProjectService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.GetAsync(projectId, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
 });
 
 projects.MapPost("/", async (
@@ -41,6 +52,32 @@ projects.MapPost("/{projectId:guid}/documents", async (
     var result = await service.RegisterDocumentAsync(projectId, request, cancellationToken);
     return result is null ? Results.NotFound() : Results.Created($"/api/projects/{projectId}/documents/{result.Id}", result);
 });
+
+projects.MapPost("/{projectId:guid}/documents/upload", async (
+    Guid projectId,
+    [FromForm] IFormFile file,
+    [FromForm] string? source,
+    ProjectService service,
+    CancellationToken cancellationToken) =>
+{
+    if (file.Length == 0)
+    {
+        return Results.BadRequest("Uploaded file is empty.");
+    }
+
+    await using var stream = file.OpenReadStream();
+    var result = await service.UploadDocumentAsync(
+        projectId,
+        new UploadDocumentCommand(
+            file.FileName,
+            file.ContentType,
+            string.IsNullOrWhiteSpace(source) ? "Manual upload" : source,
+            stream),
+        cancellationToken);
+
+    return result is null ? Results.NotFound() : Results.Created($"/api/projects/{projectId}/documents/{result.Document.Id}", result);
+})
+.DisableAntiforgery();
 
 projects.MapPost("/{projectId:guid}/roadmaps", async (
     Guid projectId,

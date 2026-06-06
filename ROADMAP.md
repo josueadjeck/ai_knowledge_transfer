@@ -103,6 +103,13 @@ Nicht im MVP:
 
 ## 7. Phasenplan
 
+Aktueller Implementierungsstand:
+
+- Phase 1 ist gestartet: Solution-Struktur, Schichten, Dependency Injection, API und Tests sind vorhanden.
+- Phase 2 ist gestartet: Blazor-Dashboard als erster MVP-Prototyp ist vorhanden.
+- Phase 3 ist gestartet: Projektanlage, Dokumentregistrierung, echter Datei-Upload und lokale Dateispeicherung sind vorhanden.
+- Phase 4 ist vorbereitet: Dokumentstatus und Quellenmodell sind vorhanden, Parsing und Knowledge Extraction folgen als naechster Ausbauschritt.
+
 ### Phase 0: Produktklaerung
 
 Ziel: Den fachlichen Rahmen und den MVP eindeutig festlegen.
@@ -391,4 +398,3 @@ Eine Funktion gilt erst als fertig, wenn:
 AI erzeugt Vorschlaege. Menschen geben Wissen frei.
 
 Diese Entscheidung schuetzt Qualitaet, Compliance und Vertrauen in der Plattform.
-

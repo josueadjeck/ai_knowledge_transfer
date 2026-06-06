@@ -3,7 +3,7 @@ namespace AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
 using AiKnowledgeTransfer.Domain.Roadmaps;
 
-internal static class RoadmapMapper
+public static class RoadmapMapper
 {
     public static RoadmapResponse ToResponse(OnboardingRoadmap roadmap)
     {
