@@ -1,5 +1,6 @@
 using AiKnowledgeTransfer.Application;
 using AiKnowledgeTransfer.Application.Documents;
+using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Contracts.Projects;
@@ -94,6 +95,23 @@ projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/analyze", async 
     catch (NotSupportedException exception)
     {
         return Results.BadRequest(exception.Message);
+    }
+    catch (InvalidOperationException exception)
+    {
+        return Results.BadRequest(exception.Message);
+    }
+});
+
+projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/extract-knowledge", async (
+    Guid projectId,
+    Guid documentId,
+    KnowledgeExtractionService service,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        var result = await service.ExtractAsync(projectId, documentId, cancellationToken);
+        return result is null ? Results.NotFound() : Results.Ok(result);
     }
     catch (InvalidOperationException exception)
     {

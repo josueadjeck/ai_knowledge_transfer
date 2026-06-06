@@ -9,6 +9,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - ASP.NET Core API with project, document and roadmap endpoints.
 - Multipart document upload with local file storage.
 - Text and Markdown parsing into document chunks.
+- Heuristic knowledge extraction for glossary terms, workflow candidates and open questions.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -91,6 +92,12 @@ Analyze an uploaded text or Markdown document:
 
 ```http
 POST http://localhost:5256/api/projects/{projectId}/documents/{documentId}/analyze
+```
+
+Extract first knowledge items from an analyzed document:
+
+```http
+POST http://localhost:5256/api/projects/{projectId}/documents/{documentId}/extract-knowledge
 ```
 
 Generate a roadmap:

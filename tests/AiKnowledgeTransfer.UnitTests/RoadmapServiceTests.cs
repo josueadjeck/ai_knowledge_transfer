@@ -2,9 +2,11 @@ namespace AiKnowledgeTransfer.UnitTests;
 
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Documents;
+using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
+using AiKnowledgeTransfer.Infrastructure.Knowledge;
 using AiKnowledgeTransfer.Infrastructure.Parsing;
 using AiKnowledgeTransfer.Infrastructure.Storage;
 using AiKnowledgeTransfer.Infrastructure.Persistence;
@@ -38,6 +40,50 @@ public sealed class RoadmapServiceTests
         Assert.Equal("text/markdown", result.Document.ContentType);
         Assert.Equal("Registered", result.Document.Status);
         Assert.True(File.Exists(Path.Combine(storageRoot, result.Document.StoragePath)));
+    }
+
+    [Fact]
+    public async Task ExtractAsync_creates_knowledge_items_from_analyzed_document()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Extraction Project", "Knowledge extraction test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("""
+            M3 Platform coordinates onboarding for Support Engineers.
+
+            Deployment and Recovery workflow must be reviewed by senior engineers.
+
+            CTU communication details are unknown and remain an open question.
+            """u8.ToArray());
+
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand(
+                "knowledge.md",
+                "text/markdown",
+                "Manual upload",
+                content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        Assert.True(extraction.CreatedItemCount >= 3);
+        Assert.Contains(extraction.KnowledgeItems, item => item.Type == "GlossaryTerm" && item.Title == "CTU");
+        Assert.Contains(extraction.KnowledgeItems, item => item.Type == "Workflow");
+        Assert.Contains(extraction.KnowledgeItems, item => item.Type == "OpenQuestion");
     }
 
     [Fact]

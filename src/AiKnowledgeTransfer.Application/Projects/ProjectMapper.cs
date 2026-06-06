@@ -61,7 +61,7 @@ public static class ProjectMapper
             chunk.CreatedAt);
     }
 
-    private static KnowledgeItemResponse ToResponse(KnowledgeItem item)
+    public static KnowledgeItemResponse ToResponse(KnowledgeItem item)
     {
         return new KnowledgeItemResponse(
             item.Id,
