@@ -9,7 +9,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - ASP.NET Core API with project, document and roadmap endpoints.
 - Multipart document upload with local file storage.
 - Text and Markdown parsing into document chunks.
-- Heuristic knowledge extraction for glossary terms, workflow candidates and open questions.
+- Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -48,6 +48,20 @@ http://localhost:5280
 dotnet build AiKnowledgeTransfer.slnx
 dotnet test AiKnowledgeTransfer.slnx
 ```
+
+## AI provider configuration
+
+Knowledge extraction is provider-independent. OpenAI is the first implemented AI provider. If `OPENAI_API_KEY` is set, the API uses OpenAI first and falls back to the local heuristic extractor if the provider returns no items or fails. If no key is set, the local heuristic extractor is used directly.
+
+Environment variables:
+
+```powershell
+$env:OPENAI_API_KEY="<your-api-key>"
+$env:OPENAI_MODEL="gpt-5.4-mini"
+$env:OPENAI_BASE_URL="https://api.openai.com/v1/"
+```
+
+`OPENAI_MODEL` and `OPENAI_BASE_URL` are optional. `OPENAI_BASE_URL` is intentionally configurable so future providers such as Azure OpenAI, customer-hosted AI gateways, or local model gateways can be added without changing the application layer.
 
 ## API examples
 
