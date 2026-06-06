@@ -6,7 +6,7 @@ using AiKnowledgeTransfer.Domain.Documents;
 using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
 
-internal static class ProjectMapper
+public static class ProjectMapper
 {
     public static ProjectDetailsResponse ToDetails(KnowledgeProject project)
     {
@@ -17,6 +17,7 @@ internal static class ProjectMapper
             project.Owner,
             project.CreatedAt,
             project.Documents.Select(ToResponse).ToArray(),
+            project.Documents.SelectMany(document => document.Chunks).Select(ToResponse).ToArray(),
             project.KnowledgeItems.Select(ToResponse).ToArray(),
             project.Roadmaps.Select(RoadmapMapper.ToResponse).ToArray());
     }
@@ -45,7 +46,19 @@ internal static class ProjectMapper
             document.VersionNumber,
             document.StoragePath,
             document.Status.ToString(),
+            document.Chunks.Count,
             document.UploadedAt);
+    }
+
+    public static DocumentChunkResponse ToResponse(DocumentChunk chunk)
+    {
+        return new DocumentChunkResponse(
+            chunk.Id,
+            chunk.ChunkNumber,
+            chunk.Text,
+            chunk.StartCharacter,
+            chunk.EndCharacter,
+            chunk.CreatedAt);
     }
 
     private static KnowledgeItemResponse ToResponse(KnowledgeItem item)

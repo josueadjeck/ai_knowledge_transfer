@@ -35,4 +35,23 @@ public sealed class LocalFileStorage(string rootPath) : IFileStorage
             fileInfo.Length,
             relativePath);
     }
+
+    public Task<Stream> OpenReadAsync(string storagePath, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(storagePath))
+        {
+            throw new ArgumentException("Storage path must not be empty.", nameof(storagePath));
+        }
+
+        var fullRootPath = Path.GetFullPath(rootPath);
+        var absolutePath = Path.GetFullPath(Path.Combine(fullRootPath, storagePath));
+
+        if (!absolutePath.StartsWith(fullRootPath, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Storage path points outside the configured storage root.");
+        }
+
+        Stream stream = File.OpenRead(absolutePath);
+        return Task.FromResult(stream);
+    }
 }

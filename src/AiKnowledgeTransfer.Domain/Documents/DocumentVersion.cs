@@ -2,6 +2,8 @@ namespace AiKnowledgeTransfer.Domain.Documents;
 
 public sealed class DocumentVersion
 {
+    private readonly List<DocumentChunk> _chunks = [];
+
     public DocumentVersion(string fileName, string contentType, string source, long sizeInBytes, int versionNumber, string storagePath)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -42,6 +44,15 @@ public sealed class DocumentVersion
     public DateTimeOffset UploadedAt { get; }
 
     public DocumentStatus Status { get; private set; }
+
+    public IReadOnlyCollection<DocumentChunk> Chunks => _chunks;
+
+    public void ReplaceChunks(IEnumerable<DocumentChunk> chunks)
+    {
+        _chunks.Clear();
+        _chunks.AddRange(chunks);
+        MarkAnalyzed();
+    }
 
     public void MarkAnalyzed()
     {

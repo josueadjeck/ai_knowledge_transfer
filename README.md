@@ -8,6 +8,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Blazor Web project with MVP dashboard.
 - ASP.NET Core API with project, document and roadmap endpoints.
 - Multipart document upload with local file storage.
+- Text and Markdown parsing into document chunks.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -84,6 +85,12 @@ Content-Type: multipart/form-data
 
 file=<document file>
 source=Manual upload
+```
+
+Analyze an uploaded text or Markdown document:
+
+```http
+POST http://localhost:5256/api/projects/{projectId}/documents/{documentId}/analyze
 ```
 
 Generate a roadmap:

@@ -9,5 +9,6 @@ public sealed record ProjectDetailsResponse(
     string Owner,
     DateTimeOffset CreatedAt,
     IReadOnlyCollection<DocumentResponse> Documents,
+    IReadOnlyCollection<DocumentChunkResponse> DocumentChunks,
     IReadOnlyCollection<KnowledgeItemResponse> KnowledgeItems,
     IReadOnlyCollection<RoadmapResponse> Roadmaps);

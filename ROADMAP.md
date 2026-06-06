@@ -108,7 +108,7 @@ Aktueller Implementierungsstand:
 - Phase 1 ist gestartet: Solution-Struktur, Schichten, Dependency Injection, API und Tests sind vorhanden.
 - Phase 2 ist gestartet: Blazor-Dashboard als erster MVP-Prototyp ist vorhanden.
 - Phase 3 ist gestartet: Projektanlage, Dokumentregistrierung, echter Datei-Upload und lokale Dateispeicherung sind vorhanden.
-- Phase 4 ist vorbereitet: Dokumentstatus und Quellenmodell sind vorhanden, Parsing und Knowledge Extraction folgen als naechster Ausbauschritt.
+- Phase 4 ist gestartet: Text-/Markdown-Parsing, Dokument-Chunks und Analyse-Endpunkt sind vorhanden; Knowledge Extraction folgt als naechster Ausbauschritt.
 
 ### Phase 0: Produktklaerung
 

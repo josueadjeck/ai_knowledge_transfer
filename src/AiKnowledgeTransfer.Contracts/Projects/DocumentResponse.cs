@@ -9,4 +9,5 @@ public sealed record DocumentResponse(
     int VersionNumber,
     string StoragePath,
     string Status,
+    int ChunkCount,
     DateTimeOffset UploadedAt);

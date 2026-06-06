@@ -1,4 +1,5 @@
 using AiKnowledgeTransfer.Application;
+using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Contracts.Projects;
@@ -78,6 +79,27 @@ projects.MapPost("/{projectId:guid}/documents/upload", async (
     return result is null ? Results.NotFound() : Results.Created($"/api/projects/{projectId}/documents/{result.Document.Id}", result);
 })
 .DisableAntiforgery();
+
+projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/analyze", async (
+    Guid projectId,
+    Guid documentId,
+    DocumentAnalysisService service,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        var result = await service.AnalyzeAsync(projectId, documentId, cancellationToken);
+        return result is null ? Results.NotFound() : Results.Ok(result);
+    }
+    catch (NotSupportedException exception)
+    {
+        return Results.BadRequest(exception.Message);
+    }
+    catch (InvalidOperationException exception)
+    {
+        return Results.BadRequest(exception.Message);
+    }
+});
 
 projects.MapPost("/{projectId:guid}/roadmaps", async (
     Guid projectId,

@@ -8,4 +8,8 @@ public interface IFileStorage
         string contentType,
         Stream content,
         CancellationToken cancellationToken);
+
+    Task<Stream> OpenReadAsync(
+        string storagePath,
+        CancellationToken cancellationToken);
 }
