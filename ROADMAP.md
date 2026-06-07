@@ -113,6 +113,7 @@ Aktueller Implementierungsstand:
 - Phase 4 ist erweitert: Textbasierte PDF-Dateien koennen analysiert werden; gescannte PDFs ohne extrahierbaren Text benoetigen spaeter OCR.
 - Phase 4 ist erweitert: Word-/DOCX-Dateien koennen analysiert und in Dokument-Chunks zerlegt werden.
 - Phase 4 ist erweitert: Die Blazor-UI zeigt pro analysiertem Dokument eine kompakte Chunk-Vorschau zur schnellen Qualitaetspruefung.
+- Phase 4 ist erweitert: TXT-, PDF- und DOCX-Parser nutzen eine gemeinsame Chunking-Komponente statt duplizierter Split-Logik.
 - Phase 6 ist erweitert: Die Blazor-UI kann Knowledge-Review-Elemente nach Typ und Review-Status filtern.
 - Phase 5 ist gestartet: Roadmaps verwenden freigegebenes Wissen bevorzugt und markieren nicht freigegebene Wissenselemente als Review-Hinweise.
 - Phase 5 ist erweitert: Die Blazor-UI zeigt Roadmap-Wochen mit Lernzielen, Uebungen, Abschlusskriterien und Review-Hinweisen als Vorschau.

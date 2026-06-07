@@ -13,6 +13,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Text and Markdown parsing into document chunks.
 - PDF text extraction into document chunks for text-based PDF files.
 - Word `.docx` text extraction into document chunks.
+- Shared chunking logic across text, PDF and Word parsers.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
 - Review workflow for extracted knowledge items.
 - Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
