@@ -5,12 +5,14 @@
 @using AiKnowledgeTransfer.Application.Audit
 @using AiKnowledgeTransfer.Application.Exports
 @using AiKnowledgeTransfer.Application.Knowledge
+@using AiKnowledgeTransfer.Application.Operations
 @using AiKnowledgeTransfer.Application.Projects
 @using AiKnowledgeTransfer.Application.Roadmaps
 @using AiKnowledgeTransfer.Application.Security
 @using AiKnowledgeTransfer.Application.Traceability
 @using AiKnowledgeTransfer.Contracts.Exports
 @using AiKnowledgeTransfer.Contracts.Audit
+@using AiKnowledgeTransfer.Contracts.Operations
 @using AiKnowledgeTransfer.Contracts.Projects
 @using AiKnowledgeTransfer.Contracts.Roadmaps
 @using AiKnowledgeTransfer.Contracts.Security
@@ -26,6 +28,7 @@
 @inject TraceabilityService Traceability
 @inject RolePermissionService Permissions
 @inject AuditLogService Audit
+@inject PersistenceBackupService Backups
 
 <PageTitle>AI Knowledge Transfer</PageTitle>
 
@@ -214,6 +217,41 @@
             <textarea class="export-preview" readonly>@_export.Markdown</textarea>
         }
     </div>
+
+    <div class="workflow-panel span-2">
+        <h2>Betrieb & Backups</h2>
+        <div class="button-row">
+            <button @onclick="CreateBackupAsync" disabled="@(!CanOperateBackups)">Backup erstellen</button>
+            <button @onclick="LoadBackupsAsync" disabled="@(!CanOperateBackups)">Backups laden</button>
+            <button @onclick="RestoreBackupAsync" disabled="@(!CanRestoreBackup)">Backup wiederherstellen</button>
+        </div>
+
+        @if (_backups.Count > 0)
+        {
+            <label class="select-label">
+                Backup
+                <select @bind="_selectedBackupFileName">
+                    @foreach (var backup in _backups)
+                    {
+                        <option value="@backup.FileName">@backup.FileName</option>
+                    }
+                </select>
+            </label>
+            <div class="compact-list">
+                @foreach (var backup in _backups.Take(5))
+                {
+                    <div>
+                        <strong>@backup.FileName</strong>
+                        <span>@backup.CreatedAt.LocalDateTime.ToString("g") | @FormatFileSize(backup.SizeInBytes)</span>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="muted">Noch keine lokalen Backups vorhanden.</p>
+        }
+    </div>
 </section>
 
 @code {
@@ -237,12 +275,19 @@
     private TraceabilityMatrixResponse? _traceability;
     private ExportProjectMarkdownResponse? _export;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
+    private IReadOnlyCollection<BackupResponse> _backups = [];
+    private string? _selectedBackupFileName;
 
     private bool CanAnalyze => Can(Permission.AnalyzeDocument)
         && _selectedProject?.Documents.Any(document => document.Status == "Registered") == true;
 
     private bool CanExtract => Can(Permission.ExtractKnowledge)
         && _selectedProject?.Documents.Any(document => document.Status == "Analyzed") == true;
+
+    private bool CanOperateBackups => _currentRole == UserRole.Admin;
+
+    private bool CanRestoreBackup => CanOperateBackups
+        && !string.IsNullOrWhiteSpace(_selectedBackupFileName);
 
     private bool Can(Permission permission)
     {
@@ -252,6 +297,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadProjectsAsync();
+        await LoadBackupsAsync();
     }
 
     private async Task CreateProjectAsync()
@@ -442,6 +488,60 @@
         });
     }
 
+    private async Task CreateBackupAsync()
+    {
+        if (!CanOperateBackups)
+        {
+            SetStatus("Keine Berechtigung", "Nur Admins duerfen lokale Backups erstellen.", isError: true);
+            return;
+        }
+
+        await RunSafelyAsync("Backup erstellen", async () =>
+        {
+            var backup = await Backups.CreateAsync(CancellationToken.None);
+            await LoadBackupsAsync();
+            _selectedBackupFileName = backup.FileName;
+            SetStatus("Backup erstellt", $"{backup.FileName} ({FormatFileSize(backup.SizeInBytes)})");
+        });
+    }
+
+    private async Task LoadBackupsAsync()
+    {
+        await RunSafelyAsync("Backups laden", () =>
+        {
+            _backups = Backups.List();
+            if (string.IsNullOrWhiteSpace(_selectedBackupFileName) || !_backups.Any(backup => backup.FileName == _selectedBackupFileName))
+            {
+                _selectedBackupFileName = _backups.FirstOrDefault()?.FileName;
+            }
+
+            return Task.CompletedTask;
+        });
+    }
+
+    private async Task RestoreBackupAsync()
+    {
+        if (!CanRestoreBackup)
+        {
+            SetStatus("Kein Backup gewaehlt", "Bitte zuerst ein Backup auswaehlen.", isError: true);
+            return;
+        }
+
+        await RunSafelyAsync("Backup wiederherstellen", async () =>
+        {
+            var restore = await Backups.RestoreAsync(_selectedBackupFileName!, CancellationToken.None);
+            if (restore is null)
+            {
+                SetStatus("Backup nicht gefunden", _selectedBackupFileName!, isError: true);
+                return;
+            }
+
+            await LoadProjectsAsync();
+            await LoadSelectedProjectAsync();
+            SetStatus("Backup wiederhergestellt", $"{restore.FileName}, {restore.RestoredEntries.Count} Eintraege");
+        });
+    }
+
     private async Task LoadProjectsAsync()
     {
         _projects = await Projects.ListAsync(CancellationToken.None);
@@ -493,6 +593,13 @@
             ArgumentException => exception.Message,
             _ => "Unerwarteter Fehler. Details stehen im Server-Log oder Audit-Kontext."
         };
+    }
+
+    private static string FormatFileSize(long sizeInBytes)
+    {
+        return sizeInBytes < 1024 * 1024
+            ? $"{Math.Max(1, sizeInBytes / 1024)} KB"
+            : $"{sizeInBytes / 1024d / 1024d:0.0} MB";
     }
 
     private sealed class CreateProjectRequestModel

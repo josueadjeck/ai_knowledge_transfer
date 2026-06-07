@@ -121,6 +121,8 @@ Aktueller Implementierungsstand:
 - API-Haertung ist gestartet: REST-Endpunkte validieren Kern-Requests und liefern konsistente JSON-Fehlerantworten fuer Validierungs-, NotFound- und BadRequest-Faelle.
 - Betriebs-Grundlage ist gestartet: Health-Endpoint meldet lokalen Storage, Persistenzdateien und AI-Provider-Konfiguration inklusive Fallback-Betrieb.
 - Backup-/Restore-Grundlage ist gestartet: lokale JSON-Persistenz, Audit Log und Upload-Dateien koennen als ZIP gesichert, aufgelistet und kontrolliert wiederhergestellt werden.
+- Persistenzentscheidung ist dokumentiert: JSON bleibt MVP-/Demo-Speicher fuer schnelle Iteration; produktionsnaher Betrieb wechselt auf PostgreSQL oder SQL Server via EF Core und bestehende Repository-Abstraktionen.
+- Backup-/Restore-UI ist gestartet: Admins koennen lokale Backups im Blazor-Workflow erstellen, laden und wiederherstellen.
 
 ### Phase 0: Produktklaerung
 
@@ -345,6 +347,7 @@ Aufgaben:
 
 - Monitoring einbauen.
 - Backup und Restore definieren.
+- Datenbankmigration von JSON zu PostgreSQL oder SQL Server mit EF Core planen und umsetzen.
 - Dependency Scan, Secret Scan und SAST in CI/CD aufnehmen.
 - Performance fuer grosse Dokumente verbessern.
 - Rollen- und Rechteverwaltung erweitern.
