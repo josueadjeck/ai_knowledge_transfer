@@ -8,6 +8,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Blazor Web project with an interactive MVP workflow.
 - User-facing error feedback for failed workflow operations.
 - ASP.NET Core API with project, document and roadmap endpoints.
+- Consistent API validation and JSON error responses for common failure cases.
 - Multipart document upload with local file storage.
 - Text and Markdown parsing into document chunks.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
