@@ -24,6 +24,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Documented persistence decision: JSON is for MVP speed; database remains the production target.
 - EF Core database model scaffold for the future relational persistence implementation.
 - SQLite-backed project repository foundation for local relational persistence tests.
+- SQLite-backed audit log foundation for local relational persistence tests.
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.

@@ -63,12 +63,13 @@ public static class DependencyInjection
         if (persistenceProvider == PersistenceProvider.Database)
         {
             services.AddScoped<IProjectRepository, EntityFrameworkProjectRepository>();
+            services.AddScoped<IAuditLog, EntityFrameworkAuditLog>();
         }
         else
         {
             services.AddSingleton<IProjectRepository>(_ => new JsonProjectRepository(projectStorePath));
+            services.AddSingleton<IAuditLog>(_ => new JsonAuditLog(auditLogPath));
         }
-        services.AddSingleton<IAuditLog>(_ => new JsonAuditLog(auditLogPath));
         services.AddSingleton<IFileStorage>(_ => new LocalFileStorage(uploadStoragePath));
         services.AddSingleton<IDocumentParser, PlainTextDocumentParser>();
         services.AddHttpClient();
