@@ -29,6 +29,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.
+- Health output reports active persistence mode and database provider configuration.
 - JSON persistence backup and restore endpoints for local MVP operation.
 - Unit and architecture tests.
 

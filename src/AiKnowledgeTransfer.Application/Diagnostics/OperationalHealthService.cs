@@ -16,6 +16,7 @@ public sealed class OperationalHealthService
         var components = new[]
         {
             GetStorageComponent(),
+            GetPersistenceComponent(),
             GetProjectStoreComponent(),
             GetAuditLogComponent(),
             GetAiProviderComponent()
@@ -61,12 +62,59 @@ public sealed class OperationalHealthService
 
     private HealthComponentResponse GetProjectStoreComponent()
     {
+        if (_options.PersistenceProvider.Equals("Database", StringComparison.OrdinalIgnoreCase))
+        {
+            return new HealthComponentResponse(
+                "projectStore",
+                "database",
+                "Project data is handled by the configured database provider.",
+                new Dictionary<string, string>
+                {
+                    ["persistenceProvider"] = _options.PersistenceProvider
+                });
+        }
+
         return GetFileComponent("projectStore", _options.ProjectStorePath);
     }
 
     private HealthComponentResponse GetAuditLogComponent()
     {
+        if (_options.PersistenceProvider.Equals("Database", StringComparison.OrdinalIgnoreCase))
+        {
+            return new HealthComponentResponse(
+                "auditLog",
+                "database",
+                "Audit events are handled by the configured database provider.",
+                new Dictionary<string, string>
+                {
+                    ["persistenceProvider"] = _options.PersistenceProvider
+                });
+        }
+
         return GetFileComponent("auditLog", _options.AuditLogPath);
+    }
+
+    private HealthComponentResponse GetPersistenceComponent()
+    {
+        var isDatabase = _options.PersistenceProvider.Equals("Database", StringComparison.OrdinalIgnoreCase);
+        var hasConnectionString = !string.IsNullOrWhiteSpace(_options.DatabaseConnectionString);
+        var status = isDatabase && !hasConnectionString ? "error" : "ok";
+        var detail = isDatabase
+            ? "Database persistence is active."
+            : "JSON persistence is active.";
+
+        return new HealthComponentResponse(
+            "persistence",
+            status,
+            detail,
+            new Dictionary<string, string>
+            {
+                ["provider"] = _options.PersistenceProvider,
+                ["databaseProvider"] = _options.DatabaseProvider ?? string.Empty,
+                ["connectionStringConfigured"] = hasConnectionString.ToString(),
+                ["projectStorePath"] = _options.ProjectStorePath,
+                ["auditLogPath"] = _options.AuditLogPath
+            });
     }
 
     private static HealthComponentResponse GetFileComponent(string name, string path)
