@@ -349,6 +349,51 @@ button:disabled {
     white-space: pre;
 }
 
+.traceability-table {
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    display: grid;
+    overflow: hidden;
+}
+
+.traceability-header,
+.traceability-row {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: 1.2fr 1.4fr .9fr .8fr;
+}
+
+.traceability-header {
+    background: #eef2f6;
+    color: #394756;
+    font-size: .78rem;
+    font-weight: 700;
+    padding: .55rem .65rem;
+    text-transform: uppercase;
+}
+
+.traceability-row {
+    background: #ffffff;
+    border-top: 1px solid #e1e6ed;
+    padding: .65rem;
+}
+
+.traceability-row strong,
+.traceability-row span {
+    display: block;
+}
+
+.traceability-row strong {
+    color: #1f2933;
+    font-size: .9rem;
+}
+
+.traceability-row span {
+    color: #617080;
+    font-size: .84rem;
+    margin-top: .15rem;
+}
+
 .flow-list {
     display: grid;
     gap: .75rem;
@@ -387,8 +432,14 @@ button:disabled {
     .workflow-grid,
     .knowledge-filters,
     .roadmap-week-grid,
+    .traceability-header,
+    .traceability-row,
     .knowledge-row {
         grid-template-columns: 1fr;
+    }
+
+    .traceability-header {
+        display: none;
     }
 
     .knowledge-filters span {

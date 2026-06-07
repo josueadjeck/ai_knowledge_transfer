@@ -118,6 +118,7 @@ Aktueller Implementierungsstand:
 - Phase 5 ist erweitert: Die Blazor-UI zeigt Roadmap-Wochen mit Lernzielen, Uebungen, Abschlusskriterien und Review-Hinweisen als Vorschau.
 - Phase 6 ist gestartet: Wissenselemente koennen in Review gesetzt, freigegeben oder abgelehnt werden; Review-Metadaten werden gespeichert.
 - Phase 7 ist gestartet: Traceability Matrix verknuepft Quellen, Chunks, Wissenselemente, Review-Status und Roadmap-/Export-Nutzung.
+- Phase 7 ist erweitert: Die Blazor-UI zeigt Traceability-Zeilen mit Quelle, Wissen, Review-Status, Roadmap-Nutzung und Export-Markierung.
 - Phase 8 ist gestartet: Projektuebergaben koennen als Markdown exportiert werden.
 - Phase 9 ist gestartet: Projekte werden lokal als JSON-Datei persistiert; Upload-Dateien bleiben im lokalen Storage.
 - Security-Grundlage ist gestartet: MVP-Rollenmatrix fuer Admin, Senior Engineer, Contributor und Viewer ist vorhanden und in der UI sichtbar.

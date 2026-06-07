@@ -74,6 +74,7 @@ The web UI can run the MVP workflow directly:
 - Generate a review-aware roadmap.
 - Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
 - Load traceability and Markdown export output.
+- Inspect traceability rows with source, knowledge, review state, roadmap usage and export state.
 
 Local project data is persisted as JSON under the app's `App_Data` folder. Uploaded files are stored under `App_Data/uploads`.
 

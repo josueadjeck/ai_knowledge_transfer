@@ -269,6 +269,35 @@
         @if (_traceability is not null)
         {
             <p class="muted">@_traceability.Rows.Count Matrix-Zeilen generiert.</p>
+            <div class="traceability-table" role="table" aria-label="Traceability Matrix">
+                <div class="traceability-header" role="row">
+                    <span role="columnheader">Quelle</span>
+                    <span role="columnheader">Wissen</span>
+                    <span role="columnheader">Review</span>
+                    <span role="columnheader">Nutzung</span>
+                </div>
+                @foreach (var row in _traceability.Rows.OrderBy(row => row.DocumentName).ThenBy(row => row.KnowledgeTitle))
+                {
+                    <div class="traceability-row" role="row">
+                        <div role="cell">
+                            <strong>@row.DocumentName</strong>
+                            <span>@row.DocumentStatus | @row.ChunkCount Chunks</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@(row.KnowledgeTitle ?? "Kein Wissenselement")</strong>
+                            <span>@(row.KnowledgeType ?? "Nicht extrahiert")</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@(row.KnowledgeReviewStatus ?? "-")</strong>
+                            <span>@ReviewDetail(row)</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@row.RoadmapUsageCount Roadmap</strong>
+                            <span>@(row.IncludedInExport ? "Exportiert" : "Nicht exportiert")</span>
+                        </div>
+                    </div>
+                }
+            </div>
         }
         @if (_auditEvents.Count > 0)
         {
@@ -725,6 +754,18 @@
         return normalized.Length <= maxLength
             ? normalized
             : $"{normalized[..maxLength]}...";
+    }
+
+    private static string ReviewDetail(TraceabilityRowResponse row)
+    {
+        if (string.IsNullOrWhiteSpace(row.ReviewedBy))
+        {
+            return "Noch nicht reviewed";
+        }
+
+        return row.ReviewedAt is null
+            ? row.ReviewedBy
+            : $"{row.ReviewedBy} | {row.ReviewedAt.Value.LocalDateTime:g}";
     }
 
     private static RenderFragment RenderRoadmapItems(IReadOnlyCollection<string> items) => builder =>
