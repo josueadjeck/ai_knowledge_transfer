@@ -17,6 +17,7 @@
 @using AiKnowledgeTransfer.Contracts.Roadmaps
 @using AiKnowledgeTransfer.Contracts.Security
 @using AiKnowledgeTransfer.Contracts.Traceability
+@using AiKnowledgeTransfer.Contracts.Validation
 @using Microsoft.AspNetCore.Components.Forms
 
 @inject ProjectService Projects
@@ -555,7 +556,14 @@
         await RunSafelyAsync("Dokument hochladen", async () =>
         {
             var file = args.File;
-            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var errors = DocumentFileValidation.Validate(file.Name, file.ContentType, file.Size);
+            if (errors.Count > 0)
+            {
+                SetStatus("Dokument hochladen fehlgeschlagen", ToValidationMessage(errors), isError: true);
+                return;
+            }
+
+            await using var stream = file.OpenReadStream(maxAllowedSize: DocumentFileValidation.MaxUploadSizeInBytes);
             var upload = await Projects.UploadDocumentAsync(
                 _selectedProject.Id,
                 new UploadDocumentCommand(file.Name, file.ContentType, _uploadSource, stream),
@@ -840,6 +848,11 @@
             ArgumentException => exception.Message,
             _ => "Unerwarteter Fehler. Details stehen im Server-Log oder Audit-Kontext."
         };
+    }
+
+    private static string ToValidationMessage(IReadOnlyDictionary<string, string[]> errors)
+    {
+        return string.Join(" ", errors.SelectMany(error => error.Value));
     }
 
     private static string FormatFileSize(long sizeInBytes)

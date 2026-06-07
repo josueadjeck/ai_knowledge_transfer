@@ -3,6 +3,7 @@ namespace AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Abstractions;
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Contracts.Projects;
+using AiKnowledgeTransfer.Contracts.Validation;
 using AiKnowledgeTransfer.Domain.Documents;
 
 public sealed class DocumentAnalysisService(
@@ -30,7 +31,7 @@ public sealed class DocumentAnalysisService(
         var parser = parsers.FirstOrDefault(candidate => candidate.CanParse(document.ContentType, document.FileName));
         if (parser is null)
         {
-            throw new NotSupportedException($"No parser is registered for '{document.ContentType}' files.");
+            throw new NotSupportedException($"No parser is registered for '{document.ContentType}' files. Supported types: {DocumentFileValidation.SupportedFileTypesDescription}.");
         }
 
         await using var content = await fileStorage.OpenReadAsync(document.StoragePath, cancellationToken);

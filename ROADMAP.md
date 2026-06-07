@@ -128,6 +128,7 @@ Aktueller Implementierungsstand:
 - Audit-Grundlage ist erweitert: Die Blazor-UI zeigt Audit Events detailliert und filterbar nach Aktion und Zieltyp.
 - UX-/Fehlerbehandlungs-Grundlage ist gestartet: kritische Blazor-Workflow-Aktionen zeigen kontrollierte Status- und Fehlermeldungen statt ungefangener UI-Fehler.
 - API-Haertung ist gestartet: REST-Endpunkte validieren Kern-Requests und liefern konsistente JSON-Fehlerantworten fuer Validierungs-, NotFound- und BadRequest-Faelle.
+- API-Haertung ist erweitert: Uploads werden zentral nach Dateigroesse und unterstuetzten Dateitypen validiert; API und Blazor zeigen konsistente Fehlermeldungen.
 - Betriebs-Grundlage ist gestartet: Health-Endpoint meldet lokalen Storage, Persistenzdateien und AI-Provider-Konfiguration inklusive Fallback-Betrieb.
 - Backup-/Restore-Grundlage ist gestartet: lokale JSON-Persistenz, Audit Log und Upload-Dateien koennen als ZIP gesichert, aufgelistet und kontrolliert wiederhergestellt werden.
 - Persistenzentscheidung ist dokumentiert: JSON bleibt MVP-/Demo-Speicher fuer schnelle Iteration; produktionsnaher Betrieb wechselt auf PostgreSQL oder SQL Server via EF Core und bestehende Repository-Abstraktionen.

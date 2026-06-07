@@ -94,6 +94,12 @@ projects.MapPost("/{projectId:guid}/documents/upload", async Task<IResult> (
         return ApiResponses.BadRequest("Uploaded file is empty.");
     }
 
+    var errors = DocumentFileValidation.Validate(file.FileName, file.ContentType, file.Length);
+    if (errors.Count > 0)
+    {
+        return ApiResponses.ValidationProblem(errors);
+    }
+
     await using var stream = file.OpenReadStream();
     var result = await service.UploadDocumentAsync(
         projectId,

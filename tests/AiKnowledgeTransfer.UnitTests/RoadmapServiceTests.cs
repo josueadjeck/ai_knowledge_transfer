@@ -45,6 +45,32 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task UploadDocumentAsync_rejects_unsupported_file_type()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var projectService = new ProjectService(repository, storage);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Upload Project", "Document storage test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("binary"u8.ToArray());
+
+        await Assert.ThrowsAsync<ArgumentException>(() => projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand(
+                "tool.exe",
+                "application/octet-stream",
+                "Manual upload",
+                content),
+            CancellationToken.None));
+
+        Assert.False(Directory.Exists(storageRoot));
+    }
+
+    [Fact]
     public async Task ExtractAsync_creates_knowledge_items_from_analyzed_document()
     {
         var repository = new InMemoryProjectRepository();

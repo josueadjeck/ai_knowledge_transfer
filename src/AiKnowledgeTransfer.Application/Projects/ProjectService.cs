@@ -2,6 +2,7 @@ namespace AiKnowledgeTransfer.Application.Projects;
 
 using AiKnowledgeTransfer.Application.Abstractions;
 using AiKnowledgeTransfer.Contracts.Projects;
+using AiKnowledgeTransfer.Contracts.Validation;
 using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
 
@@ -46,6 +47,8 @@ public sealed class ProjectService(
             return null;
         }
 
+        DocumentFileValidation.EnsureValid(request.FileName, request.ContentType, request.SizeInBytes);
+
         var document = project.RegisterDocument(
             request.FileName,
             request.ContentType,
@@ -67,6 +70,8 @@ public sealed class ProjectService(
         {
             return null;
         }
+
+        DocumentFileValidation.EnsureValid(command.FileName, command.ContentType, command.Content.Length);
 
         var storedFile = await fileStorage.SaveAsync(
             projectId,

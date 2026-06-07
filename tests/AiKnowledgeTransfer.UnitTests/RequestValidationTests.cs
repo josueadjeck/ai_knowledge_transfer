@@ -24,6 +24,38 @@ public sealed class RequestValidationTests
         Assert.Contains(nameof(RegisterDocumentRequest.SizeInBytes), errors.Keys);
     }
 
+    [Fact]
+    public void Validate_register_document_rejects_unsupported_file_type()
+    {
+        var errors = RequestValidation.Validate(new RegisterDocumentRequest("tool.exe", "application/octet-stream", "Repository", 128));
+
+        Assert.Contains(nameof(RegisterDocumentRequest.ContentType), errors.Keys);
+    }
+
+    [Fact]
+    public void Validate_register_document_rejects_files_above_upload_limit()
+    {
+        var errors = RequestValidation.Validate(new RegisterDocumentRequest(
+            "large.pdf",
+            "application/pdf",
+            "Repository",
+            DocumentFileValidation.MaxUploadSizeInBytes + 1));
+
+        Assert.Contains(nameof(RegisterDocumentRequest.SizeInBytes), errors.Keys);
+    }
+
+    [Theory]
+    [InlineData("manual.txt", "text/plain")]
+    [InlineData("manual.md", "application/octet-stream")]
+    [InlineData("manual.pdf", "application/pdf")]
+    [InlineData("manual.docx", "application/octet-stream")]
+    public void Document_file_validation_accepts_supported_types(string fileName, string contentType)
+    {
+        var errors = DocumentFileValidation.Validate(fileName, contentType, 128);
+
+        Assert.Empty(errors);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(9)]

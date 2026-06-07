@@ -10,6 +10,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - ASP.NET Core API with project, document and roadmap endpoints.
 - Consistent API validation and JSON error responses for common failure cases.
 - Multipart document upload with local file storage.
+- Central upload validation for supported file types and 10 MB maximum file size.
 - Text and Markdown parsing into document chunks.
 - PDF text extraction into document chunks for text-based PDF files.
 - Word `.docx` text extraction into document chunks.

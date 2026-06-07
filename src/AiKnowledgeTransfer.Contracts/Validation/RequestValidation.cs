@@ -28,6 +28,17 @@ public static class RequestValidation
         {
             errors[nameof(request.SizeInBytes)] = ["Size must be greater than zero."];
         }
+        else if (request.SizeInBytes > DocumentFileValidation.MaxUploadSizeInBytes)
+        {
+            errors[nameof(request.SizeInBytes)] = [$"Size must not exceed {DocumentFileValidation.FormatMaxUploadSize()}."];
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.FileName)
+            && !string.IsNullOrWhiteSpace(request.ContentType)
+            && !DocumentFileValidation.IsSupported(request.FileName, request.ContentType))
+        {
+            errors[nameof(request.ContentType)] = [$"Unsupported file type. Supported types: {DocumentFileValidation.SupportedFileTypesDescription}."];
+        }
 
         return errors;
     }
