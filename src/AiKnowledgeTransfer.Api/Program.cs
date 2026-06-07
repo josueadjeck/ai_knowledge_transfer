@@ -25,6 +25,8 @@ builder.Services
 
 var app = builder.Build();
 
+await app.Services.InitializeInfrastructureDatabaseAsync();
+
 app.UseHttpsRedirection();
 
 var projects = app.MapGroup("/api/projects");

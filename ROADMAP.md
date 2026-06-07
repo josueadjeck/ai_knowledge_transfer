@@ -127,6 +127,7 @@ Aktueller Implementierungsstand:
 - SQLite ist als erster lokaler relationaler Provider vorbereitet; EF-Modelltests laufen gegen SQLite statt EF InMemory.
 - SQLite/EF-Projektrepository ist gestartet: `IProjectRepository` kann Projektaggregate relational speichern und laden; JSON bleibt Default.
 - SQLite/EF-Audit-Log ist gestartet: `IAuditLog` kann Audit Events relational speichern, filtern und laden; JSON bleibt Default.
+- Datenbankinitialisierung ist gestartet: API und Web legen SQLite-Datei und Schema im Database-Modus beim Start kontrolliert an.
 
 ### Phase 0: Produktklaerung
 

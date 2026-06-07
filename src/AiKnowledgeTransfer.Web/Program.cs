@@ -14,6 +14,8 @@ builder.Services
 
 var app = builder.Build();
 
+await app.Services.InitializeInfrastructureDatabaseAsync();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
