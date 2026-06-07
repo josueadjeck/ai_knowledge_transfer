@@ -53,10 +53,12 @@ public static class DependencyInjection
             projectStorePath,
             auditLogPath,
             backupPath));
-        services.AddSingleton(new DatabasePersistenceOptions(
+        var databaseOptions = new DatabasePersistenceOptions(
             persistenceProvider,
             databaseConnectionString,
-            databaseProviderName));
+            databaseProviderName);
+        services.AddSingleton(databaseOptions);
+        services.AddConfiguredDatabasePersistence(databaseOptions);
 
         services.AddSingleton<IProjectRepository>(_ => new JsonProjectRepository(projectStorePath));
         services.AddSingleton<IAuditLog>(_ => new JsonAuditLog(auditLogPath));

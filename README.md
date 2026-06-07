@@ -73,12 +73,12 @@ Persistence note: the MVP intentionally starts with JSON to keep local setup fas
 Database migration preparation:
 
 ```powershell
-$env:AKT_PERSISTENCE_PROVIDER="Json"
-$env:AKT_DB_PROVIDER="SqlServer"
-$env:AKT_DB_CONNECTION_STRING="<connection-string>"
+$env:AKT_PERSISTENCE_PROVIDER="Json" # default
+$env:AKT_DB_PROVIDER="Sqlite"
+$env:AKT_DB_CONNECTION_STRING="Data Source=App_Data/knowledge-transfer.db"
 ```
 
-`Json` remains the active default. The EF Core model exists in Infrastructure so the next implementation can add a provider package and database-backed repositories without changing Domain or Application.
+`Json` remains the active default. SQLite is prepared as the first local relational provider for model and repository tests; PostgreSQL or SQL Server can be added later for production-like deployments without changing Domain or Application.
 
 ## Verify
 

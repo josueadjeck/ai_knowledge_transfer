@@ -25,6 +25,7 @@ The MVP uses local JSON persistence behind repository/application abstractions. 
 - JSON is not the long-term answer for multi-user concurrency, querying, reporting, compliance retention, identity-linked audit trails or enterprise backup/restore.
 - Before production hardening, add an EF Core infrastructure implementation, relational schema, migrations and integration tests.
 - The first EF Core model can be developed in parallel while JSON remains the active default.
+- SQLite is the preferred local relational stepping stone because it catches relational mapping issues that EF InMemory would hide.
 
 ## Migration trigger
 
