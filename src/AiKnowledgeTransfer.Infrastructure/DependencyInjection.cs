@@ -5,6 +5,7 @@ using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Operations;
 using AiKnowledgeTransfer.Infrastructure.Audit;
 using AiKnowledgeTransfer.Infrastructure.Knowledge;
+using AiKnowledgeTransfer.Infrastructure.Persistence.Database;
 using AiKnowledgeTransfer.Infrastructure.Parsing;
 using AiKnowledgeTransfer.Infrastructure.Persistence;
 using AiKnowledgeTransfer.Infrastructure.Storage;
@@ -20,6 +21,9 @@ public static class DependencyInjection
         var projectStorePath = Path.Combine(appDataPath, "projects.json");
         var auditLogPath = Path.Combine(appDataPath, "audit-log.json");
         var backupPath = Path.Combine(appDataPath, "backups");
+        var persistenceProvider = GetPersistenceProvider();
+        var databaseConnectionString = Environment.GetEnvironmentVariable("AKT_DB_CONNECTION_STRING");
+        var databaseProviderName = Environment.GetEnvironmentVariable("AKT_DB_PROVIDER");
 
         var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
@@ -49,6 +53,10 @@ public static class DependencyInjection
             projectStorePath,
             auditLogPath,
             backupPath));
+        services.AddSingleton(new DatabasePersistenceOptions(
+            persistenceProvider,
+            databaseConnectionString,
+            databaseProviderName));
 
         services.AddSingleton<IProjectRepository>(_ => new JsonProjectRepository(projectStorePath));
         services.AddSingleton<IAuditLog>(_ => new JsonAuditLog(auditLogPath));
@@ -75,5 +83,13 @@ public static class DependencyInjection
             return new FallbackKnowledgeExtractor(openAiExtractor, heuristicExtractor, logger);
         });
         return services;
+    }
+
+    private static PersistenceProvider GetPersistenceProvider()
+    {
+        var configuredProvider = Environment.GetEnvironmentVariable("AKT_PERSISTENCE_PROVIDER");
+        return Enum.TryParse<PersistenceProvider>(configuredProvider, ignoreCase: true, out var provider)
+            ? provider
+            : PersistenceProvider.Json;
     }
 }

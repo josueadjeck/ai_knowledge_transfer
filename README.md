@@ -22,6 +22,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - In-memory repository for local development.
 - JSON file persistence for projects in local MVP runs.
 - Documented persistence decision: JSON is for MVP speed; database remains the production target.
+- EF Core database model scaffold for the future relational persistence implementation.
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.
@@ -68,6 +69,16 @@ The web UI can run the MVP workflow directly:
 Local project data is persisted as JSON under the app's `App_Data` folder. Uploaded files are stored under `App_Data/uploads`.
 
 Persistence note: the MVP intentionally starts with JSON to keep local setup fast while the domain model stabilizes. The production target remains PostgreSQL or SQL Server via a second infrastructure implementation behind the existing repository abstractions. See `docs/decisions/0001-mvp-json-persistence.md`.
+
+Database migration preparation:
+
+```powershell
+$env:AKT_PERSISTENCE_PROVIDER="Json"
+$env:AKT_DB_PROVIDER="SqlServer"
+$env:AKT_DB_CONNECTION_STRING="<connection-string>"
+```
+
+`Json` remains the active default. The EF Core model exists in Infrastructure so the next implementation can add a provider package and database-backed repositories without changing Domain or Application.
 
 ## Verify
 

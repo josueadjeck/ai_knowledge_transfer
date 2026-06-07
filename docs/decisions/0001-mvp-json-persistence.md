@@ -24,6 +24,7 @@ The MVP uses local JSON persistence behind repository/application abstractions. 
 - JSON is acceptable only for local MVP runs, demos and early workflow validation.
 - JSON is not the long-term answer for multi-user concurrency, querying, reporting, compliance retention, identity-linked audit trails or enterprise backup/restore.
 - Before production hardening, add an EF Core infrastructure implementation, relational schema, migrations and integration tests.
+- The first EF Core model can be developed in parallel while JSON remains the active default.
 
 ## Migration trigger
 

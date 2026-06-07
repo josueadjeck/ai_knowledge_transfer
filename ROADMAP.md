@@ -123,6 +123,7 @@ Aktueller Implementierungsstand:
 - Backup-/Restore-Grundlage ist gestartet: lokale JSON-Persistenz, Audit Log und Upload-Dateien koennen als ZIP gesichert, aufgelistet und kontrolliert wiederhergestellt werden.
 - Persistenzentscheidung ist dokumentiert: JSON bleibt MVP-/Demo-Speicher fuer schnelle Iteration; produktionsnaher Betrieb wechselt auf PostgreSQL oder SQL Server via EF Core und bestehende Repository-Abstraktionen.
 - Backup-/Restore-UI ist gestartet: Admins koennen lokale Backups im Blazor-Workflow erstellen, laden und wiederherstellen.
+- Datenbankmigration ist vorbereitet: EF-Core-Modell, Persistenzmodus-Konfiguration und erste relationale Tabellenstruktur liegen parallel zur JSON-Implementierung in Infrastructure.
 
 ### Phase 0: Produktklaerung
 
