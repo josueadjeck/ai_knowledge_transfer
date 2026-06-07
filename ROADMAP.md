@@ -113,6 +113,7 @@ Aktueller Implementierungsstand:
 - Phase 4 ist erweitert: Textbasierte PDF-Dateien koennen analysiert werden; gescannte PDFs ohne extrahierbaren Text benoetigen spaeter OCR.
 - Phase 4 ist erweitert: Word-/DOCX-Dateien koennen analysiert und in Dokument-Chunks zerlegt werden.
 - Phase 4 ist erweitert: Die Blazor-UI zeigt pro analysiertem Dokument eine kompakte Chunk-Vorschau zur schnellen Qualitaetspruefung.
+- Phase 6 ist erweitert: Die Blazor-UI kann Knowledge-Review-Elemente nach Typ und Review-Status filtern.
 - Phase 5 ist gestartet: Roadmaps verwenden freigegebenes Wissen bevorzugt und markieren nicht freigegebene Wissenselemente als Review-Hinweise.
 - Phase 6 ist gestartet: Wissenselemente koennen in Review gesetzt, freigegeben oder abgelehnt werden; Review-Metadaten werden gespeichert.
 - Phase 7 ist gestartet: Traceability Matrix verknuepft Quellen, Chunks, Wissenselemente, Review-Status und Roadmap-/Export-Nutzung.

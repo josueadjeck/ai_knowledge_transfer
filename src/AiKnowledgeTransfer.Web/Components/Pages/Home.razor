@@ -150,8 +150,31 @@
         <h2>Knowledge Review</h2>
         @if (_selectedProject?.KnowledgeItems.Count > 0)
         {
+            <div class="knowledge-filters">
+                <label>
+                    Typ
+                    <select @bind="_knowledgeTypeFilter">
+                        <option value="">Alle Typen</option>
+                        @foreach (var type in KnowledgeTypes)
+                        {
+                            <option value="@type">@type</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    Status
+                    <select @bind="_knowledgeStatusFilter">
+                        <option value="">Alle Status</option>
+                        @foreach (var status in KnowledgeReviewStatuses)
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </label>
+                <span>@FilteredKnowledgeItems.Count() von @_selectedProject.KnowledgeItems.Count Elementen</span>
+            </div>
             <div class="knowledge-table">
-                @foreach (var item in _selectedProject.KnowledgeItems.OrderBy(item => item.ReviewStatus).ThenBy(item => item.Title))
+                @foreach (var item in FilteredKnowledgeItems)
                 {
                     <div class="knowledge-row">
                         <div>
@@ -167,6 +190,10 @@
                     </div>
                 }
             </div>
+            @if (!FilteredKnowledgeItems.Any())
+            {
+                <p class="muted">Keine Wissenselemente fuer diesen Filter.</p>
+            }
         }
         else
         {
@@ -281,6 +308,8 @@
     private string _uploadSource = "Manual upload";
     private string _roadmapRole = "Support Engineer";
     private int _roadmapWeeks = 4;
+    private string _knowledgeTypeFilter = string.Empty;
+    private string _knowledgeStatusFilter = string.Empty;
     private UserRole _currentRole = UserRole.Admin;
     private string StatusText { get; set; } = "Bereit";
     private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
@@ -301,6 +330,26 @@
 
     private bool CanRestoreBackup => CanOperateBackups
         && !string.IsNullOrWhiteSpace(_selectedBackupFileName);
+
+    private IEnumerable<string> KnowledgeTypes => _selectedProject?.KnowledgeItems
+        .Select(item => item.Type)
+        .Distinct(StringComparer.Ordinal)
+        .Order(StringComparer.Ordinal)
+        ?? Enumerable.Empty<string>();
+
+    private IEnumerable<string> KnowledgeReviewStatuses => _selectedProject?.KnowledgeItems
+        .Select(item => item.ReviewStatus)
+        .Distinct(StringComparer.Ordinal)
+        .Order(StringComparer.Ordinal)
+        ?? Enumerable.Empty<string>();
+
+    private IEnumerable<KnowledgeItemResponse> FilteredKnowledgeItems => _selectedProject?.KnowledgeItems
+        .Where(item => string.IsNullOrWhiteSpace(_knowledgeTypeFilter) || item.Type == _knowledgeTypeFilter)
+        .Where(item => string.IsNullOrWhiteSpace(_knowledgeStatusFilter) || item.ReviewStatus == _knowledgeStatusFilter)
+        .OrderBy(item => item.ReviewStatus)
+        .ThenBy(item => item.Type)
+        .ThenBy(item => item.Title)
+        ?? Enumerable.Empty<KnowledgeItemResponse>();
 
     private bool Can(Permission permission)
     {
@@ -572,6 +621,22 @@
         _traceability = null;
         _export = null;
         _auditEvents = [];
+        ResetKnowledgeFiltersIfNeeded();
+    }
+
+    private void ResetKnowledgeFiltersIfNeeded()
+    {
+        if (!string.IsNullOrWhiteSpace(_knowledgeTypeFilter)
+            && !KnowledgeTypes.Contains(_knowledgeTypeFilter, StringComparer.Ordinal))
+        {
+            _knowledgeTypeFilter = string.Empty;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_knowledgeStatusFilter)
+            && !KnowledgeReviewStatuses.Contains(_knowledgeStatusFilter, StringComparer.Ordinal))
+        {
+            _knowledgeStatusFilter = string.Empty;
+        }
     }
 
     private async Task RunSafelyAsync(string action, Func<Task> work)
