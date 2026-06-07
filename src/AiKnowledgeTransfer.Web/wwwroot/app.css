@@ -383,6 +383,60 @@ button:disabled {
     overflow-wrap: anywhere;
 }
 
+.backup-preview {
+    display: grid;
+    gap: .55rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.backup-preview div,
+.backup-preview details {
+    background: #f8fafc;
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .65rem;
+}
+
+.backup-preview span,
+.backup-preview strong {
+    display: block;
+}
+
+.backup-preview span {
+    color: #617080;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.backup-preview strong {
+    color: #1f2933;
+    font-size: .9rem;
+    margin-top: .2rem;
+    overflow-wrap: anywhere;
+}
+
+.backup-preview summary {
+    color: #244f8f;
+    cursor: pointer;
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.backup-preview ul {
+    margin: .55rem 0 0;
+    padding-left: 1.1rem;
+}
+
+.backup-warning {
+    border-color: #f5c2c7 !important;
+    background: #fff5f5 !important;
+}
+
+.backup-warning strong {
+    color: #b42318;
+}
+
 .export-sections {
     display: grid;
     gap: .55rem;
@@ -548,6 +602,7 @@ button:disabled {
     .knowledge-filters,
     .audit-filters,
     .export-summary,
+    .backup-preview,
     .roadmap-week-grid,
     .traceability-header,
     .traceability-row,

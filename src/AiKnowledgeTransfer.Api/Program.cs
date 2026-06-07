@@ -280,6 +280,22 @@ operations.MapGet("/backups", (PersistenceBackupService service) =>
     return Results.Ok(service.List());
 });
 
+operations.MapGet("/backups/{fileName}/preview", async Task<IResult> (
+    string fileName,
+    PersistenceBackupService service,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        var result = await service.PreviewAsync(fileName, cancellationToken);
+        return result is null ? ApiResponses.NotFound("Backup was not found.") : Results.Ok(result);
+    }
+    catch (InvalidOperationException exception)
+    {
+        return ApiResponses.BadRequest(exception.Message);
+    }
+});
+
 operations.MapPost("/backups/{fileName}/restore", async Task<IResult> (
     string fileName,
     PersistenceBackupService service,

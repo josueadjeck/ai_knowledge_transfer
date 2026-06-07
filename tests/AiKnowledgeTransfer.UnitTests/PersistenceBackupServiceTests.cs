@@ -43,6 +43,49 @@ public sealed class PersistenceBackupServiceTests
     }
 
     [Fact]
+    public async Task PreviewAsync_reports_manifest_and_backup_contents()
+    {
+        var options = CreateOptions();
+        Directory.CreateDirectory(options.UploadStoragePath);
+        await File.WriteAllTextAsync(options.ProjectStorePath, """{"projects":[]}""");
+        await File.WriteAllTextAsync(options.AuditLogPath, """{"events":[]}""");
+        await File.WriteAllTextAsync(Path.Combine(options.UploadStoragePath, "manual.md"), "# Manual");
+        var service = new PersistenceBackupService(options);
+        var backup = await service.CreateAsync(CancellationToken.None);
+
+        var preview = await service.PreviewAsync(backup.FileName, CancellationToken.None);
+
+        Assert.NotNull(preview);
+        Assert.Equal("json-local-v1", preview.Format);
+        Assert.True(preview.ContainsProjects);
+        Assert.True(preview.ContainsAuditLog);
+        Assert.Equal(1, preview.UploadFileCount);
+        Assert.Empty(preview.Warnings);
+        Assert.Contains("uploads/manual.md", preview.Entries);
+    }
+
+    [Fact]
+    public async Task PreviewAsync_warns_when_required_entries_are_missing()
+    {
+        var options = CreateOptions();
+        Directory.CreateDirectory(options.BackupPath);
+        var backupPath = Path.Combine(options.BackupPath, "partial.zip");
+        using (var archive = System.IO.Compression.ZipFile.Open(backupPath, System.IO.Compression.ZipArchiveMode.Create))
+        {
+            archive.CreateEntry("uploads/manual.md");
+        }
+
+        var service = new PersistenceBackupService(options);
+
+        var preview = await service.PreviewAsync("partial.zip", CancellationToken.None);
+
+        Assert.NotNull(preview);
+        Assert.Contains(preview.Warnings, warning => warning.Contains("project data", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(preview.Warnings, warning => warning.Contains("audit log", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(preview.Warnings, warning => warning.Contains("format", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public async Task RestoreAsync_rejects_path_like_backup_names()
     {
         var service = new PersistenceBackupService(CreateOptions());

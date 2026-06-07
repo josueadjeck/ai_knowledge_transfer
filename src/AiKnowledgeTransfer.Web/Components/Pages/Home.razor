@@ -400,6 +400,7 @@
         <div class="button-row">
             <button @onclick="CreateBackupAsync" disabled="@(!CanOperateBackups)">Backup erstellen</button>
             <button @onclick="LoadBackupsAsync" disabled="@(!CanOperateBackups)">Backups laden</button>
+            <button @onclick="PreviewBackupAsync" disabled="@(!CanPreviewBackup)">Backup pruefen</button>
             <button @onclick="RestoreBackupAsync" disabled="@(!CanRestoreBackup)">Backup wiederherstellen</button>
         </div>
 
@@ -414,6 +415,44 @@
                     }
                 </select>
             </label>
+            @if (_backupPreview is not null)
+            {
+                <div class="backup-preview">
+                    <div>
+                        <span>Datei</span>
+                        <strong>@_backupPreview.FileName</strong>
+                    </div>
+                    <div>
+                        <span>Format</span>
+                        <strong>@_backupPreview.Format</strong>
+                    </div>
+                    <div>
+                        <span>Inhalt</span>
+                        <strong>@_backupPreview.EntryCount Eintraege | @_backupPreview.UploadFileCount Uploads</strong>
+                    </div>
+                    <div>
+                        <span>Groesse</span>
+                        <strong>@FormatFileSize(_backupPreview.SizeInBytes)</strong>
+                    </div>
+                    @if (_backupPreview.Warnings.Count > 0)
+                    {
+                        <div class="span-2 backup-warning">
+                            <span>Warnung</span>
+                            <strong>@string.Join(" ", _backupPreview.Warnings)</strong>
+                        </div>
+                    }
+                    <details class="span-2">
+                        <summary>Backup-Eintraege anzeigen</summary>
+                        <ul>
+                            @foreach (var entry in _backupPreview.Entries)
+                            {
+                                <li>@entry</li>
+                            }
+                        </ul>
+                    </details>
+                    <p class="span-2 muted">Restore ist erst nach dieser Vorschau aktiv und ersetzt lokale Projekt-, Audit- und Upload-Daten aus dem Backup.</p>
+                </div>
+            }
             <div class="compact-list">
                 @foreach (var backup in _backups.Take(5))
                 {
@@ -457,6 +496,7 @@
     private ExportProjectMarkdownResponse? _export;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
+    private BackupPreviewResponse? _backupPreview;
     private string? _selectedBackupFileName;
 
     private bool CanAnalyze => Can(Permission.AnalyzeDocument)
@@ -468,6 +508,10 @@
     private bool CanOperateBackups => _currentRole == UserRole.Admin;
 
     private bool CanRestoreBackup => CanOperateBackups
+        && !string.IsNullOrWhiteSpace(_selectedBackupFileName)
+        && _backupPreview?.FileName == _selectedBackupFileName;
+
+    private bool CanPreviewBackup => CanOperateBackups
         && !string.IsNullOrWhiteSpace(_selectedBackupFileName);
 
     private IEnumerable<string> KnowledgeTypes => _selectedProject?.KnowledgeItems
@@ -724,6 +768,7 @@
             var backup = await Backups.CreateAsync(CancellationToken.None);
             await LoadBackupsAsync();
             _selectedBackupFileName = backup.FileName;
+            _backupPreview = await Backups.PreviewAsync(backup.FileName, CancellationToken.None);
             SetStatus("Backup erstellt", $"{backup.FileName} ({FormatFileSize(backup.SizeInBytes)})");
         });
     }
@@ -738,7 +783,33 @@
                 _selectedBackupFileName = _backups.FirstOrDefault()?.FileName;
             }
 
+            if (_backupPreview is not null && _backupPreview.FileName != _selectedBackupFileName)
+            {
+                _backupPreview = null;
+            }
+
             return Task.CompletedTask;
+        });
+    }
+
+    private async Task PreviewBackupAsync()
+    {
+        if (!CanPreviewBackup)
+        {
+            SetStatus("Kein Backup gewaehlt", "Bitte zuerst ein Backup auswaehlen.", isError: true);
+            return;
+        }
+
+        await RunSafelyAsync("Backup pruefen", async () =>
+        {
+            _backupPreview = await Backups.PreviewAsync(_selectedBackupFileName!, CancellationToken.None);
+            if (_backupPreview is null)
+            {
+                SetStatus("Backup nicht gefunden", _selectedBackupFileName!, isError: true);
+                return;
+            }
+
+            SetStatus("Backup geprueft", $"{_backupPreview.EntryCount} Eintraege, {_backupPreview.UploadFileCount} Uploads");
         });
     }
 
@@ -752,6 +823,12 @@
 
         await RunSafelyAsync("Backup wiederherstellen", async () =>
         {
+            if (_backupPreview?.FileName != _selectedBackupFileName)
+            {
+                SetStatus("Backup nicht geprueft", "Bitte zuerst die Vorschau fuer dieses Backup laden.", isError: true);
+                return;
+            }
+
             var restore = await Backups.RestoreAsync(_selectedBackupFileName!, CancellationToken.None);
             if (restore is null)
             {
@@ -761,6 +838,7 @@
 
             await LoadProjectsAsync();
             await LoadSelectedProjectAsync();
+            _backupPreview = null;
             SetStatus("Backup wiederhergestellt", $"{restore.FileName}, {restore.RestoredEntries.Count} Eintraege");
         });
     }

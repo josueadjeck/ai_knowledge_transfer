@@ -131,6 +131,7 @@ Aktueller Implementierungsstand:
 - API-Haertung ist erweitert: Uploads werden zentral nach Dateigroesse und unterstuetzten Dateitypen validiert; API und Blazor zeigen konsistente Fehlermeldungen.
 - Betriebs-Grundlage ist gestartet: Health-Endpoint meldet lokalen Storage, Persistenzdateien und AI-Provider-Konfiguration inklusive Fallback-Betrieb.
 - Backup-/Restore-Grundlage ist gestartet: lokale JSON-Persistenz, Audit Log und Upload-Dateien koennen als ZIP gesichert, aufgelistet und kontrolliert wiederhergestellt werden.
+- Backup-/Restore-Grundlage ist erweitert: Backups koennen vor Restore geprueft werden; UI zeigt Inhalt, Warnungen und aktiviert Restore erst nach Vorschau.
 - Persistenzentscheidung ist dokumentiert: JSON bleibt MVP-/Demo-Speicher fuer schnelle Iteration; produktionsnaher Betrieb wechselt auf PostgreSQL oder SQL Server via EF Core und bestehende Repository-Abstraktionen.
 - Backup-/Restore-UI ist gestartet: Admins koennen lokale Backups im Blazor-Workflow erstellen, laden und wiederherstellen.
 - Datenbankmigration ist vorbereitet: EF-Core-Modell, Persistenzmodus-Konfiguration und erste relationale Tabellenstruktur liegen parallel zur JSON-Implementierung in Infrastructure.

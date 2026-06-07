@@ -35,6 +35,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Health endpoint with local storage, persistence and AI provider configuration status.
 - Health output reports active persistence mode and database provider configuration.
 - JSON persistence backup and restore endpoints for local MVP operation.
+- Backup preview before restore, including manifest, entries, warnings and upload counts.
 - Unit and architecture tests.
 
 ## Run locally

@@ -56,6 +56,44 @@ public sealed class PersistenceBackupService
             .ToArray();
     }
 
+    public Task<BackupPreviewResponse?> PreviewAsync(string fileName, CancellationToken cancellationToken)
+    {
+        if (!IsSafeBackupFileName(fileName))
+        {
+            throw new InvalidOperationException("Backup file name is invalid.");
+        }
+
+        var backupPath = Path.Combine(_options.BackupPath, fileName);
+        if (!File.Exists(backupPath))
+        {
+            return Task.FromResult<BackupPreviewResponse?>(null);
+        }
+
+        var fileInfo = new FileInfo(backupPath);
+        using var archive = ZipFile.OpenRead(backupPath);
+        var entries = archive.Entries
+            .Where(entry => !IsDirectoryEntry(entry))
+            .Select(entry => entry.FullName)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var manifest = ReadManifest(archive);
+        var warnings = BuildPreviewWarnings(entries, manifest.Format);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult<BackupPreviewResponse?>(new BackupPreviewResponse(
+            fileName,
+            manifest.CreatedAt,
+            manifest.Format,
+            entries.Length,
+            fileInfo.Length,
+            entries.Contains("projects.json", StringComparer.OrdinalIgnoreCase),
+            entries.Contains("audit-log.json", StringComparer.OrdinalIgnoreCase),
+            entries.Count(entry => entry.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase)),
+            entries.Take(25).ToArray(),
+            warnings));
+    }
+
     public async Task<RestoreResponse?> RestoreAsync(string fileName, CancellationToken cancellationToken)
     {
         if (!IsSafeBackupFileName(fileName))
@@ -116,6 +154,50 @@ public sealed class PersistenceBackupService
         var entry = archive.CreateEntry("manifest.json", CompressionLevel.Fastest);
         await using var stream = entry.Open();
         await JsonSerializer.SerializeAsync(stream, manifest, JsonOptions, cancellationToken);
+    }
+
+    private static BackupManifest ReadManifest(ZipArchive archive)
+    {
+        var manifestEntry = archive.GetEntry("manifest.json");
+        if (manifestEntry is null)
+        {
+            return new BackupManifest(null, "unknown");
+        }
+
+        using var stream = manifestEntry.Open();
+        using var document = JsonDocument.Parse(stream);
+        var root = document.RootElement;
+        var createdAt = root.TryGetProperty("createdAt", out var createdAtElement)
+            && createdAtElement.TryGetDateTimeOffset(out var value)
+                ? value
+                : (DateTimeOffset?)null;
+        var format = root.TryGetProperty("format", out var formatElement)
+            ? formatElement.GetString() ?? "unknown"
+            : "unknown";
+
+        return new BackupManifest(createdAt, format);
+    }
+
+    private static IReadOnlyCollection<string> BuildPreviewWarnings(IReadOnlyCollection<string> entries, string format)
+    {
+        var warnings = new List<string>();
+
+        if (!format.Equals("json-local-v1", StringComparison.OrdinalIgnoreCase))
+        {
+            warnings.Add("Backup format is unknown or unsupported.");
+        }
+
+        if (!entries.Contains("projects.json", StringComparer.OrdinalIgnoreCase))
+        {
+            warnings.Add("Backup does not contain project data.");
+        }
+
+        if (!entries.Contains("audit-log.json", StringComparer.OrdinalIgnoreCase))
+        {
+            warnings.Add("Backup does not contain audit log data.");
+        }
+
+        return warnings;
     }
 
     private static async Task AddFileIfExistsAsync(ZipArchive archive, string sourcePath, string entryName, CancellationToken cancellationToken)
@@ -191,4 +273,6 @@ public sealed class PersistenceBackupService
     {
         return string.IsNullOrEmpty(entry.Name);
     }
+
+    private sealed record BackupManifest(DateTimeOffset? CreatedAt, string Format);
 }
