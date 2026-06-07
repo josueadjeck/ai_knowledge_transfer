@@ -285,6 +285,64 @@ button:disabled {
     margin: .35rem 0 0;
 }
 
+.roadmap-preview {
+    border-top: 1px solid #e1e6ed;
+    margin-top: .55rem;
+    padding-top: .55rem;
+}
+
+.roadmap-preview summary {
+    color: #244f8f;
+    cursor: pointer;
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.roadmap-preview article {
+    background: #ffffff;
+    border: 1px solid #e6ebf1;
+    border-radius: 6px;
+    margin-top: .65rem;
+    padding: .75rem;
+}
+
+.roadmap-preview header {
+    border-bottom: 1px solid #edf1f5;
+    margin-bottom: .65rem;
+    padding-bottom: .5rem;
+}
+
+.roadmap-preview header span {
+    color: #6a7684;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.roadmap-week-grid {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.roadmap-week-grid h3 {
+    color: #394756;
+    font-size: .86rem;
+    margin: 0 0 .35rem;
+}
+
+.roadmap-week-grid ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.roadmap-week-grid li,
+.roadmap-week-grid p {
+    color: #2f3b49;
+    font-size: .9rem;
+    margin-bottom: .25rem;
+}
+
 .export-preview {
     font-family: Consolas, 'Courier New', monospace;
     min-height: 18rem;
@@ -328,6 +386,7 @@ button:disabled {
     .work-board,
     .workflow-grid,
     .knowledge-filters,
+    .roadmap-week-grid,
     .knowledge-row {
         grid-template-columns: 1fr;
     }

@@ -72,6 +72,7 @@ The web UI can run the MVP workflow directly:
 - Filter knowledge review items by type and review status.
 - Submit, approve or reject knowledge items.
 - Generate a review-aware roadmap.
+- Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
 - Load traceability and Markdown export output.
 
 Local project data is persisted as JSON under the app's `App_Data` folder. Uploaded files are stored under `App_Data/uploads`.

@@ -217,12 +217,42 @@
 
         @if (_selectedProject?.Roadmaps.Count > 0)
         {
-            <div class="compact-list">
+            <div class="compact-list roadmap-list">
                 @foreach (var roadmap in _selectedProject.Roadmaps)
                 {
                     <div>
                         <strong>@roadmap.TargetRole</strong>
                         <span>@roadmap.DurationInWeeks Wochen, @roadmap.Status</span>
+                        <details class="roadmap-preview">
+                            <summary>Roadmap anzeigen</summary>
+                            @foreach (var week in roadmap.Weeks.OrderBy(week => week.WeekNumber))
+                            {
+                                <article>
+                                    <header>
+                                        <span>Woche @week.WeekNumber</span>
+                                        <strong>@week.Theme</strong>
+                                    </header>
+                                    <div class="roadmap-week-grid">
+                                        <section>
+                                            <h3>Lernziele</h3>
+                                            @RenderRoadmapItems(week.LearningGoals)
+                                        </section>
+                                        <section>
+                                            <h3>Uebungen</h3>
+                                            @RenderRoadmapItems(week.Exercises)
+                                        </section>
+                                        <section>
+                                            <h3>Abschluss</h3>
+                                            @RenderRoadmapItems(week.AcceptanceCriteria)
+                                        </section>
+                                        <section>
+                                            <h3>Review-Hinweise</h3>
+                                            @RenderRoadmapItems(week.ReviewNotes)
+                                        </section>
+                                    </div>
+                                </article>
+                            }
+                        </details>
                     </div>
                 }
             </div>
@@ -696,6 +726,29 @@
             ? normalized
             : $"{normalized[..maxLength]}...";
     }
+
+    private static RenderFragment RenderRoadmapItems(IReadOnlyCollection<string> items) => builder =>
+    {
+        if (items.Count == 0)
+        {
+            builder.OpenElement(0, "p");
+            builder.AddAttribute(1, "class", "muted");
+            builder.AddContent(2, "Keine Eintraege.");
+            builder.CloseElement();
+            return;
+        }
+
+        builder.OpenElement(3, "ul");
+        var sequence = 4;
+        foreach (var item in items)
+        {
+            builder.OpenElement(sequence++, "li");
+            builder.AddContent(sequence++, item);
+            builder.CloseElement();
+        }
+
+        builder.CloseElement();
+    };
 
     private sealed class CreateProjectRequestModel
     {
