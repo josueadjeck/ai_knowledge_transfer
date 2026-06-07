@@ -76,6 +76,7 @@ The web UI can run the MVP workflow directly:
 - Load traceability and Markdown export output.
 - Inspect traceability rows with source, knowledge, review state, roadmap usage and export state.
 - Inspect and filter audit log events by action and target type.
+- Inspect Markdown export metadata and section previews before reading the full export text.
 
 Local project data is persisted as JSON under the app's `App_Data` folder. Uploaded files are stored under `App_Data/uploads`.
 

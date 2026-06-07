@@ -360,7 +360,37 @@
         }
         @if (_export is not null)
         {
-            <textarea class="export-preview" readonly>@_export.Markdown</textarea>
+            <div class="export-summary">
+                <div>
+                    <span>Datei</span>
+                    <strong>@_export.FileName</strong>
+                </div>
+                <div>
+                    <span>Format</span>
+                    <strong>@_export.ContentType</strong>
+                </div>
+                <div>
+                    <span>Erzeugt</span>
+                    <strong>@_export.GeneratedAt.LocalDateTime.ToString("g")</strong>
+                </div>
+                <div>
+                    <span>Umfang</span>
+                    <strong>@MarkdownLineCount(_export.Markdown) Zeilen | @FormatFileSize(_export.Markdown.Length)</strong>
+                </div>
+            </div>
+            <div class="export-sections">
+                @foreach (var section in ExportSections(_export.Markdown))
+                {
+                    <details>
+                        <summary>@section.Title</summary>
+                        <pre>@section.Preview</pre>
+                    </details>
+                }
+            </div>
+            <details class="export-full">
+                <summary>Vollstaendiges Markdown anzeigen</summary>
+                <textarea class="export-preview" readonly>@_export.Markdown</textarea>
+            </details>
         }
     </div>
 
@@ -848,6 +878,53 @@
             : $"{row.ReviewedBy} | {row.ReviewedAt.Value.LocalDateTime:g}";
     }
 
+    private static int MarkdownLineCount(string markdown)
+    {
+        return markdown.Split('\n').Length;
+    }
+
+    private static IEnumerable<ExportPreviewSection> ExportSections(string markdown)
+    {
+        var sections = new List<ExportPreviewSection>();
+        var title = "Kopfbereich";
+        var lines = new List<string>();
+
+        foreach (var line in markdown.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
+        {
+            if (line.StartsWith("## ", StringComparison.Ordinal))
+            {
+                AddExportSection(sections, title, lines);
+                title = line[3..].Trim();
+                lines = [];
+                continue;
+            }
+
+            lines.Add(line);
+        }
+
+        AddExportSection(sections, title, lines);
+        return sections;
+    }
+
+    private static void AddExportSection(List<ExportPreviewSection> sections, string title, List<string> lines)
+    {
+        var preview = string.Join(Environment.NewLine, lines)
+            .Trim();
+
+        if (string.IsNullOrWhiteSpace(preview))
+        {
+            preview = "Keine Inhalte.";
+        }
+
+        const int maxPreviewLength = 1200;
+        if (preview.Length > maxPreviewLength)
+        {
+            preview = $"{preview[..maxPreviewLength]}...";
+        }
+
+        sections.Add(new ExportPreviewSection(title, preview));
+    }
+
     private static RenderFragment RenderRoadmapItems(IReadOnlyCollection<string> items) => builder =>
     {
         if (items.Count == 0)
@@ -879,4 +956,6 @@
 
         public string Owner { get; set; } = string.Empty;
     }
+
+    private sealed record ExportPreviewSection(string Title, string Preview);
 }
