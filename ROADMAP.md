@@ -110,6 +110,7 @@ Aktueller Implementierungsstand:
 - Phase 2 ist erweitert: Blazor bietet einen interaktiven MVP-Workflow fuer Projekt, Upload, Analyse, Extraction, Review, Roadmap, Traceability und Export.
 - Phase 3 ist gestartet: Projektanlage, Dokumentregistrierung, echter Datei-Upload und lokale Dateispeicherung sind vorhanden.
 - Phase 4 ist gestartet: Text-/Markdown-Parsing, Dokument-Chunks, Analyse-Endpunkt, heuristische Knowledge Extraction und OpenAI als erster provider-unabhaengiger AI-Provider sind vorhanden; Azure OpenAI, Kunden-AI und lokale Modelle koennen spaeter als weitere Provider folgen.
+- Phase 4 ist erweitert: Textbasierte PDF-Dateien koennen analysiert werden; gescannte PDFs ohne extrahierbaren Text benoetigen spaeter OCR.
 - Phase 5 ist gestartet: Roadmaps verwenden freigegebenes Wissen bevorzugt und markieren nicht freigegebene Wissenselemente als Review-Hinweise.
 - Phase 6 ist gestartet: Wissenselemente koennen in Review gesetzt, freigegeben oder abgelehnt werden; Review-Metadaten werden gespeichert.
 - Phase 7 ist gestartet: Traceability Matrix verknuepft Quellen, Chunks, Wissenselemente, Review-Status und Roadmap-/Export-Nutzung.

@@ -11,6 +11,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Consistent API validation and JSON error responses for common failure cases.
 - Multipart document upload with local file storage.
 - Text and Markdown parsing into document chunks.
+- PDF text extraction into document chunks for text-based PDF files.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
 - Review workflow for extracted knowledge items.
 - Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
@@ -63,7 +64,7 @@ The web UI can run the MVP workflow directly:
 
 - Select an MVP role and see actions enabled or disabled by permission.
 - Create or select a project.
-- Upload a text or Markdown document.
+- Upload a text, Markdown or text-based PDF document.
 - Analyze the document into chunks.
 - Extract knowledge items.
 - Submit, approve or reject knowledge items.

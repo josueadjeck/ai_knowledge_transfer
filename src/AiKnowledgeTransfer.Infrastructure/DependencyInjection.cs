@@ -75,6 +75,7 @@ public static class DependencyInjection
         }
         services.AddSingleton<IFileStorage>(_ => new LocalFileStorage(uploadStoragePath));
         services.AddSingleton<IDocumentParser, PlainTextDocumentParser>();
+        services.AddSingleton<IDocumentParser, PdfDocumentParser>();
         services.AddHttpClient();
         services.AddSingleton<IKnowledgeExtractor>(serviceProvider =>
         {
