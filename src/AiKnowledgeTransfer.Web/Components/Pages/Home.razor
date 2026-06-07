@@ -301,15 +301,62 @@
         }
         @if (_auditEvents.Count > 0)
         {
-            <div class="compact-list">
-                @foreach (var auditEvent in _auditEvents.Take(6))
+            <div class="audit-filters">
+                <label>
+                    Aktion
+                    <select @bind="_auditActionFilter">
+                        <option value="">Alle Aktionen</option>
+                        @foreach (var action in AuditActions)
+                        {
+                            <option value="@action">@action</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    Zieltyp
+                    <select @bind="_auditTargetTypeFilter">
+                        <option value="">Alle Zieltypen</option>
+                        @foreach (var targetType in AuditTargetTypes)
+                        {
+                            <option value="@targetType">@targetType</option>
+                        }
+                    </select>
+                </label>
+                <span>@FilteredAuditEvents.Count() von @_auditEvents.Count Events</span>
+            </div>
+            <div class="audit-table" role="table" aria-label="Audit Log">
+                <div class="audit-header" role="row">
+                    <span role="columnheader">Zeit</span>
+                    <span role="columnheader">Aktion</span>
+                    <span role="columnheader">Ziel</span>
+                    <span role="columnheader">Zusammenfassung</span>
+                </div>
+                @foreach (var auditEvent in FilteredAuditEvents)
                 {
-                    <div>
-                        <strong>@auditEvent.Action</strong>
-                        <span>@auditEvent.OccurredAt.LocalDateTime.ToString("g") | @auditEvent.Summary</span>
+                    <div class="audit-row" role="row">
+                        <div role="cell">
+                            <strong>@auditEvent.OccurredAt.LocalDateTime.ToString("g")</strong>
+                            <span>@auditEvent.Actor</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@auditEvent.Action</strong>
+                            <span>@auditEvent.Id</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@auditEvent.TargetType</strong>
+                            <span>@(auditEvent.TargetId?.ToString() ?? "-")</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@auditEvent.Summary</strong>
+                            <span>@(auditEvent.ProjectId?.ToString() ?? "Global")</span>
+                        </div>
                     </div>
                 }
             </div>
+            @if (!FilteredAuditEvents.Any())
+            {
+                <p class="muted">Keine Audit-Events fuer diesen Filter.</p>
+            }
         }
         @if (_export is not null)
         {
@@ -369,6 +416,8 @@
     private int _roadmapWeeks = 4;
     private string _knowledgeTypeFilter = string.Empty;
     private string _knowledgeStatusFilter = string.Empty;
+    private string _auditActionFilter = string.Empty;
+    private string _auditTargetTypeFilter = string.Empty;
     private UserRole _currentRole = UserRole.Admin;
     private string StatusText { get; set; } = "Bereit";
     private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
@@ -409,6 +458,21 @@
         .ThenBy(item => item.Type)
         .ThenBy(item => item.Title)
         ?? Enumerable.Empty<KnowledgeItemResponse>();
+
+    private IEnumerable<string> AuditActions => _auditEvents
+        .Select(auditEvent => auditEvent.Action)
+        .Distinct(StringComparer.Ordinal)
+        .Order(StringComparer.Ordinal);
+
+    private IEnumerable<string> AuditTargetTypes => _auditEvents
+        .Select(auditEvent => auditEvent.TargetType)
+        .Distinct(StringComparer.Ordinal)
+        .Order(StringComparer.Ordinal);
+
+    private IEnumerable<AuditEventResponse> FilteredAuditEvents => _auditEvents
+        .Where(auditEvent => string.IsNullOrWhiteSpace(_auditActionFilter) || auditEvent.Action == _auditActionFilter)
+        .Where(auditEvent => string.IsNullOrWhiteSpace(_auditTargetTypeFilter) || auditEvent.TargetType == _auditTargetTypeFilter)
+        .OrderByDescending(auditEvent => auditEvent.OccurredAt);
 
     private bool Can(Permission permission)
     {
@@ -681,6 +745,7 @@
         _export = null;
         _auditEvents = [];
         ResetKnowledgeFiltersIfNeeded();
+        ResetAuditFiltersIfNeeded();
     }
 
     private void ResetKnowledgeFiltersIfNeeded()
@@ -695,6 +760,21 @@
             && !KnowledgeReviewStatuses.Contains(_knowledgeStatusFilter, StringComparer.Ordinal))
         {
             _knowledgeStatusFilter = string.Empty;
+        }
+    }
+
+    private void ResetAuditFiltersIfNeeded()
+    {
+        if (!string.IsNullOrWhiteSpace(_auditActionFilter)
+            && !AuditActions.Contains(_auditActionFilter, StringComparer.Ordinal))
+        {
+            _auditActionFilter = string.Empty;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_auditTargetTypeFilter)
+            && !AuditTargetTypes.Contains(_auditTargetTypeFilter, StringComparer.Ordinal))
+        {
+            _auditTargetTypeFilter = string.Empty;
         }
     }
 
