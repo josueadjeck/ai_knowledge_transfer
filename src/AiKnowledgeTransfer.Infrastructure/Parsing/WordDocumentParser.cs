@@ -36,9 +36,14 @@ public sealed class WordDocumentParser : IDocumentParser
     {
         var builder = new StringBuilder();
         using var document = WordprocessingDocument.Open(content, isEditable: false);
-        var paragraphs = document.MainDocumentPart?.Document.Body?.Elements<Paragraph>() ?? [];
+        var mainDocument = document.MainDocumentPart?.Document;
+        var body = mainDocument?.Body;
+        if (body is null)
+        {
+            return string.Empty;
+        }
 
-        foreach (var paragraph in paragraphs)
+        foreach (var paragraph in body.Elements<Paragraph>())
         {
             cancellationToken.ThrowIfCancellationRequested();
             var text = paragraph.InnerText?.Trim();

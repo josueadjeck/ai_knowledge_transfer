@@ -51,7 +51,7 @@ public sealed class DocumentAnalysisService(
             document.Id,
             document.Status.ToString(),
             document.Chunks.Count,
-            document.Chunks.Select(ProjectMapper.ToResponse).ToArray());
+            document.Chunks.Select(chunk => ProjectMapper.ToResponse(document.Id, chunk)).ToArray());
     }
 
     private static DocumentChunk ToDomainChunk(ParsedDocumentChunk chunk)

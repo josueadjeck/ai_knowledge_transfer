@@ -17,7 +17,7 @@ public static class ProjectMapper
             project.Owner,
             project.CreatedAt,
             project.Documents.Select(ToResponse).ToArray(),
-            project.Documents.SelectMany(document => document.Chunks).Select(ToResponse).ToArray(),
+            project.Documents.SelectMany(document => document.Chunks.Select(chunk => ToResponse(document.Id, chunk))).ToArray(),
             project.KnowledgeItems.Select(ToResponse).ToArray(),
             project.Roadmaps.Select(RoadmapMapper.ToResponse).ToArray());
     }
@@ -52,8 +52,14 @@ public static class ProjectMapper
 
     public static DocumentChunkResponse ToResponse(DocumentChunk chunk)
     {
+        return ToResponse(Guid.Empty, chunk);
+    }
+
+    public static DocumentChunkResponse ToResponse(Guid documentId, DocumentChunk chunk)
+    {
         return new DocumentChunkResponse(
             chunk.Id,
+            documentId,
             chunk.ChunkNumber,
             chunk.Text,
             chunk.StartCharacter,

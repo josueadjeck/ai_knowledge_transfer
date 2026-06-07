@@ -67,6 +67,7 @@ The web UI can run the MVP workflow directly:
 - Create or select a project.
 - Upload a text, Markdown, text-based PDF or Word `.docx` document.
 - Analyze the document into chunks.
+- Inspect extracted chunks per analyzed document.
 - Extract knowledge items.
 - Submit, approve or reject knowledge items.
 - Generate a review-aware roadmap.

@@ -182,6 +182,7 @@ public sealed class RoadmapServiceTests
         Assert.NotNull(analysis);
         Assert.Equal("Analyzed", analysis.Status);
         Assert.Equal(3, analysis.ChunkCount);
+        Assert.All(analysis.Chunks, chunk => Assert.Equal(upload.Document.Id, chunk.DocumentId));
         Assert.Contains(analysis.Chunks, chunk => chunk.Text.Contains("Deployment", StringComparison.Ordinal));
     }
 

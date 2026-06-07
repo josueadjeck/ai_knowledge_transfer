@@ -226,6 +226,39 @@ button:disabled {
     color: #617080;
 }
 
+.chunk-preview {
+    border-top: 1px solid #e1e6ed;
+    margin-top: .55rem;
+    padding-top: .55rem;
+}
+
+.chunk-preview summary {
+    color: #244f8f;
+    cursor: pointer;
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.chunk-preview article {
+    background: #ffffff;
+    border: 1px solid #e6ebf1;
+    border-radius: 6px;
+    margin-top: .5rem;
+    padding: .55rem;
+}
+
+.chunk-preview article span {
+    color: #6a7684;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.chunk-preview p {
+    color: #2f3b49;
+    margin: .35rem 0 0;
+    overflow-wrap: anywhere;
+}
+
 .knowledge-row {
     align-items: start;
     display: grid;
