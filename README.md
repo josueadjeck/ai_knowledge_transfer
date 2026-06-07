@@ -23,6 +23,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - JSON file persistence for projects in local MVP runs.
 - Documented persistence decision: JSON is for MVP speed; database remains the production target.
 - EF Core database model scaffold for the future relational persistence implementation.
+- SQLite-backed project repository foundation for local relational persistence tests.
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.
@@ -78,7 +79,7 @@ $env:AKT_DB_PROVIDER="Sqlite"
 $env:AKT_DB_CONNECTION_STRING="Data Source=App_Data/knowledge-transfer.db"
 ```
 
-`Json` remains the active default. SQLite is prepared as the first local relational provider for model and repository tests; PostgreSQL or SQL Server can be added later for production-like deployments without changing Domain or Application.
+`Json` remains the active default. SQLite is prepared as the first local relational provider for model and repository tests. Set `AKT_PERSISTENCE_PROVIDER=Database` with `AKT_DB_PROVIDER=Sqlite` to activate the database registration path; PostgreSQL or SQL Server can be added later for production-like deployments without changing Domain or Application.
 
 ## Verify
 
