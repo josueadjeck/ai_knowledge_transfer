@@ -5,6 +5,7 @@ using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
+using AiKnowledgeTransfer.Application.Operations;
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Application.Security;
@@ -254,6 +255,37 @@ app.MapGet("/api/audit", async Task<IResult> (
 {
     var result = await service.ListAsync(projectId: null, cancellationToken);
     return Results.Ok(result);
+});
+
+var operations = app.MapGroup("/api/operations");
+
+operations.MapPost("/backups", async Task<IResult> (
+    PersistenceBackupService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.CreateAsync(cancellationToken);
+    return Results.Created($"/api/operations/backups/{result.FileName}", result);
+});
+
+operations.MapGet("/backups", (PersistenceBackupService service) =>
+{
+    return Results.Ok(service.List());
+});
+
+operations.MapPost("/backups/{fileName}/restore", async Task<IResult> (
+    string fileName,
+    PersistenceBackupService service,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        var result = await service.RestoreAsync(fileName, cancellationToken);
+        return result is null ? ApiResponses.NotFound("Backup was not found.") : Results.Ok(result);
+    }
+    catch (InvalidOperationException exception)
+    {
+        return ApiResponses.BadRequest(exception.Message);
+    }
 });
 
 app.Run();

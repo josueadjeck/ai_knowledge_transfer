@@ -1,0 +1,66 @@
+using AiKnowledgeTransfer.Application.Operations;
+
+namespace AiKnowledgeTransfer.UnitTests;
+
+public sealed class PersistenceBackupServiceTests
+{
+    [Fact]
+    public async Task CreateAsync_includes_projects_audit_and_upload_files()
+    {
+        var options = CreateOptions();
+        Directory.CreateDirectory(options.UploadStoragePath);
+        await File.WriteAllTextAsync(options.ProjectStorePath, """{"projects":[]}""");
+        await File.WriteAllTextAsync(options.AuditLogPath, """{"events":[]}""");
+        await File.WriteAllTextAsync(Path.Combine(options.UploadStoragePath, "manual.md"), "# Manual");
+        var service = new PersistenceBackupService(options);
+
+        var backup = await service.CreateAsync(CancellationToken.None);
+
+        Assert.True(File.Exists(backup.Path));
+        Assert.Contains(service.List(), item => item.FileName == backup.FileName);
+    }
+
+    [Fact]
+    public async Task RestoreAsync_restores_known_entries_from_backup()
+    {
+        var options = CreateOptions();
+        Directory.CreateDirectory(options.UploadStoragePath);
+        await File.WriteAllTextAsync(options.ProjectStorePath, """{"projects":[{"name":"before"}]}""");
+        await File.WriteAllTextAsync(options.AuditLogPath, """{"events":[]}""");
+        await File.WriteAllTextAsync(Path.Combine(options.UploadStoragePath, "manual.md"), "before");
+        var service = new PersistenceBackupService(options);
+        var backup = await service.CreateAsync(CancellationToken.None);
+
+        await File.WriteAllTextAsync(options.ProjectStorePath, """{"projects":[]}""");
+        await File.WriteAllTextAsync(Path.Combine(options.UploadStoragePath, "manual.md"), "after");
+        var restore = await service.RestoreAsync(backup.FileName, CancellationToken.None);
+
+        Assert.NotNull(restore);
+        Assert.Contains("projects.json", restore.RestoredEntries);
+        Assert.Contains("uploads/manual.md", restore.RestoredEntries);
+        Assert.Contains("before", await File.ReadAllTextAsync(options.ProjectStorePath));
+        Assert.Equal("before", await File.ReadAllTextAsync(Path.Combine(options.UploadStoragePath, "manual.md")));
+    }
+
+    [Fact]
+    public async Task RestoreAsync_rejects_path_like_backup_names()
+    {
+        var service = new PersistenceBackupService(CreateOptions());
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.RestoreAsync("../backup.zip", CancellationToken.None));
+    }
+
+    private static PersistenceBackupOptions CreateOptions()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-backup-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+
+        return new PersistenceBackupOptions(
+            root,
+            Path.Combine(root, "uploads"),
+            Path.Combine(root, "projects.json"),
+            Path.Combine(root, "audit-log.json"),
+            Path.Combine(root, "backups"));
+    }
+}

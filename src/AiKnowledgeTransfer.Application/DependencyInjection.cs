@@ -6,6 +6,7 @@ using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
+using AiKnowledgeTransfer.Application.Operations;
 using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Application.Traceability;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<MarkdownExportService>();
         services.AddScoped<KnowledgeExtractionService>();
         services.AddScoped<KnowledgeReviewService>();
+        services.AddScoped<PersistenceBackupService>();
         services.AddScoped<RoadmapService>();
         services.AddScoped<RolePermissionService>();
         services.AddScoped<TraceabilityService>();

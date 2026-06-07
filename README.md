@@ -24,6 +24,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.
+- JSON persistence backup and restore endpoints for local MVP operation.
 - Unit and architecture tests.
 
 ## Run locally
@@ -194,4 +195,12 @@ Get operational health:
 
 ```http
 GET http://localhost:5256/health
+```
+
+Create, list and restore local JSON persistence backups:
+
+```http
+POST http://localhost:5256/api/operations/backups
+GET http://localhost:5256/api/operations/backups
+POST http://localhost:5256/api/operations/backups/{fileName}/restore
 ```

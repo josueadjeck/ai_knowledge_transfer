@@ -2,6 +2,7 @@ namespace AiKnowledgeTransfer.Infrastructure;
 
 using AiKnowledgeTransfer.Application.Abstractions;
 using AiKnowledgeTransfer.Application.Diagnostics;
+using AiKnowledgeTransfer.Application.Operations;
 using AiKnowledgeTransfer.Infrastructure.Audit;
 using AiKnowledgeTransfer.Infrastructure.Knowledge;
 using AiKnowledgeTransfer.Infrastructure.Parsing;
@@ -18,6 +19,7 @@ public static class DependencyInjection
         var uploadStoragePath = Path.GetFullPath(storageRootPath);
         var projectStorePath = Path.Combine(appDataPath, "projects.json");
         var auditLogPath = Path.Combine(appDataPath, "audit-log.json");
+        var backupPath = Path.Combine(appDataPath, "backups");
 
         var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
@@ -41,6 +43,12 @@ public static class DependencyInjection
             model,
             baseUrl,
             !string.IsNullOrWhiteSpace(apiKey)));
+        services.AddSingleton(new PersistenceBackupOptions(
+            appDataPath,
+            uploadStoragePath,
+            projectStorePath,
+            auditLogPath,
+            backupPath));
 
         services.AddSingleton<IProjectRepository>(_ => new JsonProjectRepository(projectStorePath));
         services.AddSingleton<IAuditLog>(_ => new JsonAuditLog(auditLogPath));
