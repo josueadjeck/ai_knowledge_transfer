@@ -1,6 +1,7 @@
 using AiKnowledgeTransfer.Api;
 using AiKnowledgeTransfer.Application;
 using AiKnowledgeTransfer.Application.Audit;
+using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
@@ -236,14 +237,9 @@ projects.MapGet("/{projectId:guid}/audit", async Task<IResult> (
     return Results.Ok(result);
 });
 
-app.MapGet("/health", () =>
+app.MapGet("/health", (OperationalHealthService service) =>
 {
-    return Results.Ok(new
-    {
-        status = "ok",
-        service = "AiKnowledgeTransfer.Api",
-        timestamp = DateTimeOffset.UtcNow
-    });
+    return Results.Ok(service.GetStatus("AiKnowledgeTransfer.Api"));
 })
 .WithName("Health");
 

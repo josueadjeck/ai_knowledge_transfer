@@ -119,6 +119,7 @@ Aktueller Implementierungsstand:
 - Audit-Grundlage ist gestartet: zentrale Aktionen werden als JSON-basiertes Audit Log gespeichert und per API/UI abrufbar gemacht.
 - UX-/Fehlerbehandlungs-Grundlage ist gestartet: kritische Blazor-Workflow-Aktionen zeigen kontrollierte Status- und Fehlermeldungen statt ungefangener UI-Fehler.
 - API-Haertung ist gestartet: REST-Endpunkte validieren Kern-Requests und liefern konsistente JSON-Fehlerantworten fuer Validierungs-, NotFound- und BadRequest-Faelle.
+- Betriebs-Grundlage ist gestartet: Health-Endpoint meldet lokalen Storage, Persistenzdateien und AI-Provider-Konfiguration inklusive Fallback-Betrieb.
 
 ### Phase 0: Produktklaerung
 
