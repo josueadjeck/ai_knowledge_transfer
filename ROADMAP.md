@@ -116,6 +116,7 @@ Aktueller Implementierungsstand:
 - Phase 4 ist erweitert: Die Blazor-UI zeigt pro analysiertem Dokument eine kompakte Chunk-Vorschau zur schnellen Qualitaetspruefung.
 - Phase 4 ist erweitert: TXT-, PDF- und DOCX-Parser nutzen eine gemeinsame Chunking-Komponente statt duplizierter Split-Logik.
 - Phase 4 ist erweitert: Knowledge Extraction meldet in API und Blazor-UI den aktiven Provider, Fallback-Status und Provider-Hinweise.
+- Phase 4 ist erweitert: Wissenselemente speichern Herkunfts- und Qualitaetsmetadaten wie Source Chunk, Provider, Modell, Fallback und Review-Qualitaet.
 - Phase 6 ist erweitert: Die Blazor-UI kann Knowledge-Review-Elemente nach Typ und Review-Status filtern.
 - Phase 5 ist gestartet: Roadmaps verwenden freigegebenes Wissen bevorzugt und markieren nicht freigegebene Wissenselemente als Review-Hinweise.
 - Phase 5 ist erweitert: Die Blazor-UI zeigt Roadmap-Wochen mit Lernzielen, Uebungen, Abschlusskriterien und Review-Hinweisen als Vorschau.
@@ -123,6 +124,7 @@ Aktueller Implementierungsstand:
 - Phase 6 ist erweitert: Reviewer und Review-Kommentar koennen in der Blazor-UI eingegeben und an Review/Freigabe/Ablehnung uebergeben werden.
 - Phase 7 ist gestartet: Traceability Matrix verknuepft Quellen, Chunks, Wissenselemente, Review-Status und Roadmap-/Export-Nutzung.
 - Phase 7 ist erweitert: Die Blazor-UI zeigt Traceability-Zeilen mit Quelle, Wissen, Review-Status, Roadmap-Nutzung und Export-Markierung.
+- Phase 7 ist erweitert: Traceability und Markdown Export enthalten Extraktionsherkunft und Qualitaetsstatus je Wissenselement.
 - Phase 8 ist gestartet: Projektuebergaben koennen als Markdown exportiert werden.
 - Phase 8 ist erweitert: Die Blazor-UI zeigt Markdown-Export-Metadaten, Abschnittsvorschau und vollstaendigen Exporttext.
 - Phase 9 ist gestartet: Projekte werden lokal als JSON-Datei persistiert; Upload-Dateien bleiben im lokalen Storage.

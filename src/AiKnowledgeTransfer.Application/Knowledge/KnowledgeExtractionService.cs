@@ -27,7 +27,16 @@ public sealed class KnowledgeExtractionService(
 
         var extraction = await extractor.ExtractAsync(document.Chunks, cancellationToken);
         var createdItems = extraction.Items
-            .Select(item => project.AddKnowledgeItem(item.Type, item.Title, item.Summary, document.Id))
+            .Select(item => project.AddKnowledgeItem(
+                item.Type,
+                item.Title,
+                item.Summary,
+                document.Id,
+                item.SourceChunkNumber,
+                extraction.ProviderName,
+                extraction.ProviderModel,
+                extraction.UsedFallback,
+                DetermineQuality(extraction, item)))
             .ToArray();
 
         await projects.SaveChangesAsync(cancellationToken);
@@ -42,5 +51,15 @@ public sealed class KnowledgeExtractionService(
             extraction.UsedFallback,
             extraction.Detail,
             createdItems.Select(ProjectMapper.ToResponse).ToArray());
+    }
+
+    private static string DetermineQuality(KnowledgeExtractionResult extraction, ExtractedKnowledgeItem item)
+    {
+        if (item.Type == Domain.Knowledge.KnowledgeItemType.OpenQuestion)
+        {
+            return "Uncertain";
+        }
+
+        return extraction.UsedFallback ? "FallbackReview" : "ProviderSuggested";
     }
 }

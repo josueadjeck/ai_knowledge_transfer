@@ -112,6 +112,12 @@ public sealed class RoadmapServiceTests
         Assert.Contains(extraction.KnowledgeItems, item => item.Type == "GlossaryTerm" && item.Title == "CTU");
         Assert.Contains(extraction.KnowledgeItems, item => item.Type == "Workflow");
         Assert.Contains(extraction.KnowledgeItems, item => item.Type == "OpenQuestion");
+        Assert.All(extraction.KnowledgeItems, item => Assert.Equal("Heuristic", item.ExtractionProvider));
+        Assert.All(extraction.KnowledgeItems, item => Assert.False(item.ExtractionUsedFallback));
+
+        var openQuestion = extraction.KnowledgeItems.First(item => item.Type == "OpenQuestion");
+        Assert.Equal("Uncertain", openQuestion.ExtractionQuality);
+        Assert.NotNull(openQuestion.SourceChunkNumber);
     }
 
     [Fact]

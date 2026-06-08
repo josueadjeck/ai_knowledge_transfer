@@ -132,7 +132,12 @@ public sealed class JsonProjectRepository : IProjectRepository
             item.CreatedAt,
             item.ReviewedBy,
             item.ReviewComment,
-            item.ReviewedAt);
+            item.ReviewedAt,
+            item.SourceChunkNumber,
+            item.ExtractionProvider,
+            item.ExtractionModel,
+            item.ExtractionUsedFallback,
+            item.ExtractionQuality);
     }
 
     private static RoadmapSnapshot ToSnapshot(OnboardingRoadmap roadmap)
@@ -204,6 +209,11 @@ public sealed class JsonProjectRepository : IProjectRepository
             snapshot.Title,
             snapshot.Summary,
             snapshot.SourceDocumentId,
+            snapshot.SourceChunkNumber,
+            snapshot.ExtractionProvider,
+            snapshot.ExtractionModel,
+            snapshot.ExtractionUsedFallback,
+            snapshot.ExtractionQuality,
             snapshot.ReviewStatus,
             snapshot.CreatedAt,
             snapshot.ReviewedBy,
@@ -275,7 +285,12 @@ public sealed class JsonProjectRepository : IProjectRepository
         DateTimeOffset CreatedAt,
         string? ReviewedBy,
         string? ReviewComment,
-        DateTimeOffset? ReviewedAt);
+        DateTimeOffset? ReviewedAt,
+        int? SourceChunkNumber = null,
+        string ExtractionProvider = "Legacy",
+        string? ExtractionModel = null,
+        bool ExtractionUsedFallback = false,
+        string ExtractionQuality = "LegacyImported");
 
     private sealed record RoadmapSnapshot(
         Guid Id,

@@ -65,6 +65,9 @@ public sealed class KnowledgeTransferDbContext : DbContext
             entity.Property(item => item.Type).HasMaxLength(80).IsRequired();
             entity.Property(item => item.Title).HasMaxLength(512).IsRequired();
             entity.Property(item => item.Summary).HasMaxLength(4000).IsRequired();
+            entity.Property(item => item.ExtractionProvider).HasMaxLength(160).IsRequired();
+            entity.Property(item => item.ExtractionModel).HasMaxLength(240);
+            entity.Property(item => item.ExtractionQuality).HasMaxLength(120).IsRequired();
             entity.Property(item => item.ReviewStatus).HasMaxLength(80).IsRequired();
             entity.Property(item => item.ReviewedBy).HasMaxLength(240);
             entity.Property(item => item.ReviewComment).HasMaxLength(2000);

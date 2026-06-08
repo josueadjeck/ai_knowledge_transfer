@@ -16,6 +16,16 @@ public sealed class KnowledgeItemRecord
 
     public Guid? SourceDocumentId { get; set; }
 
+    public int? SourceChunkNumber { get; set; }
+
+    public string ExtractionProvider { get; set; } = string.Empty;
+
+    public string? ExtractionModel { get; set; }
+
+    public bool ExtractionUsedFallback { get; set; }
+
+    public string ExtractionQuality { get; set; } = string.Empty;
+
     public string ReviewStatus { get; set; } = string.Empty;
 
     public DateTimeOffset CreatedAt { get; set; }

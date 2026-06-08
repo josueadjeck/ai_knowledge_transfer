@@ -233,6 +233,11 @@
                             <strong>@item.Title</strong>
                             <span>@item.Type | @item.ReviewStatus</span>
                             <p>@item.Summary</p>
+                            <div class="knowledge-origin">
+                                <span>Quelle: @KnowledgeSourceDetail(item)</span>
+                                <span>Provider: @KnowledgeProviderDetail(item)</span>
+                                <span>Qualitaet: @item.ExtractionQuality</span>
+                            </div>
                             @if (!string.IsNullOrWhiteSpace(item.ReviewedBy) || !string.IsNullOrWhiteSpace(item.ReviewComment))
                             {
                                 <div class="review-meta">
@@ -345,6 +350,7 @@
                 <div class="traceability-header" role="row">
                     <span role="columnheader">Quelle</span>
                     <span role="columnheader">Wissen</span>
+                    <span role="columnheader">Herkunft</span>
                     <span role="columnheader">Review</span>
                     <span role="columnheader">Nutzung</span>
                 </div>
@@ -358,6 +364,10 @@
                         <div role="cell">
                             <strong>@(row.KnowledgeTitle ?? "Kein Wissenselement")</strong>
                             <span>@(row.KnowledgeType ?? "Nicht extrahiert")</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@TraceabilityExtractionDetail(row)</strong>
+                            <span>@TraceabilityQualityDetail(row)</span>
                         </div>
                         <div role="cell">
                             <strong>@(row.KnowledgeReviewStatus ?? "-")</strong>
@@ -1143,6 +1153,26 @@
             : $"{row.ReviewedBy} | {row.ReviewedAt.Value.LocalDateTime:g}";
     }
 
+    private static string TraceabilityExtractionDetail(TraceabilityRowResponse row)
+    {
+        if (string.IsNullOrWhiteSpace(row.ExtractionProvider))
+        {
+            return "-";
+        }
+
+        var model = string.IsNullOrWhiteSpace(row.ExtractionModel) ? string.Empty : $" ({row.ExtractionModel})";
+        var fallback = row.ExtractionUsedFallback ? ", Fallback" : string.Empty;
+        return $"{row.ExtractionProvider}{model}{fallback}";
+    }
+
+    private static string TraceabilityQualityDetail(TraceabilityRowResponse row)
+    {
+        var chunk = row.SourceChunkNumber is null ? "Chunk -" : $"Chunk {row.SourceChunkNumber}";
+        return string.IsNullOrWhiteSpace(row.ExtractionQuality)
+            ? chunk
+            : $"{chunk} | {row.ExtractionQuality}";
+    }
+
     private ReviewKnowledgeItemRequest? BuildReviewRequest()
     {
         var request = new ReviewKnowledgeItemRequest(_reviewerName, _reviewComment);
@@ -1166,6 +1196,26 @@
         return item.ReviewedAt is null
             ? item.ReviewedBy
             : $"{item.ReviewedBy} | {item.ReviewedAt.Value.LocalDateTime:g}";
+    }
+
+    private static string KnowledgeSourceDetail(KnowledgeItemResponse item)
+    {
+        if (item.SourceDocumentId is null)
+        {
+            return "Starterwissen";
+        }
+
+        return item.SourceChunkNumber is null
+            ? item.SourceDocumentId.Value.ToString()
+            : $"{item.SourceDocumentId.Value}, Chunk {item.SourceChunkNumber}";
+    }
+
+    private static string KnowledgeProviderDetail(KnowledgeItemResponse item)
+    {
+        var fallback = item.ExtractionUsedFallback ? ", Fallback" : string.Empty;
+        return string.IsNullOrWhiteSpace(item.ExtractionModel)
+            ? $"{item.ExtractionProvider}{fallback}"
+            : $"{item.ExtractionProvider} ({item.ExtractionModel}){fallback}";
     }
 
     private static string ExtractionStatusDetail(ExtractKnowledgeResponse? extraction)

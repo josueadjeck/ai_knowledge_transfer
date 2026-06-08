@@ -101,6 +101,9 @@ public sealed class MarkdownExportService(
                 builder.AppendLine($"- Type: {item.Type}");
                 builder.AppendLine($"- Status: {item.ReviewStatus}");
                 builder.AppendLine($"- Reviewed by: {item.ReviewedBy}");
+                builder.AppendLine($"- Source chunk: {FormatSourceChunk(item)}");
+                builder.AppendLine($"- Extraction: {FormatExtraction(item)}");
+                builder.AppendLine($"- Quality: {item.ExtractionQuality}");
                 builder.AppendLine($"- Summary: {item.Summary}");
                 builder.AppendLine();
             }
@@ -164,12 +167,12 @@ public sealed class MarkdownExportService(
     {
         builder.AppendLine("## Traceability Matrix");
         builder.AppendLine();
-        builder.AppendLine("| Source | Chunks | Knowledge Item | Type | Review Status | Reviewed By | Roadmap Usage | Exported |");
-        builder.AppendLine("| --- | ---: | --- | --- | --- | --- | ---: | --- |");
+        builder.AppendLine("| Source | Chunks | Knowledge Item | Type | Review Status | Extraction | Quality | Reviewed By | Roadmap Usage | Exported |");
+        builder.AppendLine("| --- | ---: | --- | --- | --- | --- | --- | --- | ---: | --- |");
 
         if (project.Documents.Count == 0)
         {
-            builder.AppendLine("| - | 0 | - | - | - | - | 0 | No |");
+            builder.AppendLine("| - | 0 | - | - | - | - | - | - | 0 | No |");
             builder.AppendLine();
             return;
         }
@@ -184,7 +187,7 @@ public sealed class MarkdownExportService(
 
             if (linkedItems.Length == 0)
             {
-                builder.AppendLine($"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | - | - | - | - | 0 | No |");
+                builder.AppendLine($"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | - | - | - | - | - | - | 0 | No |");
                 continue;
             }
 
@@ -200,7 +203,7 @@ public sealed class MarkdownExportService(
                 var exported = item.ReviewStatus == KnowledgeReviewStatus.Approved ? "Yes" : "No";
 
                 builder.AppendLine(
-                    $"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | {EscapeTable(item.Title)} | {item.Type} | {item.ReviewStatus} | {EscapeTable(item.ReviewedBy ?? "-")} | {roadmapUsage} | {exported} |");
+                    $"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | {EscapeTable(item.Title)} | {item.Type} | {item.ReviewStatus} | {EscapeTable(FormatExtraction(item))} | {item.ExtractionQuality} | {EscapeTable(item.ReviewedBy ?? "-")} | {roadmapUsage} | {exported} |");
             }
         }
 
@@ -237,6 +240,18 @@ public sealed class MarkdownExportService(
     private static bool ContainsTitle(IEnumerable<string> values, string title)
     {
         return values.Any(value => value.Contains(title, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string FormatSourceChunk(KnowledgeItem item)
+    {
+        return item.SourceChunkNumber is null ? "-" : item.SourceChunkNumber.Value.ToString();
+    }
+
+    private static string FormatExtraction(KnowledgeItem item)
+    {
+        var model = string.IsNullOrWhiteSpace(item.ExtractionModel) ? string.Empty : $" ({item.ExtractionModel})";
+        var fallback = item.ExtractionUsedFallback ? ", fallback" : string.Empty;
+        return $"{item.ExtractionProvider}{model}{fallback}";
     }
 
     private static string EscapeTable(string value)

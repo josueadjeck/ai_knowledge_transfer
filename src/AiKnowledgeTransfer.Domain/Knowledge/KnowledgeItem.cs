@@ -8,6 +8,11 @@ public sealed class KnowledgeItem
         string title,
         string summary,
         Guid? sourceDocumentId,
+        int? sourceChunkNumber,
+        string extractionProvider,
+        string? extractionModel,
+        bool extractionUsedFallback,
+        string extractionQuality,
         KnowledgeReviewStatus reviewStatus,
         DateTimeOffset createdAt,
         string? reviewedBy,
@@ -19,6 +24,11 @@ public sealed class KnowledgeItem
         Title = title;
         Summary = summary;
         SourceDocumentId = sourceDocumentId;
+        SourceChunkNumber = sourceChunkNumber;
+        ExtractionProvider = extractionProvider;
+        ExtractionModel = extractionModel;
+        ExtractionUsedFallback = extractionUsedFallback;
+        ExtractionQuality = extractionQuality;
         ReviewStatus = reviewStatus;
         CreatedAt = createdAt;
         ReviewedBy = reviewedBy;
@@ -26,7 +36,16 @@ public sealed class KnowledgeItem
         ReviewedAt = reviewedAt;
     }
 
-    public KnowledgeItem(KnowledgeItemType type, string title, string summary, Guid? sourceDocumentId)
+    public KnowledgeItem(
+        KnowledgeItemType type,
+        string title,
+        string summary,
+        Guid? sourceDocumentId,
+        int? sourceChunkNumber = null,
+        string extractionProvider = "Manual",
+        string? extractionModel = null,
+        bool extractionUsedFallback = false,
+        string extractionQuality = "HumanSeeded")
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -38,6 +57,11 @@ public sealed class KnowledgeItem
         Title = title.Trim();
         Summary = summary.Trim();
         SourceDocumentId = sourceDocumentId;
+        SourceChunkNumber = sourceChunkNumber;
+        ExtractionProvider = RequireText(extractionProvider, nameof(extractionProvider));
+        ExtractionModel = string.IsNullOrWhiteSpace(extractionModel) ? null : extractionModel.Trim();
+        ExtractionUsedFallback = extractionUsedFallback;
+        ExtractionQuality = RequireText(extractionQuality, nameof(extractionQuality));
         ReviewStatus = KnowledgeReviewStatus.Draft;
         CreatedAt = DateTimeOffset.UtcNow;
     }
@@ -51,6 +75,16 @@ public sealed class KnowledgeItem
     public string Summary { get; }
 
     public Guid? SourceDocumentId { get; }
+
+    public int? SourceChunkNumber { get; }
+
+    public string ExtractionProvider { get; }
+
+    public string? ExtractionModel { get; }
+
+    public bool ExtractionUsedFallback { get; }
+
+    public string ExtractionQuality { get; }
 
     public KnowledgeReviewStatus ReviewStatus { get; private set; }
 
@@ -88,12 +122,17 @@ public sealed class KnowledgeItem
 
     private static string RequireReviewer(string reviewer)
     {
-        if (string.IsNullOrWhiteSpace(reviewer))
+        return RequireText(reviewer, nameof(reviewer));
+    }
+
+    private static string RequireText(string value, string parameterName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("Reviewer must not be empty.", nameof(reviewer));
+            throw new ArgumentException("Value must not be empty.", parameterName);
         }
 
-        return reviewer.Trim();
+        return value.Trim();
     }
 
     public static KnowledgeItem Rehydrate(
@@ -102,6 +141,11 @@ public sealed class KnowledgeItem
         string title,
         string summary,
         Guid? sourceDocumentId,
+        int? sourceChunkNumber,
+        string extractionProvider,
+        string? extractionModel,
+        bool extractionUsedFallback,
+        string extractionQuality,
         KnowledgeReviewStatus reviewStatus,
         DateTimeOffset createdAt,
         string? reviewedBy,
@@ -114,6 +158,11 @@ public sealed class KnowledgeItem
             title,
             summary,
             sourceDocumentId,
+            sourceChunkNumber,
+            extractionProvider,
+            extractionModel,
+            extractionUsedFallback,
+            extractionQuality,
             reviewStatus,
             createdAt,
             reviewedBy,

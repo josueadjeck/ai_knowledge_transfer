@@ -12,9 +12,8 @@ public sealed partial class HeuristicKnowledgeExtractor : IKnowledgeExtractor
         CancellationToken cancellationToken)
     {
         var items = new List<ExtractedKnowledgeItem>();
-        var combinedText = string.Join(Environment.NewLine, chunks.Select(chunk => chunk.Text));
 
-        AddTechnicalTerms(combinedText, items);
+        AddTechnicalTerms(chunks, items);
         AddWorkflowCandidates(chunks, items);
         AddOpenQuestions(chunks, items);
 
@@ -30,17 +29,21 @@ public sealed partial class HeuristicKnowledgeExtractor : IKnowledgeExtractor
             Detail: "Local rule-based extractor."));
     }
 
-    private static void AddTechnicalTerms(string text, List<ExtractedKnowledgeItem> items)
+    private static void AddTechnicalTerms(IEnumerable<DocumentChunk> chunks, List<ExtractedKnowledgeItem> items)
     {
-        foreach (var match in TechnicalTermRegex().Matches(text).Cast<Match>())
+        foreach (var chunk in chunks)
         {
-            var term = match.Value.Trim();
-            var type = term.Length <= 5 ? KnowledgeItemType.GlossaryTerm : KnowledgeItemType.Component;
+            foreach (var match in TechnicalTermRegex().Matches(chunk.Text).Cast<Match>())
+            {
+                var term = match.Value.Trim();
+                var type = term.Length <= 5 ? KnowledgeItemType.GlossaryTerm : KnowledgeItemType.Component;
 
-            items.Add(new ExtractedKnowledgeItem(
-                type,
-                term,
-                $"Candidate extracted from document text. Needs expert review for project-specific meaning of '{term}'."));
+                items.Add(new ExtractedKnowledgeItem(
+                    type,
+                    term,
+                    $"Candidate extracted from document text. Needs expert review for project-specific meaning of '{term}'.",
+                    chunk.ChunkNumber));
+            }
         }
     }
 
@@ -51,7 +54,8 @@ public sealed partial class HeuristicKnowledgeExtractor : IKnowledgeExtractor
             items.Add(new ExtractedKnowledgeItem(
                 KnowledgeItemType.Workflow,
                 $"Workflow candidate from chunk {chunk.ChunkNumber}",
-                Summarize(chunk.Text)));
+                Summarize(chunk.Text),
+                chunk.ChunkNumber));
         }
     }
 
@@ -62,7 +66,8 @@ public sealed partial class HeuristicKnowledgeExtractor : IKnowledgeExtractor
             items.Add(new ExtractedKnowledgeItem(
                 KnowledgeItemType.OpenQuestion,
                 $"Review needed for chunk {chunk.ChunkNumber}",
-                $"Clarify or review this source statement: {Summarize(chunk.Text)}"));
+                $"Clarify or review this source statement: {Summarize(chunk.Text)}",
+                chunk.ChunkNumber));
         }
     }
 

@@ -18,6 +18,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Shared chunking logic across text, PDF and Word parsers.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
 - Knowledge extraction responses and the Blazor workflow show the active provider and whether fallback was used.
+- Extracted knowledge items retain source chunk, provider, model, fallback and quality metadata for review, traceability and export.
 - Review workflow for extracted knowledge items.
 - Editable reviewer and review comment fields in the Blazor review workflow.
 - Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
@@ -76,6 +77,7 @@ The web UI can run the MVP workflow directly:
 - Analyze the document into chunks.
 - Inspect extracted chunks per analyzed document.
 - Extract knowledge items.
+- Inspect source, provider and quality metadata for extracted knowledge items.
 - Filter knowledge review items by type and review status.
 - Submit, approve or reject knowledge items.
 - Generate a review-aware roadmap.

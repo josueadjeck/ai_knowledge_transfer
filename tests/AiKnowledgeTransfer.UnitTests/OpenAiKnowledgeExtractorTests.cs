@@ -39,6 +39,8 @@ public sealed class OpenAiKnowledgeExtractorTests
         var item = Assert.Single(result.Items);
         Assert.Equal("CTU", item.Title);
         Assert.Equal(Domain.Knowledge.KnowledgeItemType.GlossaryTerm, item.Type);
+        Assert.Equal("OpenAI", result.ProviderName);
+        Assert.Equal("test-model", result.ProviderModel);
     }
 
     private sealed class StubHttpMessageHandler(string responseJson) : HttpMessageHandler

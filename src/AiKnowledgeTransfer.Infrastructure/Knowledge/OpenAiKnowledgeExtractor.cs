@@ -37,6 +37,7 @@ public sealed class OpenAiKnowledgeExtractor(
         return new KnowledgeExtractionResult(
             extractedItems,
             "OpenAI",
+            options.Model,
             Detail: $"Model: {options.Model}");
     }
 

@@ -44,6 +44,7 @@ public sealed class FallbackKnowledgeExtractor(
         return result with
         {
             UsedFallback = true,
+            ProviderModel = result.ProviderModel,
             Detail = detail
         };
     }

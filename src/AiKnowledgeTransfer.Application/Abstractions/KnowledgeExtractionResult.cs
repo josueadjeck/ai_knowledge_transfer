@@ -5,5 +5,6 @@ using AiKnowledgeTransfer.Domain.Knowledge;
 public sealed record KnowledgeExtractionResult(
     IReadOnlyCollection<ExtractedKnowledgeItem> Items,
     string ProviderName = "Unknown",
+    string? ProviderModel = null,
     bool UsedFallback = false,
     string Detail = "");

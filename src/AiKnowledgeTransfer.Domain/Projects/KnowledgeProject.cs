@@ -64,9 +64,27 @@ public sealed class KnowledgeProject
         return document;
     }
 
-    public KnowledgeItem AddKnowledgeItem(KnowledgeItemType type, string title, string summary, Guid? sourceDocumentId)
+    public KnowledgeItem AddKnowledgeItem(
+        KnowledgeItemType type,
+        string title,
+        string summary,
+        Guid? sourceDocumentId,
+        int? sourceChunkNumber = null,
+        string extractionProvider = "Manual",
+        string? extractionModel = null,
+        bool extractionUsedFallback = false,
+        string extractionQuality = "HumanSeeded")
     {
-        var item = new KnowledgeItem(type, title, summary, sourceDocumentId);
+        var item = new KnowledgeItem(
+            type,
+            title,
+            summary,
+            sourceDocumentId,
+            sourceChunkNumber,
+            extractionProvider,
+            extractionModel,
+            extractionUsedFallback,
+            extractionQuality);
         _knowledgeItems.Add(item);
         return item;
     }
