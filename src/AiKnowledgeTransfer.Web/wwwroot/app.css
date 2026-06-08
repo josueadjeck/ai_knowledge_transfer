@@ -437,6 +437,96 @@ button:disabled {
     color: #b42318;
 }
 
+.health-overview {
+    display: grid;
+    gap: .55rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.health-overview div {
+    background: #f8fafc;
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .65rem;
+}
+
+.health-overview span,
+.health-overview strong {
+    display: block;
+}
+
+.health-overview span {
+    color: #617080;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.health-overview strong {
+    color: #1f2933;
+    font-size: .9rem;
+    margin-top: .2rem;
+    overflow-wrap: anywhere;
+}
+
+.health-table {
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    display: grid;
+    overflow: hidden;
+}
+
+.health-header,
+.health-row {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: .9fr .7fr 1.5fr 2fr;
+}
+
+.health-header {
+    background: #eef2f6;
+    color: #394756;
+    font-size: .78rem;
+    font-weight: 700;
+    padding: .55rem .65rem;
+    text-transform: uppercase;
+}
+
+.health-row {
+    background: #ffffff;
+    border-top: 1px solid #e1e6ed;
+    padding: .65rem;
+}
+
+.health-row strong,
+.health-row span {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.health-row strong {
+    color: #1f2933;
+    font-size: .9rem;
+}
+
+.health-row span {
+    color: #617080;
+    font-size: .84rem;
+    margin-bottom: .2rem;
+}
+
+.health-ok {
+    color: #23704a !important;
+}
+
+.health-warning {
+    color: #946200 !important;
+}
+
+.health-error {
+    color: #b42318 !important;
+}
+
 .export-sections {
     display: grid;
     gap: .55rem;
@@ -603,17 +693,21 @@ button:disabled {
     .audit-filters,
     .export-summary,
     .backup-preview,
+    .health-overview,
     .roadmap-week-grid,
     .traceability-header,
     .traceability-row,
     .audit-header,
     .audit-row,
+    .health-header,
+    .health-row,
     .knowledge-row {
         grid-template-columns: 1fr;
     }
 
     .traceability-header,
-    .audit-header {
+    .audit-header,
+    .health-header {
         display: none;
     }
 

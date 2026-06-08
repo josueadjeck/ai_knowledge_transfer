@@ -3,6 +3,7 @@
 
 @using AiKnowledgeTransfer.Application.Documents
 @using AiKnowledgeTransfer.Application.Audit
+@using AiKnowledgeTransfer.Application.Diagnostics
 @using AiKnowledgeTransfer.Application.Exports
 @using AiKnowledgeTransfer.Application.Knowledge
 @using AiKnowledgeTransfer.Application.Operations
@@ -12,6 +13,7 @@
 @using AiKnowledgeTransfer.Application.Traceability
 @using AiKnowledgeTransfer.Contracts.Exports
 @using AiKnowledgeTransfer.Contracts.Audit
+@using AiKnowledgeTransfer.Contracts.Diagnostics
 @using AiKnowledgeTransfer.Contracts.Operations
 @using AiKnowledgeTransfer.Contracts.Projects
 @using AiKnowledgeTransfer.Contracts.Roadmaps
@@ -30,6 +32,7 @@
 @inject RolePermissionService Permissions
 @inject AuditLogService Audit
 @inject PersistenceBackupService Backups
+@inject OperationalHealthService Health
 
 <PageTitle>AI Knowledge Transfer</PageTitle>
 
@@ -398,11 +401,58 @@
     <div class="workflow-panel span-2">
         <h2>Betrieb & Backups</h2>
         <div class="button-row">
+            <button @onclick="LoadHealthAsync" disabled="@(!CanOperateBackups)">Status laden</button>
             <button @onclick="CreateBackupAsync" disabled="@(!CanOperateBackups)">Backup erstellen</button>
             <button @onclick="LoadBackupsAsync" disabled="@(!CanOperateBackups)">Backups laden</button>
             <button @onclick="PreviewBackupAsync" disabled="@(!CanPreviewBackup)">Backup pruefen</button>
             <button @onclick="RestoreBackupAsync" disabled="@(!CanRestoreBackup)">Backup wiederherstellen</button>
         </div>
+
+        @if (_health is not null)
+        {
+            <div class="health-overview">
+                <div>
+                    <span>Service</span>
+                    <strong>@_health.Service</strong>
+                </div>
+                <div>
+                    <span>Status</span>
+                    <strong class="@HealthStatusClass(_health.Status)">@_health.Status</strong>
+                </div>
+                <div>
+                    <span>Zeitpunkt</span>
+                    <strong>@_health.Timestamp.LocalDateTime.ToString("g")</strong>
+                </div>
+            </div>
+            <div class="health-table" role="table" aria-label="Betriebsstatus">
+                <div class="health-header" role="row">
+                    <span role="columnheader">Komponente</span>
+                    <span role="columnheader">Status</span>
+                    <span role="columnheader">Details</span>
+                    <span role="columnheader">Metadaten</span>
+                </div>
+                @foreach (var component in _health.Components.OrderBy(component => component.Name))
+                {
+                    <div class="health-row" role="row">
+                        <div role="cell">
+                            <strong>@component.Name</strong>
+                        </div>
+                        <div role="cell">
+                            <strong class="@HealthStatusClass(component.Status)">@component.Status</strong>
+                        </div>
+                        <div role="cell">
+                            <span>@component.Detail</span>
+                        </div>
+                        <div role="cell">
+                            @foreach (var item in component.Metadata)
+                            {
+                                <span><strong>@item.Key</strong>: @MaskHealthValue(item.Key, item.Value)</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
 
         @if (_backups.Count > 0)
         {
@@ -494,6 +544,7 @@
     private bool HasError { get; set; }
     private TraceabilityMatrixResponse? _traceability;
     private ExportProjectMarkdownResponse? _export;
+    private HealthResponse? _health;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
     private BackupPreviewResponse? _backupPreview;
@@ -558,6 +609,7 @@
     {
         await LoadProjectsAsync();
         await LoadBackupsAsync();
+        await LoadHealthAsync();
     }
 
     private async Task CreateProjectAsync()
@@ -773,6 +825,12 @@
         });
     }
 
+    private Task LoadHealthAsync()
+    {
+        _health = Health.GetStatus("AiKnowledgeTransfer.Web");
+        return Task.CompletedTask;
+    }
+
     private async Task LoadBackupsAsync()
     {
         await RunSafelyAsync("Backups laden", () =>
@@ -938,6 +996,24 @@
         return sizeInBytes < 1024 * 1024
             ? $"{Math.Max(1, sizeInBytes / 1024)} KB"
             : $"{sizeInBytes / 1024d / 1024d:0.0} MB";
+    }
+
+    private static string HealthStatusClass(string status)
+    {
+        return status.Equals("ok", StringComparison.OrdinalIgnoreCase)
+            || status.Equals("database", StringComparison.OrdinalIgnoreCase)
+                ? "health-ok"
+                : status.Equals("fallback", StringComparison.OrdinalIgnoreCase)
+                    ? "health-warning"
+                    : "health-error";
+    }
+
+    private static string MaskHealthValue(string key, string value)
+    {
+        return key.Contains("connectionString", StringComparison.OrdinalIgnoreCase)
+            && value.Equals("True", StringComparison.OrdinalIgnoreCase)
+                ? "configured"
+                : value;
     }
 
     private IEnumerable<DocumentChunkResponse> DocumentChunks(Guid documentId)
