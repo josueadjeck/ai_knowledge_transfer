@@ -128,9 +128,36 @@
             <div class="compact-list">
                 @foreach (var document in _selectedProject.Documents)
                 {
-                    <div>
-                        <strong>@document.FileName</strong>
-                        <span>@document.Status, @document.ChunkCount Chunks</span>
+                    <div class="document-card">
+                        <div class="document-card-header">
+                            <div>
+                                <strong>@document.FileName</strong>
+                                <span>@document.Status, @document.ChunkCount Chunks</span>
+                            </div>
+                            <span class="document-version">v@document.VersionNumber</span>
+                        </div>
+                        <dl class="document-meta">
+                            <div>
+                                <dt>Quelle</dt>
+                                <dd>@document.Source</dd>
+                            </div>
+                            <div>
+                                <dt>Typ</dt>
+                                <dd>@document.ContentType</dd>
+                            </div>
+                            <div>
+                                <dt>Groesse</dt>
+                                <dd>@FormatFileSize(document.SizeInBytes)</dd>
+                            </div>
+                            <div>
+                                <dt>Upload</dt>
+                                <dd>@document.UploadedAt.LocalDateTime.ToString("g")</dd>
+                            </div>
+                            <div class="span-2">
+                                <dt>Storage</dt>
+                                <dd>@DocumentStorageLabel(document)</dd>
+                            </div>
+                        </dl>
                         @if (document.ChunkCount > 0)
                         {
                             <details class="chunk-preview">
@@ -1022,6 +1049,13 @@
             .Where(chunk => chunk.DocumentId == documentId)
             .OrderBy(chunk => chunk.ChunkNumber)
             ?? Enumerable.Empty<DocumentChunkResponse>();
+    }
+
+    private static string DocumentStorageLabel(DocumentResponse document)
+    {
+        return string.IsNullOrWhiteSpace(document.StoragePath)
+            ? "Nur registriert, keine Datei gespeichert"
+            : document.StoragePath;
     }
 
     private static string PreviewText(string text)

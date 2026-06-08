@@ -11,6 +11,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Consistent API validation and JSON error responses for common failure cases.
 - Multipart document upload with local file storage.
 - Central upload validation for supported file types and 10 MB maximum file size.
+- Document cards show source, content type, file size, version, upload time and storage status.
 - Text and Markdown parsing into document chunks.
 - PDF text extraction into document chunks for text-based PDF files.
 - Word `.docx` text extraction into document chunks.

@@ -109,6 +109,7 @@ Aktueller Implementierungsstand:
 - Phase 2 ist gestartet: Blazor-Dashboard als erster MVP-Prototyp ist vorhanden.
 - Phase 2 ist erweitert: Blazor bietet einen interaktiven MVP-Workflow fuer Projekt, Upload, Analyse, Extraction, Review, Roadmap, Traceability und Export.
 - Phase 3 ist gestartet: Projektanlage, Dokumentregistrierung, echter Datei-Upload und lokale Dateispeicherung sind vorhanden.
+- Phase 3 ist erweitert: Die Blazor-UI zeigt Dokumentmetadaten wie Quelle, Typ, Groesse, Version, Upload-Zeit und Storage-Status.
 - Phase 4 ist gestartet: Text-/Markdown-Parsing, Dokument-Chunks, Analyse-Endpunkt, heuristische Knowledge Extraction und OpenAI als erster provider-unabhaengiger AI-Provider sind vorhanden; Azure OpenAI, Kunden-AI und lokale Modelle koennen spaeter als weitere Provider folgen.
 - Phase 4 ist erweitert: Textbasierte PDF-Dateien koennen analysiert werden; gescannte PDFs ohne extrahierbaren Text benoetigen spaeter OCR.
 - Phase 4 ist erweitert: Word-/DOCX-Dateien koennen analysiert und in Dokument-Chunks zerlegt werden.
