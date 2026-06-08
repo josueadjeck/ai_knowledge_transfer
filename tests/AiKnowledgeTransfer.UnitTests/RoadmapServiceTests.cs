@@ -1,6 +1,7 @@
 namespace AiKnowledgeTransfer.UnitTests;
 
 using AiKnowledgeTransfer.Application.Projects;
+using AiKnowledgeTransfer.Application.Compliance;
 using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
@@ -578,6 +579,64 @@ public sealed class RoadmapServiceTests
         Assert.NotNull(workflowRow.LatestReviewAt);
         Assert.True(workflowRow.RoadmapUsageCount > 0);
         Assert.True(workflowRow.IncludedInExport);
+    }
+
+    [Fact]
+    public async Task ComplianceMatrixService_reports_compliant_and_open_evidence()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+        var reviewService = new KnowledgeReviewService(repository);
+        var complianceService = new ComplianceMatrixService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Compliance Project", "Compliance matrix test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("""
+            CTU communication is unknown.
+
+            Deployment workflow must be reviewed by senior engineers.
+            """u8.ToArray());
+
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("compliance.md", "text/markdown", "Manual upload", content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        var workflow = extraction.KnowledgeItems.First(item => item.Type == "Workflow");
+        await reviewService.ApproveAsync(
+            project.Id,
+            workflow.Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Workflow confirmed."),
+            CancellationToken.None);
+
+        var matrix = await complianceService.GetMatrixAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(matrix);
+        Assert.True(matrix.TotalRows >= extraction.KnowledgeItems.Count);
+        Assert.True(matrix.CompliantCount >= 1);
+        Assert.True(matrix.OpenIssueCount >= 1);
+
+        var workflowRow = matrix.Rows.Single(row => row.KnowledgeItemId == workflow.Id);
+        Assert.Equal("compliance.md", workflowRow.Source);
+        Assert.True(workflowRow.ExportReady);
+        Assert.Equal("Compliant", workflowRow.ComplianceStatus);
+        Assert.Equal("Nachweis vollstaendig.", workflowRow.Gap);
+
+        Assert.Contains(matrix.Rows, row =>
+            row.ComplianceStatus == "OpenIssue"
+            && row.Gap.Contains("nicht freigegeben", StringComparison.Ordinal));
     }
 
     private static int CountFor(IReadOnlyCollection<KnowledgeReviewSummaryGroupResponse> groups, string name)

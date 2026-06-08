@@ -3,6 +3,7 @@
 
 @using AiKnowledgeTransfer.Application.Documents
 @using AiKnowledgeTransfer.Application.Audit
+@using AiKnowledgeTransfer.Application.Compliance
 @using AiKnowledgeTransfer.Application.Diagnostics
 @using AiKnowledgeTransfer.Application.Exports
 @using AiKnowledgeTransfer.Application.Knowledge
@@ -13,6 +14,7 @@
 @using AiKnowledgeTransfer.Application.Traceability
 @using AiKnowledgeTransfer.Contracts.Exports
 @using AiKnowledgeTransfer.Contracts.Audit
+@using AiKnowledgeTransfer.Contracts.Compliance
 @using AiKnowledgeTransfer.Contracts.Diagnostics
 @using AiKnowledgeTransfer.Contracts.Operations
 @using AiKnowledgeTransfer.Contracts.Projects
@@ -30,6 +32,7 @@
 @inject RoadmapService Roadmaps
 @inject MarkdownExportService MarkdownExports
 @inject TraceabilityService Traceability
+@inject ComplianceMatrixService Compliance
 @inject RolePermissionService Permissions
 @inject AuditLogService Audit
 @inject PersistenceBackupService Backups
@@ -404,9 +407,56 @@
         <h2>Export & Traceability</h2>
         <div class="button-row">
             <button @onclick="LoadTraceabilityAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Traceability laden</button>
+            <button @onclick="LoadComplianceAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Compliance Matrix</button>
             <button @onclick="ExportMarkdownAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Markdown Export</button>
             <button @onclick="LoadAuditAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Audit Log</button>
         </div>
+        @if (_compliance is not null)
+        {
+            <div class="compliance-summary">
+                <div>
+                    <span>Nachweise</span>
+                    <strong>@_compliance.TotalRows</strong>
+                </div>
+                <div>
+                    <span>Compliant</span>
+                    <strong>@_compliance.CompliantCount</strong>
+                </div>
+                <div>
+                    <span>Offen</span>
+                    <strong>@_compliance.OpenIssueCount</strong>
+                </div>
+            </div>
+            <div class="compliance-table" role="table" aria-label="Compliance Matrix">
+                <div class="compliance-header" role="row">
+                    <span role="columnheader">Quelle</span>
+                    <span role="columnheader">Nachweis</span>
+                    <span role="columnheader">Review</span>
+                    <span role="columnheader">Status</span>
+                </div>
+                @foreach (var row in _compliance.Rows.OrderBy(row => row.ComplianceStatus).ThenBy(row => row.Source).ThenBy(row => row.KnowledgeTitle))
+                {
+                    <div class="compliance-row" role="row">
+                        <div role="cell">
+                            <strong>@row.Source</strong>
+                            <span>@row.EvidenceType</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@row.KnowledgeTitle</strong>
+                            <span>@(row.ExportReady ? "Exportbereit" : "Nicht exportbereit")</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@row.ReviewStatus | @row.QualityStatus</strong>
+                            <span>@row.ReviewHistoryCount Historie</span>
+                        </div>
+                        <div role="cell">
+                            <strong>@row.ComplianceStatus</strong>
+                            <span>@row.Gap</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
         @if (_traceability is not null)
         {
             <p class="muted">@_traceability.Rows.Count Matrix-Zeilen generiert.</p>
@@ -690,6 +740,7 @@
     private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
     private bool HasError { get; set; }
     private TraceabilityMatrixResponse? _traceability;
+    private ComplianceMatrixResponse? _compliance;
     private ExportProjectMarkdownResponse? _export;
     private ExtractKnowledgeResponse? _lastExtraction;
     private KnowledgeReviewSummaryResponse? _reviewSummary;
@@ -1043,6 +1094,20 @@
         });
     }
 
+    private async Task LoadComplianceAsync()
+    {
+        if (_selectedProject is null || !Can(Permission.ViewTraceability))
+        {
+            return;
+        }
+
+        await RunSafelyAsync("Compliance Matrix laden", async () =>
+        {
+            _compliance = await Compliance.GetMatrixAsync(_selectedProject.Id, CancellationToken.None);
+            SetStatus("Compliance Matrix geladen", $"{_compliance?.OpenIssueCount ?? 0} offene Punkte");
+        });
+    }
+
     private async Task ExportMarkdownAsync()
     {
         if (_selectedProject is null || !Can(Permission.ExportProject))
@@ -1183,6 +1248,7 @@
             ? null
             : await ReviewSummary.GetAsync(_selectedProjectId, CancellationToken.None);
         _traceability = null;
+        _compliance = null;
         _export = null;
         _lastExtraction = null;
         _auditEvents = [];

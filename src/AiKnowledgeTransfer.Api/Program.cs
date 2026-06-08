@@ -1,6 +1,7 @@
 using AiKnowledgeTransfer.Api;
 using AiKnowledgeTransfer.Application;
 using AiKnowledgeTransfer.Application.Audit;
+using AiKnowledgeTransfer.Application.Compliance;
 using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Exports;
@@ -303,6 +304,15 @@ projects.MapGet("/{projectId:guid}/exports/markdown", async Task<IResult> (
 projects.MapGet("/{projectId:guid}/traceability", async Task<IResult> (
     Guid projectId,
     TraceabilityService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.GetMatrixAsync(projectId, cancellationToken);
+    return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
+});
+
+projects.MapGet("/{projectId:guid}/compliance", async Task<IResult> (
+    Guid projectId,
+    ComplianceMatrixService service,
     CancellationToken cancellationToken) =>
 {
     var result = await service.GetMatrixAsync(projectId, cancellationToken);

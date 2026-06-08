@@ -561,6 +561,12 @@ button:disabled {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.compliance-summary {
+    display: grid;
+    gap: .55rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .export-summary div {
     background: #f8fafc;
     border: 1px solid #e1e6ed;
@@ -568,19 +574,30 @@ button:disabled {
     padding: .65rem;
 }
 
+.compliance-summary div {
+    background: #f8fafc;
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .65rem;
+}
+
 .export-summary span,
-.export-summary strong {
+.export-summary strong,
+.compliance-summary span,
+.compliance-summary strong {
     display: block;
 }
 
-.export-summary span {
+.export-summary span,
+.compliance-summary span {
     color: #617080;
     font-size: .78rem;
     font-weight: 700;
     text-transform: uppercase;
 }
 
-.export-summary strong {
+.export-summary strong,
+.compliance-summary strong {
     color: #1f2933;
     font-size: .9rem;
     margin-top: .2rem;
@@ -773,14 +790,33 @@ button:disabled {
     overflow: hidden;
 }
 
+.compliance-table {
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    display: grid;
+    overflow: hidden;
+}
+
 .traceability-header,
-.traceability-row {
+.traceability-row,
+.compliance-header,
+.compliance-row {
     display: grid;
     gap: .75rem;
+}
+
+.traceability-header,
+.traceability-row {
     grid-template-columns: 1.1fr 1.3fr 1.1fr .9fr .8fr;
 }
 
-.traceability-header {
+.compliance-header,
+.compliance-row {
+    grid-template-columns: 1fr 1.2fr 1fr 1.2fr;
+}
+
+.traceability-header,
+.compliance-header {
     background: #eef2f6;
     color: #394756;
     font-size: .78rem;
@@ -789,23 +825,28 @@ button:disabled {
     text-transform: uppercase;
 }
 
-.traceability-row {
+.traceability-row,
+.compliance-row {
     background: #ffffff;
     border-top: 1px solid #e1e6ed;
     padding: .65rem;
 }
 
 .traceability-row strong,
-.traceability-row span {
+.traceability-row span,
+.compliance-row strong,
+.compliance-row span {
     display: block;
 }
 
-.traceability-row strong {
+.traceability-row strong,
+.compliance-row strong {
     color: #1f2933;
     font-size: .9rem;
 }
 
-.traceability-row span {
+.traceability-row span,
+.compliance-row span {
     color: #617080;
     font-size: .84rem;
     margin-top: .15rem;
@@ -896,6 +937,7 @@ button:disabled {
     .knowledge-filters,
     .audit-filters,
     .export-summary,
+    .compliance-summary,
     .backup-preview,
     .health-overview,
     .extraction-summary,
@@ -906,6 +948,8 @@ button:disabled {
     .roadmap-week-grid,
     .traceability-header,
     .traceability-row,
+    .compliance-header,
+    .compliance-row,
     .audit-header,
     .audit-row,
     .health-header,
@@ -915,6 +959,7 @@ button:disabled {
     }
 
     .traceability-header,
+    .compliance-header,
     .audit-header,
     .health-header {
         display: none;

@@ -1,6 +1,7 @@
 namespace AiKnowledgeTransfer.Application;
 
 using AiKnowledgeTransfer.Application.Audit;
+using AiKnowledgeTransfer.Application.Compliance;
 using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Projects;
 using AiKnowledgeTransfer.Application.Documents;
@@ -17,6 +18,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<AuditLogService>();
+        services.AddScoped<ComplianceMatrixService>();
         services.AddScoped<OperationalHealthService>();
         services.AddScoped<ProjectService>();
         services.AddScoped<DocumentAnalysisService>();
