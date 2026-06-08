@@ -116,6 +116,7 @@ Aktueller Implementierungsstand:
 - Phase 4 ist erweitert: Die Blazor-UI zeigt pro analysiertem Dokument eine kompakte Chunk-Vorschau zur schnellen Qualitaetspruefung.
 - Phase 4 ist erweitert: TXT-, PDF- und DOCX-Parser nutzen eine gemeinsame Chunking-Komponente statt duplizierter Split-Logik.
 - Phase 4 ist erweitert: Analyseantworten zeigen Parser-Diagnostik mit Parsername, Chunk-Anzahl und Hinweisen; PDFs ohne extrahierbaren Text melden OCR-Bedarf klarer.
+- Phase 4 ist erweitert: Unterstuetzte Parser-Formate sind per API abrufbar und in der Blazor-Dokumentansicht sichtbar.
 - Phase 4 ist erweitert: Knowledge Extraction meldet in API und Blazor-UI den aktiven Provider, Fallback-Status und Provider-Hinweise.
 - Phase 4 ist erweitert: Wissenselemente speichern Herkunfts- und Qualitaetsmetadaten wie Source Chunk, Provider, Modell, Fallback und Review-Qualitaet.
 - Phase 6 ist erweitert: Die Blazor-UI kann Knowledge-Review-Elemente nach Typ und Review-Status filtern.

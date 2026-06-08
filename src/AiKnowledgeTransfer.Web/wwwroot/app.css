@@ -301,6 +301,50 @@ button:disabled {
     overflow-wrap: anywhere;
 }
 
+.parser-capabilities {
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .65rem;
+}
+
+.parser-capabilities summary {
+    color: #244f8f;
+    cursor: pointer;
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.parser-capabilities article {
+    border-top: 1px solid #e6ebf1;
+    margin-top: .55rem;
+    padding-top: .55rem;
+}
+
+.parser-capabilities strong,
+.parser-capabilities span,
+.parser-capabilities p {
+    display: block;
+}
+
+.parser-capabilities strong {
+    color: #1f2933;
+    font-size: .88rem;
+}
+
+.parser-capabilities span {
+    color: #617080;
+    font-size: .78rem;
+    font-weight: 700;
+    margin-top: .15rem;
+    overflow-wrap: anywhere;
+}
+
+.parser-capabilities p {
+    color: #2f3b49;
+    font-size: .82rem;
+    margin: .25rem 0 0;
+}
+
 .analysis-summary,
 .extraction-summary {
     display: grid;

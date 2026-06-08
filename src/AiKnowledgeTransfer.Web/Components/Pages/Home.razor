@@ -37,6 +37,7 @@
 @inject AuditLogService Audit
 @inject PersistenceBackupService Backups
 @inject OperationalHealthService Health
+@inject DocumentParserCapabilityService ParserCapabilities
 
 <PageTitle>AI Knowledge Transfer</PageTitle>
 
@@ -122,6 +123,20 @@
             <input @bind="_uploadSource" />
         </label>
         <InputFile OnChange="UploadDocumentAsync" disabled="@(_selectedProject is null || !Can(Permission.UploadDocument))" />
+        @if (_parserCapabilities.Count > 0)
+        {
+            <details class="parser-capabilities">
+                <summary>Unterstuetzte Formate</summary>
+                @foreach (var parser in _parserCapabilities)
+                {
+                    <article>
+                        <strong>@parser.ParserName</strong>
+                        <span>@FormatParserFormats(parser)</span>
+                        <p>@parser.Detail</p>
+                    </article>
+                }
+            </details>
+        }
         <div class="button-row">
             <button @onclick="AnalyzeLatestDocumentAsync" disabled="@(!CanAnalyze)">Analysieren</button>
             <button @onclick="ExtractKnowledgeAsync" disabled="@(!CanExtract)">Wissen extrahieren</button>
@@ -765,6 +780,7 @@
     private HealthResponse? _health;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
+    private IReadOnlyCollection<DocumentParserCapabilityResponse> _parserCapabilities = [];
     private BackupPreviewResponse? _backupPreview;
     private string? _selectedBackupFileName;
 
@@ -841,6 +857,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _parserCapabilities = ParserCapabilities.List();
         await LoadProjectsAsync();
         await LoadBackupsAsync();
         await LoadHealthAsync();
@@ -1523,6 +1540,11 @@
         return string.IsNullOrWhiteSpace(analysis.Detail)
             ? "Keine weiteren Parser-Details."
             : analysis.Detail;
+    }
+
+    private static string FormatParserFormats(DocumentParserCapabilityResponse parser)
+    {
+        return $"{string.Join(", ", parser.FileExtensions)} | {string.Join(", ", parser.ContentTypes)}";
     }
 
     private static string SummaryText(IReadOnlyCollection<KnowledgeReviewSummaryGroupResponse> groups)

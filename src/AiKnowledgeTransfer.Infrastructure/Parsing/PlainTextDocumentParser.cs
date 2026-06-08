@@ -5,6 +5,23 @@ using AiKnowledgeTransfer.Application.Abstractions;
 
 public sealed class PlainTextDocumentParser : IDocumentParser
 {
+    public string Name => nameof(PlainTextDocumentParser);
+
+    public IReadOnlyCollection<string> SupportedContentTypes =>
+    [
+        "text/*",
+        "application/markdown"
+    ];
+
+    public IReadOnlyCollection<string> SupportedFileExtensions =>
+    [
+        ".txt",
+        ".md",
+        ".markdown"
+    ];
+
+    public string CapabilityDescription => "Text and Markdown documents are parsed as UTF-8 text.";
+
     public bool CanParse(string contentType, string fileName)
     {
         var extension = Path.GetExtension(fileName);
@@ -28,7 +45,7 @@ public sealed class PlainTextDocumentParser : IDocumentParser
 
         return new ParsedDocument(
             chunks,
-            nameof(PlainTextDocumentParser),
+            Name,
             $"Text parser created {chunks.Count} chunks.");
     }
 }

@@ -16,6 +16,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - PDF text extraction into document chunks for text-based PDF files.
 - Word `.docx` text extraction into document chunks.
 - Shared chunking logic across text, PDF and Word parsers.
+- Supported parser capabilities are available through API and visible in the Blazor document workflow.
 - Document analysis responses and the Blazor workflow show parser name, chunk count and parser detail.
 - PDF analysis reports that scanned PDFs need OCR when no extractable text is available.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
@@ -80,6 +81,7 @@ The web UI can run the MVP workflow directly:
 - Select an MVP role and see actions enabled or disabled by permission.
 - Create or select a project.
 - Upload a text, Markdown, text-based PDF or Word `.docx` document.
+- Inspect supported parser formats before analysis.
 - Analyze the document into chunks.
 - Inspect parser diagnostics after analysis.
 - Inspect extracted chunks per analyzed document.
@@ -174,6 +176,12 @@ Content-Type: multipart/form-data
 
 file=<document file>
 source=Manual upload
+```
+
+List supported document parsers:
+
+```http
+GET http://localhost:5256/api/document-parsers
 ```
 
 Analyze an uploaded text or Markdown document:

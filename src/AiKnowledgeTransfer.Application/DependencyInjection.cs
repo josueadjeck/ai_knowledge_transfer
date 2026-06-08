@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<OperationalHealthService>();
         services.AddScoped<ProjectService>();
         services.AddScoped<DocumentAnalysisService>();
+        services.AddScoped<DocumentParserCapabilityService>();
         services.AddScoped<MarkdownExportService>();
         services.AddScoped<KnowledgeExtractionService>();
         services.AddScoped<KnowledgeReviewService>();

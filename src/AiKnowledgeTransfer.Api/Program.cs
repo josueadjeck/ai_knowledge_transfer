@@ -334,6 +334,11 @@ app.MapGet("/health", (OperationalHealthService service) =>
 })
 .WithName("Health");
 
+app.MapGet("/api/document-parsers", (DocumentParserCapabilityService service) =>
+{
+    return Results.Ok(service.List());
+});
+
 app.MapGet("/api/security/roles", (RolePermissionService service) =>
 {
     return Results.Ok(service.GetMatrix());

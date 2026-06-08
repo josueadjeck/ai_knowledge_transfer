@@ -9,6 +9,20 @@ public sealed class WordDocumentParser : IDocumentParser
 {
     private const string WordContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
+    public string Name => nameof(WordDocumentParser);
+
+    public IReadOnlyCollection<string> SupportedContentTypes =>
+    [
+        WordContentType
+    ];
+
+    public IReadOnlyCollection<string> SupportedFileExtensions =>
+    [
+        ".docx"
+    ];
+
+    public string CapabilityDescription => "Word .docx paragraphs are extracted from the document body.";
+
     public bool CanParse(string contentType, string fileName)
     {
         return contentType.Equals(WordContentType, StringComparison.OrdinalIgnoreCase)
@@ -30,7 +44,7 @@ public sealed class WordDocumentParser : IDocumentParser
 
         return Task.FromResult(new ParsedDocument(
             chunks,
-            nameof(WordDocumentParser),
+            Name,
             $"Word parser created {chunks.Count} chunks."));
     }
 

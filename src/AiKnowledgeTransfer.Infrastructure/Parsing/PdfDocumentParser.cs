@@ -7,6 +7,20 @@ using UglyToad.PdfPig;
 
 public sealed class PdfDocumentParser : IDocumentParser
 {
+    public string Name => nameof(PdfDocumentParser);
+
+    public IReadOnlyCollection<string> SupportedContentTypes =>
+    [
+        "application/pdf"
+    ];
+
+    public IReadOnlyCollection<string> SupportedFileExtensions =>
+    [
+        ".pdf"
+    ];
+
+    public string CapabilityDescription => "Text-based PDFs are parsed with PdfPig; scanned PDFs require OCR before analysis.";
+
     public bool CanParse(string contentType, string fileName)
     {
         return contentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase)
@@ -28,7 +42,7 @@ public sealed class PdfDocumentParser : IDocumentParser
 
         return Task.FromResult(new ParsedDocument(
             chunks,
-            nameof(PdfDocumentParser),
+            Name,
             $"PDF text parser created {chunks.Count} chunks. Scanned PDFs still require OCR."));
     }
 
