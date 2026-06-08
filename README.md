@@ -26,7 +26,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Review summary endpoint and dashboard cards show counts by review status, quality status, type and final usable knowledge.
 - Roadmap generation that uses approved and verified knowledge as final content and marks other items as review notes.
 - Markdown export for project handover documents.
-- Traceability matrix for source, knowledge, review and roadmap/export usage.
+- Traceability matrix for source, knowledge, review, review history and roadmap/export usage.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -91,7 +91,7 @@ The web UI can run the MVP workflow directly:
 - Generate a review-aware roadmap.
 - Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
 - Load traceability and Markdown export output.
-- Inspect traceability rows with source, knowledge, review state, roadmap usage and export state.
+- Inspect traceability rows with source, knowledge, review state, review history, roadmap usage and export state.
 - Inspect and filter audit log events by action and target type.
 - Inspect Markdown export metadata and section previews before reading the full export text.
 

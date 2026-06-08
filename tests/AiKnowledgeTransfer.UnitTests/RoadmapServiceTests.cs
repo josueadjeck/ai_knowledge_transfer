@@ -513,8 +513,12 @@ public sealed class RoadmapServiceTests
         Assert.Contains("## Sources", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("## Knowledge Items", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("## Roadmaps", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("## Review History", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("## Traceability Matrix", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("- Quality: Verified", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("| Time | Action | Status | Quality | Reviewer | Comment |", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("Approve", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("Review History", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("Support Engineer", export.Markdown, StringComparison.Ordinal);
     }
 
@@ -569,6 +573,9 @@ public sealed class RoadmapServiceTests
         Assert.Equal("Approved", workflowRow.KnowledgeReviewStatus);
         Assert.Equal("Verified", workflowRow.ExtractionQuality);
         Assert.Equal("Senior Engineer", workflowRow.ReviewedBy);
+        Assert.Equal(1, workflowRow.ReviewHistoryCount);
+        Assert.Equal("Approve", workflowRow.LatestReviewAction);
+        Assert.NotNull(workflowRow.LatestReviewAt);
         Assert.True(workflowRow.RoadmapUsageCount > 0);
         Assert.True(workflowRow.IncludedInExport);
     }

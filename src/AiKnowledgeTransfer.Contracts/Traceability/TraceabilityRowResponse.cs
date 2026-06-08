@@ -16,5 +16,8 @@ public sealed record TraceabilityRowResponse(
     string? KnowledgeReviewStatus,
     string? ReviewedBy,
     DateTimeOffset? ReviewedAt,
+    int ReviewHistoryCount,
+    string? LatestReviewAction,
+    DateTimeOffset? LatestReviewAt,
     int RoadmapUsageCount,
     bool IncludedInExport);

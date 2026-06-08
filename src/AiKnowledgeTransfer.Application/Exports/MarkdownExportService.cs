@@ -49,6 +49,7 @@ public sealed class MarkdownExportService(
 
         AppendDocuments(builder, project);
         AppendKnowledge(builder, project);
+        AppendReviewHistory(builder, project);
         AppendTraceability(builder, project);
         AppendRoadmaps(builder, project);
 
@@ -164,16 +165,51 @@ public sealed class MarkdownExportService(
         }
     }
 
+    private static void AppendReviewHistory(StringBuilder builder, KnowledgeProject project)
+    {
+        builder.AppendLine("## Review History");
+        builder.AppendLine();
+
+        var itemsWithHistory = project.KnowledgeItems
+            .Where(item => item.ReviewHistory.Count > 0)
+            .OrderBy(item => item.Type)
+            .ThenBy(item => item.Title)
+            .ToArray();
+
+        if (itemsWithHistory.Length == 0)
+        {
+            builder.AppendLine("No review history available.");
+            builder.AppendLine();
+            return;
+        }
+
+        foreach (var item in itemsWithHistory)
+        {
+            builder.AppendLine($"### {item.Title}");
+            builder.AppendLine();
+            builder.AppendLine("| Time | Action | Status | Quality | Reviewer | Comment |");
+            builder.AppendLine("| --- | --- | --- | --- | --- | --- |");
+
+            foreach (var history in item.ReviewHistory.OrderBy(history => history.CreatedAt))
+            {
+                builder.AppendLine(
+                    $"| {history.CreatedAt:O} | {EscapeTable(history.Action)} | {history.ReviewStatus} | {EscapeTable(history.QualityStatus)} | {EscapeTable(history.Reviewer)} | {EscapeTable(history.Comment)} |");
+            }
+
+            builder.AppendLine();
+        }
+    }
+
     private static void AppendTraceability(StringBuilder builder, KnowledgeProject project)
     {
         builder.AppendLine("## Traceability Matrix");
         builder.AppendLine();
-        builder.AppendLine("| Source | Chunks | Knowledge Item | Type | Review Status | Extraction | Quality | Reviewed By | Roadmap Usage | Exported |");
-        builder.AppendLine("| --- | ---: | --- | --- | --- | --- | --- | --- | ---: | --- |");
+        builder.AppendLine("| Source | Chunks | Knowledge Item | Type | Review Status | Review History | Extraction | Quality | Reviewed By | Roadmap Usage | Exported |");
+        builder.AppendLine("| --- | ---: | --- | --- | --- | --- | --- | --- | --- | ---: | --- |");
 
         if (project.Documents.Count == 0)
         {
-            builder.AppendLine("| - | 0 | - | - | - | - | - | - | 0 | No |");
+            builder.AppendLine("| - | 0 | - | - | - | - | - | - | - | 0 | No |");
             builder.AppendLine();
             return;
         }
@@ -188,7 +224,7 @@ public sealed class MarkdownExportService(
 
             if (linkedItems.Length == 0)
             {
-                builder.AppendLine($"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | - | - | - | - | - | - | 0 | No |");
+                builder.AppendLine($"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | - | - | - | - | - | - | - | 0 | No |");
                 continue;
             }
 
@@ -204,7 +240,7 @@ public sealed class MarkdownExportService(
                 var exported = KnowledgeQualityPolicy.IsFinal(item) ? "Yes" : "No";
 
                 builder.AppendLine(
-                    $"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | {EscapeTable(item.Title)} | {item.Type} | {item.ReviewStatus} | {EscapeTable(FormatExtraction(item))} | {item.ExtractionQuality} | {EscapeTable(item.ReviewedBy ?? "-")} | {roadmapUsage} | {exported} |");
+                    $"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | {EscapeTable(item.Title)} | {item.Type} | {item.ReviewStatus} | {FormatReviewHistorySummary(item)} | {EscapeTable(FormatExtraction(item))} | {item.ExtractionQuality} | {EscapeTable(item.ReviewedBy ?? "-")} | {roadmapUsage} | {exported} |");
             }
         }
 
@@ -253,6 +289,17 @@ public sealed class MarkdownExportService(
         var model = string.IsNullOrWhiteSpace(item.ExtractionModel) ? string.Empty : $" ({item.ExtractionModel})";
         var fallback = item.ExtractionUsedFallback ? ", fallback" : string.Empty;
         return $"{item.ExtractionProvider}{model}{fallback}";
+    }
+
+    private static string FormatReviewHistorySummary(KnowledgeItem item)
+    {
+        var latestReview = item.ReviewHistory
+            .OrderByDescending(history => history.CreatedAt)
+            .FirstOrDefault();
+
+        return latestReview is null
+            ? "0"
+            : $"{item.ReviewHistory.Count} ({EscapeTable(latestReview.Action)} {latestReview.CreatedAt:O})";
     }
 
     private static string EscapeTable(string value)

@@ -436,6 +436,7 @@
                         <div role="cell">
                             <strong>@(row.KnowledgeReviewStatus ?? "-")</strong>
                             <span>@ReviewDetail(row)</span>
+                            <span>@ReviewHistoryDetail(row)</span>
                         </div>
                         <div role="cell">
                             <strong>@row.RoadmapUsageCount Roadmap</strong>
@@ -1323,6 +1324,19 @@
         return row.ReviewedAt is null
             ? row.ReviewedBy
             : $"{row.ReviewedBy} | {row.ReviewedAt.Value.LocalDateTime:g}";
+    }
+
+    private static string ReviewHistoryDetail(TraceabilityRowResponse row)
+    {
+        if (row.ReviewHistoryCount == 0)
+        {
+            return "Keine Historie";
+        }
+
+        var latest = string.IsNullOrWhiteSpace(row.LatestReviewAction) ? "Letzte Aktion" : row.LatestReviewAction;
+        return row.LatestReviewAt is null
+            ? $"{row.ReviewHistoryCount} Historie"
+            : $"{row.ReviewHistoryCount} Historie | {latest} {row.LatestReviewAt.Value.LocalDateTime:g}";
     }
 
     private static string TraceabilityExtractionDetail(TraceabilityRowResponse row)

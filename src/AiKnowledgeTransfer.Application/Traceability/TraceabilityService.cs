@@ -62,6 +62,9 @@ public sealed class TraceabilityService(
                     KnowledgeReviewStatus: null,
                     ReviewedBy: null,
                     ReviewedAt: null,
+                    ReviewHistoryCount: 0,
+                    LatestReviewAction: null,
+                    LatestReviewAt: null,
                     RoadmapUsageCount: 0,
                     IncludedInExport: false));
 
@@ -70,6 +73,10 @@ public sealed class TraceabilityService(
 
             foreach (var item in linkedKnowledgeItems)
             {
+                var latestReview = item.ReviewHistory
+                    .OrderByDescending(history => history.CreatedAt)
+                    .FirstOrDefault();
+
                 rows.Add(new TraceabilityRowResponse(
                     document.Id,
                     document.FileName,
@@ -86,6 +93,9 @@ public sealed class TraceabilityService(
                     item.ReviewStatus.ToString(),
                     item.ReviewedBy,
                     item.ReviewedAt,
+                    item.ReviewHistory.Count,
+                    latestReview?.Action,
+                    latestReview?.CreatedAt,
                     CountRoadmapUsage(project, item),
                     KnowledgeQualityPolicy.IsFinal(item)));
             }

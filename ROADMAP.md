@@ -132,9 +132,11 @@ Aktueller Implementierungsstand:
 - Phase 7 ist gestartet: Traceability Matrix verknuepft Quellen, Chunks, Wissenselemente, Review-Status und Roadmap-/Export-Nutzung.
 - Phase 7 ist erweitert: Die Blazor-UI zeigt Traceability-Zeilen mit Quelle, Wissen, Review-Status, Roadmap-Nutzung und Export-Markierung.
 - Phase 7 ist erweitert: Traceability und Markdown Export enthalten Extraktionsherkunft und Qualitaetsstatus je Wissenselement.
+- Phase 7 ist erweitert: Traceability zeigt Review-Historien-Metadaten wie Anzahl und letzte Review-Aktion je Wissenselement.
 - Phase 8 ist gestartet: Projektuebergaben koennen als Markdown exportiert werden.
 - Phase 8 ist erweitert: Die Blazor-UI zeigt Markdown-Export-Metadaten, Abschnittsvorschau und vollstaendigen Exporttext.
 - Phase 8 ist erweitert: Markdown Export behandelt nur Verified-Wissen als final exportiert und fuehrt nicht verifizierte Inhalte als Review Notes.
+- Phase 8 ist erweitert: Markdown Export enthaelt eine Review-History-Sektion und die Traceability Matrix weist Review-Historien aus.
 - Phase 9 ist gestartet: Projekte werden lokal als JSON-Datei persistiert; Upload-Dateien bleiben im lokalen Storage.
 - Security-Grundlage ist gestartet: MVP-Rollenmatrix fuer Admin, Senior Engineer, Contributor und Viewer ist vorhanden und in der UI sichtbar.
 - Audit-Grundlage ist gestartet: zentrale Aktionen werden als JSON-basiertes Audit Log gespeichert und per API/UI abrufbar gemacht.
