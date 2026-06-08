@@ -338,7 +338,7 @@ button:disabled {
     align-items: end;
     display: grid;
     gap: .75rem;
-    grid-template-columns: repeat(2, minmax(160px, 220px)) minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(150px, 220px)) minmax(0, 1fr);
 }
 
 .knowledge-filters span,

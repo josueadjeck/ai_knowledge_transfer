@@ -78,6 +78,7 @@ The web UI can run the MVP workflow directly:
 - Analyze the document into chunks.
 - Inspect extracted chunks per analyzed document.
 - Extract knowledge items.
+- Filter knowledge review items by type, review status and quality status.
 - Inspect source, provider and quality metadata for extracted knowledge items.
 - Filter knowledge review items by type and review status.
 - Submit, approve or reject knowledge items.

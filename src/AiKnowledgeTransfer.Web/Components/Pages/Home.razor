@@ -223,6 +223,16 @@
                         }
                     </select>
                 </label>
+                <label>
+                    Qualitaet
+                    <select @bind="_knowledgeQualityFilter">
+                        <option value="">Alle Qualitaeten</option>
+                        @foreach (var quality in KnowledgeQualityStatuses)
+                        {
+                            <option value="@quality">@quality</option>
+                        }
+                    </select>
+                </label>
                 <span>@FilteredKnowledgeItems.Count() von @_selectedProject.KnowledgeItems.Count Elementen</span>
             </div>
             <div class="knowledge-table">
@@ -624,6 +634,7 @@
     private int _roadmapWeeks = 4;
     private string _knowledgeTypeFilter = string.Empty;
     private string _knowledgeStatusFilter = string.Empty;
+    private string _knowledgeQualityFilter = string.Empty;
     private string _auditActionFilter = string.Empty;
     private string _auditTargetTypeFilter = string.Empty;
     private string _reviewerName = "Senior Engineer";
@@ -669,10 +680,18 @@
         .Order(StringComparer.Ordinal)
         ?? Enumerable.Empty<string>();
 
+    private IEnumerable<string> KnowledgeQualityStatuses => _selectedProject?.KnowledgeItems
+        .Select(item => item.ExtractionQuality)
+        .Distinct(StringComparer.Ordinal)
+        .Order(StringComparer.Ordinal)
+        ?? Enumerable.Empty<string>();
+
     private IEnumerable<KnowledgeItemResponse> FilteredKnowledgeItems => _selectedProject?.KnowledgeItems
         .Where(item => string.IsNullOrWhiteSpace(_knowledgeTypeFilter) || item.Type == _knowledgeTypeFilter)
         .Where(item => string.IsNullOrWhiteSpace(_knowledgeStatusFilter) || item.ReviewStatus == _knowledgeStatusFilter)
+        .Where(item => string.IsNullOrWhiteSpace(_knowledgeQualityFilter) || item.ExtractionQuality == _knowledgeQualityFilter)
         .OrderBy(item => item.ReviewStatus)
+        .ThenBy(item => item.ExtractionQuality)
         .ThenBy(item => item.Type)
         .ThenBy(item => item.Title)
         ?? Enumerable.Empty<KnowledgeItemResponse>();
@@ -1046,6 +1065,12 @@
             && !KnowledgeReviewStatuses.Contains(_knowledgeStatusFilter, StringComparer.Ordinal))
         {
             _knowledgeStatusFilter = string.Empty;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_knowledgeQualityFilter)
+            && !KnowledgeQualityStatuses.Contains(_knowledgeQualityFilter, StringComparer.Ordinal))
+        {
+            _knowledgeQualityFilter = string.Empty;
         }
     }
 
