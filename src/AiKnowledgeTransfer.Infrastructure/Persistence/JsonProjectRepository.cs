@@ -118,6 +118,7 @@ public sealed class JsonProjectRepository : IProjectRepository
             chunk.StartCharacter,
             chunk.EndCharacter,
             chunk.SourceReference,
+            chunk.QualityStatus,
             chunk.CreatedAt);
     }
 
@@ -213,7 +214,8 @@ public sealed class JsonProjectRepository : IProjectRepository
             snapshot.StartCharacter,
             snapshot.EndCharacter,
             snapshot.CreatedAt,
-            snapshot.SourceReference);
+            snapshot.SourceReference,
+            snapshot.QualityStatus);
     }
 
     private static KnowledgeItem FromSnapshot(KnowledgeItemSnapshot snapshot)
@@ -302,6 +304,7 @@ public sealed class JsonProjectRepository : IProjectRepository
         int StartCharacter,
         int EndCharacter,
         string SourceReference,
+        string QualityStatus,
         DateTimeOffset CreatedAt);
 
     private sealed record KnowledgeItemSnapshot(

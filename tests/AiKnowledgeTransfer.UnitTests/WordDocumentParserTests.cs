@@ -33,6 +33,7 @@ public sealed class WordDocumentParserTests
         Assert.Contains("Word parser created", parsed.Detail, StringComparison.Ordinal);
         Assert.Equal(2, parsed.Chunks.Count);
         Assert.All(parsed.Chunks, chunk => Assert.Contains("Word document body", chunk.SourceReference, StringComparison.Ordinal));
+        Assert.All(parsed.Chunks, chunk => Assert.Contains("Text", chunk.QualityStatus, StringComparison.Ordinal));
         Assert.Contains(parsed.Chunks, chunk => chunk.Text == "System overview");
         Assert.Contains(parsed.Chunks, chunk => chunk.Text.Contains("Deployment", StringComparison.Ordinal));
     }

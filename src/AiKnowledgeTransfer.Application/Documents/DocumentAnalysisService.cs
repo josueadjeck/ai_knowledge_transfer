@@ -64,6 +64,7 @@ public sealed class DocumentAnalysisService(
             chunk.Text,
             chunk.StartCharacter,
             chunk.EndCharacter,
-            chunk.SourceReference);
+            chunk.SourceReference,
+            chunk.QualityStatus);
     }
 }

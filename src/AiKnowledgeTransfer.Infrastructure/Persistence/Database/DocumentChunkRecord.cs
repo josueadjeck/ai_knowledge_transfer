@@ -18,5 +18,7 @@ public sealed class DocumentChunkRecord
 
     public string SourceReference { get; set; } = string.Empty;
 
+    public string QualityStatus { get; set; } = string.Empty;
+
     public DateTimeOffset CreatedAt { get; set; }
 }

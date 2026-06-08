@@ -222,7 +222,7 @@
                                 @foreach (var chunk in DocumentChunks(document.Id).Take(3))
                                 {
                                     <article>
-                                        <span>Chunk @chunk.ChunkNumber | @chunk.SourceReference</span>
+                                        <span>Chunk @chunk.ChunkNumber | @chunk.QualityStatus | @chunk.SourceReference</span>
                                         <p>@PreviewText(chunk.Text)</p>
                                     </article>
                                 }

@@ -5,4 +5,5 @@ public sealed record ParsedDocumentChunk(
     string Text,
     int StartCharacter,
     int EndCharacter,
-    string SourceReference = "Document text");
+    string SourceReference = "Document text",
+    string QualityStatus = "Unassessed");

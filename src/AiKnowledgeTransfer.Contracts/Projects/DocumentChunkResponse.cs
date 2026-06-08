@@ -8,4 +8,5 @@ public sealed record DocumentChunkResponse(
     int StartCharacter,
     int EndCharacter,
     string SourceReference,
+    string QualityStatus,
     DateTimeOffset CreatedAt);

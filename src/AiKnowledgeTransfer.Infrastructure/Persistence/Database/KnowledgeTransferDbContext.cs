@@ -59,6 +59,7 @@ public sealed class KnowledgeTransferDbContext : DbContext
             entity.HasKey(chunk => chunk.Id);
             entity.Property(chunk => chunk.Text).IsRequired();
             entity.Property(chunk => chunk.SourceReference).HasMaxLength(512).IsRequired();
+            entity.Property(chunk => chunk.QualityStatus).HasMaxLength(120).IsRequired();
         });
 
         modelBuilder.Entity<KnowledgeItemRecord>(entity =>

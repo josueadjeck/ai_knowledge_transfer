@@ -30,7 +30,8 @@ internal static class DocumentChunker
                         chunkText,
                         start,
                         start + chunkText.Length,
-                        $"{sourceReference}, characters {start}-{start + chunkText.Length}"));
+                        $"{sourceReference}, characters {start}-{start + chunkText.Length}",
+                        AssessQuality(chunkText)));
                 }
 
                 remaining = remaining[length..].TrimStart();
@@ -39,6 +40,13 @@ internal static class DocumentChunker
         }
 
         return chunks;
+    }
+
+    private static string AssessQuality(string chunkText)
+    {
+        return chunkText.Length < 40
+            ? "ReviewShortText"
+            : "UsableText";
     }
 
     private static IEnumerable<(string Text, int StartCharacter)> ReadParagraphs(string text)

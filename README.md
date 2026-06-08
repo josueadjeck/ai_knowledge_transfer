@@ -17,6 +17,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Word `.docx` text extraction into document chunks.
 - Shared chunking logic across text, PDF and Word parsers.
 - Document chunks retain parser-specific source references for review and traceability.
+- Document chunks include deterministic quality labels such as `UsableText` and `ReviewShortText`.
 - Supported parser capabilities are available through API and visible in the Blazor document workflow.
 - Document analysis responses and the Blazor workflow show parser name, chunk count and parser detail.
 - PDF analysis reports that scanned PDFs need OCR when no extractable text is available.
@@ -85,7 +86,7 @@ The web UI can run the MVP workflow directly:
 - Inspect supported parser formats before analysis.
 - Analyze the document into chunks.
 - Inspect parser diagnostics after analysis.
-- Inspect extracted chunks and parser-specific source references per analyzed document.
+- Inspect extracted chunks, quality labels and parser-specific source references per analyzed document.
 - Extract knowledge items.
 - Filter knowledge review items by type, review status and quality status.
 - Inspect review summary counts for final, open and quality-gated knowledge.

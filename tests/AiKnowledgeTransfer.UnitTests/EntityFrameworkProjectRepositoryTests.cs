@@ -1,5 +1,7 @@
 using AiKnowledgeTransfer.Contracts.Projects;
+using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Knowledge;
+using AiKnowledgeTransfer.Infrastructure.Parsing;
 using AiKnowledgeTransfer.Infrastructure.Persistence.Database;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -103,6 +105,55 @@ public sealed class EntityFrameworkProjectRepositoryTests
             Assert.Equal("Approve", history.Action);
             Assert.Equal("Senior Engineer", history.Reviewer);
             Assert.Equal("Verified", history.QualityStatus);
+        }
+    }
+
+    [Fact]
+    public async Task Repository_persists_and_loads_document_chunk_quality_metadata()
+    {
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        var options = new DbContextOptionsBuilder<KnowledgeTransferDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        await using (var setup = new KnowledgeTransferDbContext(options))
+        {
+            await setup.Database.EnsureCreatedAsync();
+        }
+
+        Guid projectId;
+        await using (var writeContext = new KnowledgeTransferDbContext(options))
+        {
+            var repository = new EntityFrameworkProjectRepository(writeContext);
+            var storage = new Infrastructure.Storage.LocalFileStorage(Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-ef-tests", Guid.NewGuid().ToString("N")));
+            var projectService = new Application.Projects.ProjectService(repository, storage);
+            var analysisService = new DocumentAnalysisService(repository, storage, [new PlainTextDocumentParser()]);
+
+            var project = await projectService.CreateAsync(
+                new CreateProjectRequest("SQLite Chunk Project", "Chunk quality persistence test", "Engineering"),
+                CancellationToken.None);
+            projectId = project.Id;
+
+            await using var content = new MemoryStream("This paragraph has enough technical context to be reviewed as usable source text."u8.ToArray());
+            var upload = await projectService.UploadDocumentAsync(
+                project.Id,
+                new Application.Projects.UploadDocumentCommand("quality.md", "text/markdown", "Test", content),
+                CancellationToken.None);
+
+            Assert.NotNull(upload);
+            await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        }
+
+        await using (var readContext = new KnowledgeTransferDbContext(options))
+        {
+            var repository = new EntityFrameworkProjectRepository(readContext);
+            var project = await repository.GetAsync(projectId, CancellationToken.None);
+
+            Assert.NotNull(project);
+            var chunk = Assert.Single(project.Documents.Single().Chunks);
+            Assert.Equal("UsableText", chunk.QualityStatus);
+            Assert.Contains("Plain text body", chunk.SourceReference, StringComparison.Ordinal);
         }
     }
 }

@@ -65,6 +65,7 @@ public static class ProjectMapper
             chunk.StartCharacter,
             chunk.EndCharacter,
             chunk.SourceReference,
+            chunk.QualityStatus,
             chunk.CreatedAt);
     }
 

@@ -9,6 +9,7 @@ public sealed class DocumentChunk
         int startCharacter,
         int endCharacter,
         string sourceReference,
+        string qualityStatus,
         DateTimeOffset createdAt)
     {
         Id = id;
@@ -19,6 +20,9 @@ public sealed class DocumentChunk
         SourceReference = string.IsNullOrWhiteSpace(sourceReference)
             ? "Imported legacy chunk"
             : sourceReference.Trim();
+        QualityStatus = string.IsNullOrWhiteSpace(qualityStatus)
+            ? "Unassessed"
+            : qualityStatus.Trim();
         CreatedAt = createdAt;
     }
 
@@ -27,7 +31,8 @@ public sealed class DocumentChunk
         string text,
         int startCharacter,
         int endCharacter,
-        string sourceReference = "Document text")
+        string sourceReference = "Document text",
+        string qualityStatus = "Unassessed")
     {
         if (chunkNumber <= 0)
         {
@@ -52,6 +57,9 @@ public sealed class DocumentChunk
         SourceReference = string.IsNullOrWhiteSpace(sourceReference)
             ? "Document text"
             : sourceReference.Trim();
+        QualityStatus = string.IsNullOrWhiteSpace(qualityStatus)
+            ? "Unassessed"
+            : qualityStatus.Trim();
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
@@ -67,6 +75,8 @@ public sealed class DocumentChunk
 
     public string SourceReference { get; }
 
+    public string QualityStatus { get; }
+
     public DateTimeOffset CreatedAt { get; }
 
     public static DocumentChunk Rehydrate(
@@ -76,7 +86,8 @@ public sealed class DocumentChunk
         int startCharacter,
         int endCharacter,
         DateTimeOffset createdAt,
-        string sourceReference = "Imported legacy chunk")
+        string sourceReference = "Imported legacy chunk",
+        string qualityStatus = "Unassessed")
     {
         return new DocumentChunk(
             id,
@@ -85,6 +96,7 @@ public sealed class DocumentChunk
             startCharacter,
             endCharacter,
             sourceReference,
+            qualityStatus,
             createdAt);
     }
 }
