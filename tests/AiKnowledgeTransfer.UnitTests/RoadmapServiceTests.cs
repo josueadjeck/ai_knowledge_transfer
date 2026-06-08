@@ -178,6 +178,66 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task OnboardingStartPackage_returns_readiness_task_when_project_is_not_ready()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storage = new LocalFileStorage(Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N")));
+        var projectService = new ProjectService(repository, storage);
+        var readinessService = new OnboardingReadinessService(repository);
+        var startPackageService = new OnboardingStartPackageService(repository, readinessService);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Package Project", "Onboarding package test", "Engineering"),
+            CancellationToken.None);
+
+        var package = await startPackageService.GetAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(package);
+        Assert.False(package.CanStartOnboarding);
+        Assert.Equal("NotReady", package.Status);
+        Assert.Empty(package.FirstWeeks);
+        Assert.Contains(package.StarterTasks, task => task.Contains("Readiness", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task OnboardingStartPackage_returns_first_weeks_for_ready_pilot()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storage = new LocalFileStorage(Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N")));
+        var projectService = new ProjectService(repository, storage);
+        var reviewService = new KnowledgeReviewService(repository);
+        var roadmapService = new RoadmapService(repository);
+        var readinessService = new OnboardingReadinessService(repository);
+        var startPackageService = new OnboardingStartPackageService(repository, readinessService);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Ready Package Project", "Onboarding package test", "Engineering"),
+            CancellationToken.None);
+        var details = await projectService.GetAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(details);
+        await reviewService.ApproveAsync(
+            project.Id,
+            details.KnowledgeItems.First().Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Ready for package."),
+            CancellationToken.None);
+        await roadmapService.GenerateAsync(
+            project.Id,
+            new GenerateRoadmapRequest("Support Engineer", 3),
+            CancellationToken.None);
+
+        var package = await startPackageService.GetAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(package);
+        Assert.True(package.CanStartOnboarding);
+        Assert.Equal("ReadyForPilot", package.Status);
+        Assert.Equal("Support Engineer", package.TargetRole);
+        Assert.Equal(2, package.FirstWeeks.Count);
+        Assert.NotEmpty(package.StarterTasks);
+        Assert.NotEmpty(package.ReviewWarnings);
+    }
+
+    [Fact]
     public async Task KnowledgeReviewService_updates_status_and_review_metadata()
     {
         var repository = new InMemoryProjectRepository();

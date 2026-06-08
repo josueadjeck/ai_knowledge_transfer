@@ -32,6 +32,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Review summary endpoint and dashboard cards show counts by review status, quality status, type and final usable knowledge.
 - Roadmap generation that uses approved and verified knowledge as final content and marks other items as review notes.
 - Onboarding readiness check for whether a project can start a supervised pilot onboarding.
+- Onboarding start package with first-week roadmap content, starter tasks and review warnings.
 - Markdown export for project handover documents.
 - Traceability matrix for source, knowledge, review, review history and roadmap/export usage.
 - Compliance matrix endpoint and Blazor view for compliant vs open evidence.
@@ -100,6 +101,7 @@ The web UI can run the MVP workflow directly:
 - Inspect the latest review history entries per knowledge item.
 - Generate a review-aware roadmap.
 - Inspect onboarding readiness before starting a new employee.
+- Inspect the onboarding start package for the first supervised onboarding steps.
 - Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
 - Load traceability and Markdown export output.
 - Inspect traceability rows with source, knowledge, review state, review history, roadmap usage and export state.
@@ -258,6 +260,12 @@ Check onboarding readiness:
 
 ```http
 GET http://localhost:5256/api/projects/{projectId}/onboarding-readiness
+```
+
+Get the onboarding start package:
+
+```http
+GET http://localhost:5256/api/projects/{projectId}/onboarding-start-package
 ```
 
 Export a project handover document as Markdown:

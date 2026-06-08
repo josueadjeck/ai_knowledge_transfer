@@ -31,6 +31,7 @@
 @inject KnowledgeReviewSummaryService ReviewSummary
 @inject RoadmapService Roadmaps
 @inject OnboardingReadinessService OnboardingReadiness
+@inject OnboardingStartPackageService OnboardingStartPackages
 @inject MarkdownExportService MarkdownExports
 @inject TraceabilityService Traceability
 @inject ComplianceMatrixService Compliance
@@ -427,6 +428,41 @@
             }
         }
 
+        @if (_onboardingStartPackage is not null)
+        {
+            <details class="start-package">
+                <summary>Startpaket anzeigen</summary>
+                <div class="start-package-meta">
+                    <span>@(_onboardingStartPackage.TargetRole ?? "Keine Zielrolle")</span>
+                    <strong>@_onboardingStartPackage.Status</strong>
+                </div>
+                <section>
+                    <h3>Starter-Aufgaben</h3>
+                    @RenderRoadmapItems(_onboardingStartPackage.StarterTasks)
+                </section>
+                @if (_onboardingStartPackage.FirstWeeks.Count > 0)
+                {
+                    <section>
+                        <h3>Erste Wochen</h3>
+                        @foreach (var week in _onboardingStartPackage.FirstWeeks)
+                        {
+                            <article>
+                                <strong>Woche @week.WeekNumber: @week.Theme</strong>
+                                @RenderRoadmapItems(week.LearningGoals.Take(3).ToArray())
+                            </article>
+                        }
+                    </section>
+                }
+                @if (_onboardingStartPackage.ReviewWarnings.Count > 0)
+                {
+                    <section>
+                        <h3>Review-Warnungen</h3>
+                        @RenderRoadmapItems(_onboardingStartPackage.ReviewWarnings)
+                    </section>
+                }
+            </details>
+        }
+
         @if (_selectedProject?.Roadmaps.Count > 0)
         {
             <div class="compact-list roadmap-list">
@@ -814,6 +850,7 @@
     private ExtractKnowledgeResponse? _lastExtraction;
     private KnowledgeReviewSummaryResponse? _reviewSummary;
     private OnboardingReadinessResponse? _onboardingReadiness;
+    private OnboardingStartPackageResponse? _onboardingStartPackage;
     private HealthResponse? _health;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
@@ -1323,6 +1360,9 @@
         _onboardingReadiness = _selectedProjectId == Guid.Empty
             ? null
             : await OnboardingReadiness.GetAsync(_selectedProjectId, CancellationToken.None);
+        _onboardingStartPackage = _selectedProjectId == Guid.Empty
+            ? null
+            : await OnboardingStartPackages.GetAsync(_selectedProjectId, CancellationToken.None);
         _traceability = null;
         _compliance = null;
         _export = null;

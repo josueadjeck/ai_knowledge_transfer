@@ -458,6 +458,67 @@ button:disabled {
     margin-top: .25rem;
 }
 
+.start-package {
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .65rem;
+}
+
+.start-package summary {
+    color: #244f8f;
+    cursor: pointer;
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.start-package-meta {
+    background: #f8fafc;
+    border: 1px solid #e6ebf1;
+    border-radius: 6px;
+    margin-top: .55rem;
+    padding: .55rem;
+}
+
+.start-package-meta span,
+.start-package-meta strong {
+    display: block;
+}
+
+.start-package-meta span {
+    color: #617080;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.start-package-meta strong {
+    color: #1f2933;
+    font-size: .9rem;
+    margin-top: .15rem;
+}
+
+.start-package section {
+    border-top: 1px solid #e6ebf1;
+    margin-top: .65rem;
+    padding-top: .65rem;
+}
+
+.start-package h3 {
+    color: #1f2933;
+    font-size: .9rem;
+    margin: 0 0 .4rem;
+}
+
+.start-package article + article {
+    margin-top: .55rem;
+}
+
+.start-package article strong {
+    color: #1f2933;
+    display: block;
+    font-size: .86rem;
+    margin-bottom: .25rem;
+}
+
 .knowledge-filters,
 .audit-filters {
     align-items: end;

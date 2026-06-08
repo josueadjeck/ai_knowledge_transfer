@@ -130,6 +130,7 @@ Aktueller Implementierungsstand:
 - Phase 5 ist erweitert: Die Blazor-UI zeigt Roadmap-Wochen mit Lernzielen, Uebungen, Abschlusskriterien und Review-Hinweisen als Vorschau.
 - Phase 5 ist erweitert: Roadmaps verwenden nur freigegebenes und als Verified markiertes Wissen als finale Lerninhalte; andere Qualitaetsstatus bleiben Review-Risiken.
 - Phase 5 ist erweitert: Eine Onboarding-Readiness-Bewertung zeigt, ob ein Projekt fuer einen betreuten Pilotstart mit neuen Mitarbeitenden bereit ist.
+- Phase 5 ist erweitert: Ein Onboarding-Startpaket buendelt erste Roadmap-Wochen, Starter-Aufgaben und Review-Warnungen fuer neue Mitarbeitende.
 - Phase 6 ist gestartet: Wissenselemente koennen in Review gesetzt, freigegeben oder abgelehnt werden; Review-Metadaten werden gespeichert.
 - Phase 6 ist erweitert: Reviewer und Review-Kommentar koennen in der Blazor-UI eingegeben und an Review/Freigabe/Ablehnung uebergeben werden.
 - Phase 6 ist erweitert: Review-Aktionen koennen den Qualitaetsstatus von Wissenselementen setzen, z. B. NeedsClarification, Verified oder RejectedSource.

@@ -301,6 +301,15 @@ projects.MapGet("/{projectId:guid}/onboarding-readiness", async Task<IResult> (
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
 });
 
+projects.MapGet("/{projectId:guid}/onboarding-start-package", async Task<IResult> (
+    Guid projectId,
+    OnboardingStartPackageService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.GetAsync(projectId, cancellationToken);
+    return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
+});
+
 projects.MapGet("/{projectId:guid}/exports/markdown", async Task<IResult> (
     Guid projectId,
     MarkdownExportService service,
