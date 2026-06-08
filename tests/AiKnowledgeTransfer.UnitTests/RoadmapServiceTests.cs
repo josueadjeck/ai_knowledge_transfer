@@ -299,6 +299,51 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task GenerateAsync_keeps_approved_but_unverified_knowledge_in_review_notes()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+        var reviewService = new KnowledgeReviewService(repository);
+        var roadmapService = new RoadmapService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Quality Roadmap Project", "Quality gated roadmap test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("Deployment workflow must be reviewed by senior engineers."u8.ToArray());
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("quality-roadmap.md", "text/markdown", "Manual upload", content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        var workflow = extraction.KnowledgeItems.First(item => item.Type == "Workflow");
+        await reviewService.ApproveAsync(
+            project.Id,
+            workflow.Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Approved but still needs clarification.", "NeedsClarification"),
+            CancellationToken.None);
+
+        var roadmap = await roadmapService.GenerateAsync(
+            project.Id,
+            new GenerateRoadmapRequest("Support Engineer", 3),
+            CancellationToken.None);
+
+        Assert.NotNull(roadmap);
+        Assert.DoesNotContain(roadmap.Weeks.SelectMany(week => week.LearningGoals), goal => goal.Contains(workflow.Title, StringComparison.Ordinal));
+        Assert.Contains(roadmap.Weeks.SelectMany(week => week.ReviewNotes), note => note.Contains("NeedsClarification", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task ExportProjectAsync_creates_markdown_with_sources_knowledge_and_roadmap()
     {
         var repository = new InMemoryProjectRepository();
@@ -350,6 +395,7 @@ public sealed class RoadmapServiceTests
         Assert.Contains("## Knowledge Items", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("## Roadmaps", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("## Traceability Matrix", export.Markdown, StringComparison.Ordinal);
+        Assert.Contains("- Quality: Verified", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("Support Engineer", export.Markdown, StringComparison.Ordinal);
     }
 
@@ -402,6 +448,7 @@ public sealed class RoadmapServiceTests
         var workflowRow = matrix.Rows.Single(row => row.KnowledgeItemId == workflow.Id);
         Assert.Equal("traceability.md", workflowRow.DocumentName);
         Assert.Equal("Approved", workflowRow.KnowledgeReviewStatus);
+        Assert.Equal("Verified", workflowRow.ExtractionQuality);
         Assert.Equal("Senior Engineer", workflowRow.ReviewedBy);
         Assert.True(workflowRow.RoadmapUsageCount > 0);
         Assert.True(workflowRow.IncludedInExport);

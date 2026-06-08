@@ -120,6 +120,7 @@ Aktueller Implementierungsstand:
 - Phase 6 ist erweitert: Die Blazor-UI kann Knowledge-Review-Elemente nach Typ und Review-Status filtern.
 - Phase 5 ist gestartet: Roadmaps verwenden freigegebenes Wissen bevorzugt und markieren nicht freigegebene Wissenselemente als Review-Hinweise.
 - Phase 5 ist erweitert: Die Blazor-UI zeigt Roadmap-Wochen mit Lernzielen, Uebungen, Abschlusskriterien und Review-Hinweisen als Vorschau.
+- Phase 5 ist erweitert: Roadmaps verwenden nur freigegebenes und als Verified markiertes Wissen als finale Lerninhalte; andere Qualitaetsstatus bleiben Review-Risiken.
 - Phase 6 ist gestartet: Wissenselemente koennen in Review gesetzt, freigegeben oder abgelehnt werden; Review-Metadaten werden gespeichert.
 - Phase 6 ist erweitert: Reviewer und Review-Kommentar koennen in der Blazor-UI eingegeben und an Review/Freigabe/Ablehnung uebergeben werden.
 - Phase 6 ist erweitert: Review-Aktionen koennen den Qualitaetsstatus von Wissenselementen setzen, z. B. NeedsClarification, Verified oder RejectedSource.
@@ -128,6 +129,7 @@ Aktueller Implementierungsstand:
 - Phase 7 ist erweitert: Traceability und Markdown Export enthalten Extraktionsherkunft und Qualitaetsstatus je Wissenselement.
 - Phase 8 ist gestartet: Projektuebergaben koennen als Markdown exportiert werden.
 - Phase 8 ist erweitert: Die Blazor-UI zeigt Markdown-Export-Metadaten, Abschnittsvorschau und vollstaendigen Exporttext.
+- Phase 8 ist erweitert: Markdown Export behandelt nur Verified-Wissen als final exportiert und fuehrt nicht verifizierte Inhalte als Review Notes.
 - Phase 9 ist gestartet: Projekte werden lokal als JSON-Datei persistiert; Upload-Dateien bleiben im lokalen Storage.
 - Security-Grundlage ist gestartet: MVP-Rollenmatrix fuer Admin, Senior Engineer, Contributor und Viewer ist vorhanden und in der UI sichtbar.
 - Audit-Grundlage ist gestartet: zentrale Aktionen werden als JSON-basiertes Audit Log gespeichert und per API/UI abrufbar gemacht.

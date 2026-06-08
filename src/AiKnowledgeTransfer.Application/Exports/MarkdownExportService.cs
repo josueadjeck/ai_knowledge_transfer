@@ -2,6 +2,7 @@ namespace AiKnowledgeTransfer.Application.Exports;
 
 using System.Text;
 using AiKnowledgeTransfer.Application.Abstractions;
+using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Contracts.Exports;
 using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
@@ -83,14 +84,14 @@ public sealed class MarkdownExportService(
         builder.AppendLine();
 
         var approvedItems = project.KnowledgeItems
-            .Where(item => item.ReviewStatus == KnowledgeReviewStatus.Approved)
+            .Where(KnowledgeQualityPolicy.IsFinal)
             .OrderBy(item => item.Type)
             .ThenBy(item => item.Title)
             .ToArray();
 
         if (approvedItems.Length == 0)
         {
-            builder.AppendLine("No approved knowledge items available.");
+            builder.AppendLine("No verified knowledge items available.");
         }
         else
         {
@@ -110,7 +111,7 @@ public sealed class MarkdownExportService(
         }
 
         var reviewItems = project.KnowledgeItems
-            .Where(item => item.ReviewStatus != KnowledgeReviewStatus.Approved)
+            .Where(item => !KnowledgeQualityPolicy.IsFinal(item))
             .OrderBy(item => item.ReviewStatus)
             .ThenBy(item => item.Title)
             .ToArray();
@@ -128,7 +129,7 @@ public sealed class MarkdownExportService(
 
         foreach (var item in reviewItems)
         {
-            builder.AppendLine($"- {item.Title} ({item.Type}, {item.ReviewStatus}): {item.Summary}");
+            builder.AppendLine($"- {item.Title} ({item.Type}, {item.ReviewStatus}, {item.ExtractionQuality}): {item.Summary}");
         }
 
         builder.AppendLine();
@@ -200,7 +201,7 @@ public sealed class MarkdownExportService(
                         || ContainsTitle(week.Exercises, item.Title)
                         || ContainsTitle(week.ReviewNotes, item.Title));
 
-                var exported = item.ReviewStatus == KnowledgeReviewStatus.Approved ? "Yes" : "No";
+                var exported = KnowledgeQualityPolicy.IsFinal(item) ? "Yes" : "No";
 
                 builder.AppendLine(
                     $"| {EscapeTable(document.FileName)} | {document.Chunks.Count} | {EscapeTable(item.Title)} | {item.Type} | {item.ReviewStatus} | {EscapeTable(FormatExtraction(item))} | {item.ExtractionQuality} | {EscapeTable(item.ReviewedBy ?? "-")} | {roadmapUsage} | {exported} |");

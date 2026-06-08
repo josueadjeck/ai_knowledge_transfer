@@ -1,6 +1,7 @@
 namespace AiKnowledgeTransfer.Application.Roadmaps;
 
 using AiKnowledgeTransfer.Application.Abstractions;
+using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
 using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
@@ -132,28 +133,28 @@ public sealed class RoadmapService(
     {
         public static RoadmapKnowledgeContext FromProject(KnowledgeProject project)
         {
-            var approvedItems = project.KnowledgeItems
-                .Where(item => item.ReviewStatus == KnowledgeReviewStatus.Approved)
+            var finalItems = project.KnowledgeItems
+                .Where(KnowledgeQualityPolicy.IsFinal)
                 .ToArray();
 
             var reviewNotes = project.KnowledgeItems
-                .Where(item => item.ReviewStatus != KnowledgeReviewStatus.Approved)
-                .Select(item => $"{item.Title} ({item.ReviewStatus}) muss vor finaler Nutzung geprueft werden.")
+                .Where(item => !KnowledgeQualityPolicy.IsFinal(item))
+                .Select(KnowledgeQualityPolicy.ToReviewRisk)
                 .Take(10)
                 .ToArray();
 
             return new RoadmapKnowledgeContext(
-                approvedItems
+                finalItems
                     .Where(item => item.Type == KnowledgeItemType.GlossaryTerm)
                     .Select(item => item.Title)
                     .Take(5)
                     .ToArray(),
-                approvedItems
+                finalItems
                     .Where(item => item.Type == KnowledgeItemType.Component)
                     .Select(item => item.Title)
                     .Take(5)
                     .ToArray(),
-                approvedItems
+                finalItems
                     .Where(item => item.Type == KnowledgeItemType.Workflow)
                     .Select(item => item.Title)
                     .Take(5)

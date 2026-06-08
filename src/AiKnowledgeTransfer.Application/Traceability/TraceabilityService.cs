@@ -1,6 +1,7 @@
 namespace AiKnowledgeTransfer.Application.Traceability;
 
 using AiKnowledgeTransfer.Application.Abstractions;
+using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Contracts.Traceability;
 using AiKnowledgeTransfer.Domain.Knowledge;
 using AiKnowledgeTransfer.Domain.Projects;
@@ -86,7 +87,7 @@ public sealed class TraceabilityService(
                     item.ReviewedBy,
                     item.ReviewedAt,
                     CountRoadmapUsage(project, item),
-                    item.ReviewStatus == KnowledgeReviewStatus.Approved));
+                    KnowledgeQualityPolicy.IsFinal(item)));
             }
         }
 

@@ -23,7 +23,7 @@ public sealed class KnowledgeReviewService(
             item =>
             {
                 item.SubmitForReview(request.Reviewer, request.Comment);
-                ApplyQualityStatus(item, request.QualityStatus);
+                ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.NeedsClarification);
             },
             "KnowledgeReviewSubmitted",
             request.Reviewer,
@@ -42,7 +42,7 @@ public sealed class KnowledgeReviewService(
             item =>
             {
                 item.Approve(request.Reviewer, request.Comment);
-                ApplyQualityStatus(item, request.QualityStatus);
+                ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.Verified);
             },
             "KnowledgeApproved",
             request.Reviewer,
@@ -61,7 +61,7 @@ public sealed class KnowledgeReviewService(
             item =>
             {
                 item.Reject(request.Reviewer, request.Comment);
-                ApplyQualityStatus(item, request.QualityStatus);
+                ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.RejectedSource);
             },
             "KnowledgeRejected",
             request.Reviewer,
@@ -92,11 +92,8 @@ public sealed class KnowledgeReviewService(
         return ProjectMapper.ToResponse(item);
     }
 
-    private static void ApplyQualityStatus(KnowledgeItem item, string? qualityStatus)
+    private static void ApplyQualityStatus(KnowledgeItem item, string? qualityStatus, string defaultQualityStatus)
     {
-        if (!string.IsNullOrWhiteSpace(qualityStatus))
-        {
-            item.UpdateExtractionQuality(qualityStatus);
-        }
+        item.UpdateExtractionQuality(string.IsNullOrWhiteSpace(qualityStatus) ? defaultQualityStatus : qualityStatus);
     }
 }

@@ -22,7 +22,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Review workflow for extracted knowledge items.
 - Editable reviewer and review comment fields in the Blazor review workflow.
 - Review actions can update knowledge quality status such as `NeedsClarification`, `Verified` or `RejectedSource`.
-- Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
+- Roadmap generation that uses approved and verified knowledge as final content and marks other items as review notes.
 - Markdown export for project handover documents.
 - Traceability matrix for source, knowledge, review and roadmap/export usage.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
@@ -204,7 +204,7 @@ Content-Type: application/json
 }
 ```
 
-Generated roadmap weeks include `reviewNotes`. Approved knowledge items are added to learning goals and exercises where they fit; draft, in-review or rejected items remain visible as review notes.
+Generated roadmap weeks include `reviewNotes`. Only approved knowledge with `qualityStatus` `Verified` is added to learning goals and exercises where it fits; draft, in-review, rejected or not-yet-verified items remain visible as review notes.
 
 Export a project handover document as Markdown:
 
