@@ -272,6 +272,16 @@
                 <input @bind="_reviewerName" />
             </label>
             <label>
+                Qualitaet
+                <select @bind="_reviewQualityStatus">
+                    <option value="">Automatisch</option>
+                    @foreach (var qualityStatus in RequestValidation.AllowedKnowledgeQualityStatuses)
+                    {
+                        <option value="@qualityStatus">@qualityStatus</option>
+                    }
+                </select>
+            </label>
+            <label>
                 Kommentar
                 <textarea @bind="_reviewComment"></textarea>
             </label>
@@ -618,6 +628,7 @@
     private string _auditTargetTypeFilter = string.Empty;
     private string _reviewerName = "Senior Engineer";
     private string _reviewComment = "Reviewed from UI.";
+    private string _reviewQualityStatus = string.Empty;
     private UserRole _currentRole = UserRole.Admin;
     private string StatusText { get; set; } = "Bereit";
     private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
@@ -792,7 +803,7 @@
             return;
         }
 
-        var request = BuildReviewRequest();
+        var request = BuildReviewRequest("NeedsClarification");
         if (request is null)
         {
             return;
@@ -814,7 +825,7 @@
             return;
         }
 
-        var request = BuildReviewRequest();
+        var request = BuildReviewRequest("Verified");
         if (request is null)
         {
             return;
@@ -836,7 +847,7 @@
             return;
         }
 
-        var request = BuildReviewRequest();
+        var request = BuildReviewRequest("RejectedSource");
         if (request is null)
         {
             return;
@@ -1173,9 +1184,12 @@
             : $"{chunk} | {row.ExtractionQuality}";
     }
 
-    private ReviewKnowledgeItemRequest? BuildReviewRequest()
+    private ReviewKnowledgeItemRequest? BuildReviewRequest(string automaticQualityStatus)
     {
-        var request = new ReviewKnowledgeItemRequest(_reviewerName, _reviewComment);
+        var qualityStatus = string.IsNullOrWhiteSpace(_reviewQualityStatus)
+            ? automaticQualityStatus
+            : _reviewQualityStatus;
+        var request = new ReviewKnowledgeItemRequest(_reviewerName, _reviewComment, qualityStatus);
         var errors = RequestValidation.Validate(request);
         if (errors.Count == 0)
         {

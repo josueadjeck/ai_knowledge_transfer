@@ -402,7 +402,7 @@ button:disabled {
     border-top: 1px solid #e1e6ed;
     display: grid;
     gap: .75rem;
-    grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);
+    grid-template-columns: minmax(160px, 220px) minmax(160px, 220px) minmax(0, 1fr);
     padding-top: .9rem;
 }
 

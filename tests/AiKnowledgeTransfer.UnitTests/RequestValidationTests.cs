@@ -74,4 +74,12 @@ public sealed class RequestValidationTests
         Assert.Contains(nameof(ReviewKnowledgeItemRequest.Reviewer), errors.Keys);
         Assert.Contains(nameof(ReviewKnowledgeItemRequest.Comment), errors.Keys);
     }
+
+    [Fact]
+    public void Validate_review_rejects_unknown_quality_status()
+    {
+        var errors = RequestValidation.Validate(new ReviewKnowledgeItemRequest("Reviewer", "Comment", "Guessed"));
+
+        Assert.Contains(nameof(ReviewKnowledgeItemRequest.QualityStatus), errors.Keys);
+    }
 }

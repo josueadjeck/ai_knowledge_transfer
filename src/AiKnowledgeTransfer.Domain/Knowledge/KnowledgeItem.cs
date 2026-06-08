@@ -84,7 +84,7 @@ public sealed class KnowledgeItem
 
     public bool ExtractionUsedFallback { get; }
 
-    public string ExtractionQuality { get; }
+    public string ExtractionQuality { get; private set; }
 
     public KnowledgeReviewStatus ReviewStatus { get; private set; }
 
@@ -118,6 +118,11 @@ public sealed class KnowledgeItem
         ReviewedBy = RequireReviewer(reviewer);
         ReviewComment = comment.Trim();
         ReviewedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void UpdateExtractionQuality(string qualityStatus)
+    {
+        ExtractionQuality = RequireText(qualityStatus, nameof(qualityStatus));
     }
 
     private static string RequireReviewer(string reviewer)

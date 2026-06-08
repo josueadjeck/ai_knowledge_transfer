@@ -20,7 +20,11 @@ public sealed class KnowledgeReviewService(
         return UpdateReviewStatusAsync(
             projectId,
             knowledgeItemId,
-            item => item.SubmitForReview(request.Reviewer, request.Comment),
+            item =>
+            {
+                item.SubmitForReview(request.Reviewer, request.Comment);
+                ApplyQualityStatus(item, request.QualityStatus);
+            },
             "KnowledgeReviewSubmitted",
             request.Reviewer,
             cancellationToken);
@@ -35,7 +39,11 @@ public sealed class KnowledgeReviewService(
         return UpdateReviewStatusAsync(
             projectId,
             knowledgeItemId,
-            item => item.Approve(request.Reviewer, request.Comment),
+            item =>
+            {
+                item.Approve(request.Reviewer, request.Comment);
+                ApplyQualityStatus(item, request.QualityStatus);
+            },
             "KnowledgeApproved",
             request.Reviewer,
             cancellationToken);
@@ -50,7 +58,11 @@ public sealed class KnowledgeReviewService(
         return UpdateReviewStatusAsync(
             projectId,
             knowledgeItemId,
-            item => item.Reject(request.Reviewer, request.Comment),
+            item =>
+            {
+                item.Reject(request.Reviewer, request.Comment);
+                ApplyQualityStatus(item, request.QualityStatus);
+            },
             "KnowledgeRejected",
             request.Reviewer,
             cancellationToken);
@@ -74,9 +86,17 @@ public sealed class KnowledgeReviewService(
         update(item);
         await projects.SaveChangesAsync(cancellationToken);
         await _auditLog.AppendAsync(
-            AuditEvent.Create(project.Id, action, actor, "KnowledgeItem", item.Id, $"Knowledge item '{item.Title}' changed to {item.ReviewStatus}."),
+            AuditEvent.Create(project.Id, action, actor, "KnowledgeItem", item.Id, $"Knowledge item '{item.Title}' changed to {item.ReviewStatus} with quality {item.ExtractionQuality}."),
             cancellationToken);
 
         return ProjectMapper.ToResponse(item);
+    }
+
+    private static void ApplyQualityStatus(KnowledgeItem item, string? qualityStatus)
+    {
+        if (!string.IsNullOrWhiteSpace(qualityStatus))
+        {
+            item.UpdateExtractionQuality(qualityStatus);
+        }
     }
 }

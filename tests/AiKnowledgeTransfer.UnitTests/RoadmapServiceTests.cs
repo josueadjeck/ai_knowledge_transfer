@@ -157,22 +157,24 @@ public sealed class RoadmapServiceTests
         var inReview = await reviewService.SubmitForReviewAsync(
             project.Id,
             itemId,
-            new ReviewKnowledgeItemRequest("Senior Engineer", "Needs technical confirmation."),
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Needs technical confirmation.", "NeedsClarification"),
             CancellationToken.None);
 
         Assert.NotNull(inReview);
         Assert.Equal("InReview", inReview.ReviewStatus);
+        Assert.Equal("NeedsClarification", inReview.ExtractionQuality);
 
         var approved = await reviewService.ApproveAsync(
             project.Id,
             itemId,
-            new ReviewKnowledgeItemRequest("Senior Engineer", "Confirmed against source."),
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Confirmed against source.", "Verified"),
             CancellationToken.None);
 
         Assert.NotNull(approved);
         Assert.Equal("Approved", approved.ReviewStatus);
         Assert.Equal("Senior Engineer", approved.ReviewedBy);
         Assert.Equal("Confirmed against source.", approved.ReviewComment);
+        Assert.Equal("Verified", approved.ExtractionQuality);
         Assert.NotNull(approved.ReviewedAt);
     }
 

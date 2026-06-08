@@ -5,6 +5,18 @@ namespace AiKnowledgeTransfer.Contracts.Validation;
 
 public static class RequestValidation
 {
+    public static readonly IReadOnlyCollection<string> AllowedKnowledgeQualityStatuses =
+    [
+        "ProviderSuggested",
+        "FallbackReview",
+        "Uncertain",
+        "NeedsClarification",
+        "Verified",
+        "RejectedSource",
+        "HumanSeeded",
+        "LegacyImported"
+    ];
+
     public static IReadOnlyDictionary<string, string[]> Validate(CreateProjectRequest request)
     {
         var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
@@ -49,6 +61,12 @@ public static class RequestValidation
 
         AddRequired(errors, nameof(request.Reviewer), request.Reviewer);
         AddRequired(errors, nameof(request.Comment), request.Comment);
+
+        if (!string.IsNullOrWhiteSpace(request.QualityStatus)
+            && !AllowedKnowledgeQualityStatuses.Contains(request.QualityStatus, StringComparer.Ordinal))
+        {
+            errors[nameof(request.QualityStatus)] = [$"QualityStatus must be one of: {string.Join(", ", AllowedKnowledgeQualityStatuses)}."];
+        }
 
         return errors;
     }

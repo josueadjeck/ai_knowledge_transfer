@@ -21,6 +21,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Extracted knowledge items retain source chunk, provider, model, fallback and quality metadata for review, traceability and export.
 - Review workflow for extracted knowledge items.
 - Editable reviewer and review comment fields in the Blazor review workflow.
+- Review actions can update knowledge quality status such as `NeedsClarification`, `Verified` or `RejectedSource`.
 - Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
 - Markdown export for project handover documents.
 - Traceability matrix for source, knowledge, review and roadmap/export usage.
@@ -80,6 +81,7 @@ The web UI can run the MVP workflow directly:
 - Inspect source, provider and quality metadata for extracted knowledge items.
 - Filter knowledge review items by type and review status.
 - Submit, approve or reject knowledge items.
+- Set or automatically derive review quality status while submitting, approving or rejecting knowledge items.
 - Generate a review-aware roadmap.
 - Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
 - Load traceability and Markdown export output.
@@ -185,7 +187,8 @@ Content-Type: application/json
 
 {
   "reviewer": "Senior Engineer",
-  "comment": "Confirmed against source."
+  "comment": "Confirmed against source.",
+  "qualityStatus": "Verified"
 }
 ```
 
