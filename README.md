@@ -18,6 +18,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Shared chunking logic across text, PDF and Word parsers.
 - Document chunks retain parser-specific source references for review and traceability.
 - Document chunks include deterministic quality labels such as `UsableText` and `ReviewShortText`.
+- Document analysis responses and the Blazor workflow summarize chunk quality counts.
 - Supported parser capabilities are available through API and visible in the Blazor document workflow.
 - Document analysis responses and the Blazor workflow show parser name, chunk count and parser detail.
 - PDF analysis reports that scanned PDFs need OCR when no extractable text is available.

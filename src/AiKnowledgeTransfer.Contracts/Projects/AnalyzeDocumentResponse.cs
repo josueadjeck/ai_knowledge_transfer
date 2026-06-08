@@ -6,4 +6,5 @@ public sealed record AnalyzeDocumentResponse(
     int ChunkCount,
     string ParserName,
     string Detail,
+    IReadOnlyCollection<DocumentChunkQualitySummaryResponse> QualitySummary,
     IReadOnlyCollection<DocumentChunkResponse> Chunks);

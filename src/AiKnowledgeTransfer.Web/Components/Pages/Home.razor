@@ -153,6 +153,10 @@
                     <strong>@_lastAnalysis.ChunkCount</strong>
                 </div>
                 <div class="span-2">
+                    <span>Qualitaet</span>
+                    <strong>@AnalysisQualitySummary(_lastAnalysis)</strong>
+                </div>
+                <div class="span-2">
                     <span>Hinweis</span>
                     <strong>@AnalysisDetail(_lastAnalysis)</strong>
                 </div>
@@ -1532,7 +1536,7 @@
     {
         return analysis is null
             ? "Keine Analyse erzeugt."
-            : $"{analysis.ChunkCount} Chunks via {analysis.ParserName}";
+            : $"{analysis.ChunkCount} Chunks via {analysis.ParserName} | {AnalysisQualitySummary(analysis)}";
     }
 
     private static string AnalysisDetail(AnalyzeDocumentResponse analysis)
@@ -1540,6 +1544,13 @@
         return string.IsNullOrWhiteSpace(analysis.Detail)
             ? "Keine weiteren Parser-Details."
             : analysis.Detail;
+    }
+
+    private static string AnalysisQualitySummary(AnalyzeDocumentResponse analysis)
+    {
+        return analysis.QualitySummary.Count == 0
+            ? "Keine Qualitaetsdaten"
+            : string.Join(", ", analysis.QualitySummary.Select(item => $"{item.QualityStatus}: {item.Count}"));
     }
 
     private static string FormatParserFormats(DocumentParserCapabilityResponse parser)

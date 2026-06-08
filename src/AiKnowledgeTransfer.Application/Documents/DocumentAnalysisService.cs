@@ -54,6 +54,11 @@ public sealed class DocumentAnalysisService(
             document.Chunks.Count,
             parsedDocument.ParserName,
             parsedDocument.Detail,
+            document.Chunks
+                .GroupBy(chunk => chunk.QualityStatus, StringComparer.Ordinal)
+                .OrderBy(group => group.Key, StringComparer.Ordinal)
+                .Select(group => new DocumentChunkQualitySummaryResponse(group.Key, group.Count()))
+                .ToArray(),
             document.Chunks.Select(chunk => ProjectMapper.ToResponse(document.Id, chunk)).ToArray());
     }
 

@@ -341,6 +341,7 @@ public sealed class RoadmapServiceTests
         Assert.All(analysis.Chunks, chunk => Assert.Equal(upload.Document.Id, chunk.DocumentId));
         Assert.All(analysis.Chunks, chunk => Assert.Contains("Plain text body", chunk.SourceReference, StringComparison.Ordinal));
         Assert.All(analysis.Chunks, chunk => Assert.Contains("Text", chunk.QualityStatus, StringComparison.Ordinal));
+        Assert.Contains(analysis.QualitySummary, quality => quality.QualityStatus == "UsableText");
         Assert.Contains(analysis.Chunks, chunk => chunk.Text.Contains("Deployment", StringComparison.Ordinal));
     }
 

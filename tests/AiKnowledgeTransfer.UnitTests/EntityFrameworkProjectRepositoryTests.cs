@@ -142,7 +142,10 @@ public sealed class EntityFrameworkProjectRepositoryTests
                 CancellationToken.None);
 
             Assert.NotNull(upload);
-            await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+            var analysis = await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+            Assert.NotNull(analysis);
+            Assert.Contains(analysis.QualitySummary, quality => quality.QualityStatus == "UsableText" && quality.Count == 1);
         }
 
         await using (var readContext = new KnowledgeTransferDbContext(options))

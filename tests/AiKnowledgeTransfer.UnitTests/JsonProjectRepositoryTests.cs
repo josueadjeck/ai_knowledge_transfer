@@ -92,7 +92,10 @@ public sealed class JsonProjectRepositoryTests
             CancellationToken.None);
 
         Assert.NotNull(upload);
-        await analysisService.AnalyzeAsync(created.Id, upload.Document.Id, CancellationToken.None);
+        var analysis = await analysisService.AnalyzeAsync(created.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(analysis);
+        Assert.Contains(analysis.QualitySummary, quality => quality.QualityStatus == "UsableText" && quality.Count == 1);
 
         var reloadedRepository = new JsonProjectRepository(storePath);
         var reloaded = await reloadedRepository.GetAsync(created.Id, CancellationToken.None);
