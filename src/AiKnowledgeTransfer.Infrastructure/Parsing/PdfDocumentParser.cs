@@ -2,6 +2,7 @@ namespace AiKnowledgeTransfer.Infrastructure.Parsing;
 
 using System.Text;
 using AiKnowledgeTransfer.Application.Abstractions;
+using UglyToad.PdfPig.Core;
 using UglyToad.PdfPig;
 
 public sealed class PdfDocumentParser : IDocumentParser
@@ -22,16 +23,19 @@ public sealed class PdfDocumentParser : IDocumentParser
         var chunks = DocumentChunker.SplitIntoChunks(text);
         if (chunks.Count == 0)
         {
-            throw new InvalidOperationException("PDF did not contain extractable text.");
+            throw new InvalidOperationException("PDF did not contain extractable text. Scanned PDFs need OCR before analysis.");
         }
 
-        return Task.FromResult(new ParsedDocument(chunks));
+        return Task.FromResult(new ParsedDocument(
+            chunks,
+            nameof(PdfDocumentParser),
+            $"PDF text parser created {chunks.Count} chunks. Scanned PDFs still require OCR."));
     }
 
     private static string ExtractText(Stream content, CancellationToken cancellationToken)
     {
         var builder = new StringBuilder();
-        using var pdf = PdfDocument.Open(content);
+        using var pdf = OpenPdf(content);
 
         foreach (var page in pdf.GetPages())
         {
@@ -44,5 +48,17 @@ public sealed class PdfDocumentParser : IDocumentParser
         }
 
         return builder.ToString();
+    }
+
+    private static PdfDocument OpenPdf(Stream content)
+    {
+        try
+        {
+            return PdfDocument.Open(content);
+        }
+        catch (PdfDocumentFormatException exception)
+        {
+            throw new InvalidOperationException("PDF could not be parsed. Ensure the file is valid; scanned PDFs need OCR before analysis.", exception);
+        }
     }
 }

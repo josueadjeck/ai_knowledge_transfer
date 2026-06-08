@@ -28,7 +28,10 @@ public sealed class WordDocumentParser : IDocumentParser
             throw new InvalidOperationException("Word document did not contain extractable text.");
         }
 
-        return Task.FromResult(new ParsedDocument(chunks));
+        return Task.FromResult(new ParsedDocument(
+            chunks,
+            nameof(WordDocumentParser),
+            $"Word parser created {chunks.Count} chunks."));
     }
 
     private static string ExtractText(Stream content, CancellationToken cancellationToken)

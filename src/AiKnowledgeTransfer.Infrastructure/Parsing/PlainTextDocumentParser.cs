@@ -26,6 +26,9 @@ public sealed class PlainTextDocumentParser : IDocumentParser
         var text = await reader.ReadToEndAsync(cancellationToken);
         var chunks = DocumentChunker.SplitIntoChunks(text);
 
-        return new ParsedDocument(chunks);
+        return new ParsedDocument(
+            chunks,
+            nameof(PlainTextDocumentParser),
+            $"Text parser created {chunks.Count} chunks.");
     }
 }

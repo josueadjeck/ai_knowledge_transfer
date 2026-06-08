@@ -126,6 +126,23 @@
             <button @onclick="AnalyzeLatestDocumentAsync" disabled="@(!CanAnalyze)">Analysieren</button>
             <button @onclick="ExtractKnowledgeAsync" disabled="@(!CanExtract)">Wissen extrahieren</button>
         </div>
+        @if (_lastAnalysis is not null)
+        {
+            <div class="analysis-summary">
+                <div>
+                    <span>Parser</span>
+                    <strong>@_lastAnalysis.ParserName</strong>
+                </div>
+                <div>
+                    <span>Chunks</span>
+                    <strong>@_lastAnalysis.ChunkCount</strong>
+                </div>
+                <div class="span-2">
+                    <span>Hinweis</span>
+                    <strong>@AnalysisDetail(_lastAnalysis)</strong>
+                </div>
+            </div>
+        }
         @if (_lastExtraction is not null)
         {
             <div class="extraction-summary">
@@ -742,6 +759,7 @@
     private TraceabilityMatrixResponse? _traceability;
     private ComplianceMatrixResponse? _compliance;
     private ExportProjectMarkdownResponse? _export;
+    private AnalyzeDocumentResponse? _lastAnalysis;
     private ExtractKnowledgeResponse? _lastExtraction;
     private KnowledgeReviewSummaryResponse? _reviewSummary;
     private HealthResponse? _health;
@@ -896,9 +914,10 @@
 
         await RunSafelyAsync("Dokument analysieren", async () =>
         {
-            await Analysis.AnalyzeAsync(_selectedProject.Id, document.Id, CancellationToken.None);
+            var analysis = await Analysis.AnalyzeAsync(_selectedProject.Id, document.Id, CancellationToken.None);
             await LoadSelectedProjectAsync();
-            SetStatus("Analyse abgeschlossen", document.FileName);
+            _lastAnalysis = analysis;
+            SetStatus("Analyse abgeschlossen", AnalysisStatusDetail(analysis));
         });
     }
 
@@ -1250,6 +1269,7 @@
         _traceability = null;
         _compliance = null;
         _export = null;
+        _lastAnalysis = null;
         _lastExtraction = null;
         _auditEvents = [];
         ResetKnowledgeFiltersIfNeeded();
@@ -1489,6 +1509,20 @@
         return string.IsNullOrWhiteSpace(extraction.Detail)
             ? "Keine weiteren Provider-Details."
             : extraction.Detail;
+    }
+
+    private static string AnalysisStatusDetail(AnalyzeDocumentResponse? analysis)
+    {
+        return analysis is null
+            ? "Keine Analyse erzeugt."
+            : $"{analysis.ChunkCount} Chunks via {analysis.ParserName}";
+    }
+
+    private static string AnalysisDetail(AnalyzeDocumentResponse analysis)
+    {
+        return string.IsNullOrWhiteSpace(analysis.Detail)
+            ? "Keine weiteren Parser-Details."
+            : analysis.Detail;
     }
 
     private static string SummaryText(IReadOnlyCollection<KnowledgeReviewSummaryGroupResponse> groups)

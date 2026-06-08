@@ -29,6 +29,8 @@ public sealed class WordDocumentParserTests
             stream,
             CancellationToken.None);
 
+        Assert.Equal(nameof(WordDocumentParser), parsed.ParserName);
+        Assert.Contains("Word parser created", parsed.Detail, StringComparison.Ordinal);
         Assert.Equal(2, parsed.Chunks.Count);
         Assert.Contains(parsed.Chunks, chunk => chunk.Text == "System overview");
         Assert.Contains(parsed.Chunks, chunk => chunk.Text.Contains("Deployment", StringComparison.Ordinal));

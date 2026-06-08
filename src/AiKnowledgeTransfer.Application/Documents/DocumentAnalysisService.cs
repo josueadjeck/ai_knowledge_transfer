@@ -45,13 +45,15 @@ public sealed class DocumentAnalysisService(
 
         await projects.SaveChangesAsync(cancellationToken);
         await _auditLog.AppendAsync(
-            AuditEvent.Create(project.Id, "DocumentAnalyzed", "system", "Document", document.Id, $"Document '{document.FileName}' was analyzed into {document.Chunks.Count} chunks."),
+            AuditEvent.Create(project.Id, "DocumentAnalyzed", "system", "Document", document.Id, $"Document '{document.FileName}' was analyzed by {parsedDocument.ParserName} into {document.Chunks.Count} chunks."),
             cancellationToken);
 
         return new AnalyzeDocumentResponse(
             document.Id,
             document.Status.ToString(),
             document.Chunks.Count,
+            parsedDocument.ParserName,
+            parsedDocument.Detail,
             document.Chunks.Select(chunk => ProjectMapper.ToResponse(document.Id, chunk)).ToArray());
     }
 
