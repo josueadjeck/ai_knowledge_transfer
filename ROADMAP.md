@@ -167,6 +167,7 @@ Aktueller Implementierungsstand:
 - SQLite/EF-Audit-Log ist gestartet: `IAuditLog` kann Audit Events relational speichern, filtern und laden; JSON bleibt Default.
 - Datenbankinitialisierung ist gestartet: API und Web legen SQLite-Datei und Schema im Database-Modus beim Start kontrolliert an.
 - Health-Persistenzstatus ist erweitert: `/health` zeigt JSON-vs-Database-Modus, DB-Provider und Connection-String-Konfigurationsstatus.
+- Security-Gates sind gestartet: GitHub Actions prueft Restore, Release-Build, Tests, NuGet-Vulnerabilities und einfache Secret-Muster auf `main` und Pull Requests.
 
 ### Phase 0: Produktklaerung
 

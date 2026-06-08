@@ -55,6 +55,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Blazor operations panel shows health components for storage, persistence and AI provider status.
 - JSON persistence backup and restore endpoints for local MVP operation.
 - Backup preview before restore, including manifest, entries, warnings and upload counts.
+- GitHub Actions CI for restore, build, tests, vulnerability checks and basic secret scanning.
 - Unit and architecture tests.
 
 ## Run locally
@@ -134,6 +135,8 @@ When database mode is active, API and Web initialize the SQLite schema on startu
 dotnet build AiKnowledgeTransfer.slnx
 dotnet test AiKnowledgeTransfer.slnx
 ```
+
+The GitHub Actions workflow runs the same build and test gates on `main` and pull requests. It also checks NuGet package vulnerabilities and common secret patterns. See `docs/operations/security-gates.md`.
 
 ## AI provider configuration
 
