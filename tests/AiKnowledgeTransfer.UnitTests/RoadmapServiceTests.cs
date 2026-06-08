@@ -122,6 +122,62 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task OnboardingReadiness_reports_not_ready_without_verified_knowledge_or_roadmap()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storage = new LocalFileStorage(Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N")));
+        var projectService = new ProjectService(repository, storage);
+        var readinessService = new OnboardingReadinessService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Readiness Project", "Onboarding readiness test", "Engineering"),
+            CancellationToken.None);
+
+        var readiness = await readinessService.GetAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(readiness);
+        Assert.False(readiness.CanStartOnboarding);
+        Assert.Equal("NotReady", readiness.Status);
+        Assert.Contains(readiness.Recommendations, recommendation => recommendation.Contains("Roadmap", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task OnboardingReadiness_reports_ready_for_pilot_with_verified_knowledge_and_roadmap()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storage = new LocalFileStorage(Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N")));
+        var projectService = new ProjectService(repository, storage);
+        var reviewService = new KnowledgeReviewService(repository);
+        var roadmapService = new RoadmapService(repository);
+        var readinessService = new OnboardingReadinessService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Ready Project", "Onboarding readiness test", "Engineering"),
+            CancellationToken.None);
+        var details = await projectService.GetAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(details);
+        await reviewService.ApproveAsync(
+            project.Id,
+            details.KnowledgeItems.First().Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Ready for pilot."),
+            CancellationToken.None);
+        await roadmapService.GenerateAsync(
+            project.Id,
+            new GenerateRoadmapRequest("Support Engineer", 2),
+            CancellationToken.None);
+
+        var readiness = await readinessService.GetAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(readiness);
+        Assert.True(readiness.CanStartOnboarding);
+        Assert.Equal("ReadyForPilot", readiness.Status);
+        Assert.Equal(1, readiness.FinalKnowledgeCount);
+        Assert.Equal(1, readiness.RoadmapCount);
+        Assert.Equal("Support Engineer", readiness.LatestRoadmapTargetRole);
+    }
+
+    [Fact]
     public async Task KnowledgeReviewService_updates_status_and_review_metadata()
     {
         var repository = new InMemoryProjectRepository();

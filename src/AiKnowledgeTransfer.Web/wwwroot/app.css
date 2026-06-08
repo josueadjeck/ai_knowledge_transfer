@@ -415,6 +415,49 @@ button:disabled {
     overflow-wrap: anywhere;
 }
 
+.readiness-summary {
+    display: grid;
+    gap: .55rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.readiness-summary div {
+    background: #f8fafc;
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .65rem;
+}
+
+.readiness-summary span,
+.readiness-summary strong {
+    display: block;
+}
+
+.readiness-summary span {
+    color: #617080;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.readiness-summary strong {
+    color: #1f2933;
+    font-size: .88rem;
+    margin-top: .15rem;
+    overflow-wrap: anywhere;
+}
+
+.readiness-notes {
+    color: #2f3b49;
+    font-size: .85rem;
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.readiness-notes li + li {
+    margin-top: .25rem;
+}
+
 .knowledge-filters,
 .audit-filters {
     align-items: end;
@@ -993,6 +1036,7 @@ button:disabled {
     .analysis-summary,
     .extraction-summary,
     .review-summary,
+    .readiness-summary,
     .document-card-header,
     .document-meta,
     .review-inputs,

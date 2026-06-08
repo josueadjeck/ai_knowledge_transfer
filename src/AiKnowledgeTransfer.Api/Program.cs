@@ -292,6 +292,15 @@ projects.MapPost("/{projectId:guid}/roadmaps", async Task<IResult> (
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Created($"/api/projects/{projectId}/roadmaps/{result.Id}", result);
 });
 
+projects.MapGet("/{projectId:guid}/onboarding-readiness", async Task<IResult> (
+    Guid projectId,
+    OnboardingReadinessService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.GetAsync(projectId, cancellationToken);
+    return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
+});
+
 projects.MapGet("/{projectId:guid}/exports/markdown", async Task<IResult> (
     Guid projectId,
     MarkdownExportService service,

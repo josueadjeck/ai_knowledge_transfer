@@ -30,6 +30,7 @@
 @inject KnowledgeReviewService Review
 @inject KnowledgeReviewSummaryService ReviewSummary
 @inject RoadmapService Roadmaps
+@inject OnboardingReadinessService OnboardingReadiness
 @inject MarkdownExportService MarkdownExports
 @inject TraceabilityService Traceability
 @inject ComplianceMatrixService Compliance
@@ -394,6 +395,37 @@
             </label>
         </div>
         <button class="primary-action" @onclick="GenerateRoadmapAsync" disabled="@(_selectedProject is null || !Can(Permission.GenerateRoadmap))">Roadmap erzeugen</button>
+
+        @if (_onboardingReadiness is not null)
+        {
+            <div class="readiness-summary">
+                <div>
+                    <span>Status</span>
+                    <strong>@_onboardingReadiness.Status</strong>
+                </div>
+                <div>
+                    <span>Start</span>
+                    <strong>@(_onboardingReadiness.CanStartOnboarding ? "Pilot moeglich" : "Noch nicht")</strong>
+                </div>
+                <div>
+                    <span>Finales Wissen</span>
+                    <strong>@_onboardingReadiness.FinalKnowledgeCount</strong>
+                </div>
+                <div>
+                    <span>Review-Risiken</span>
+                    <strong>@_onboardingReadiness.ReviewRiskCount</strong>
+                </div>
+            </div>
+            @if (_onboardingReadiness.Recommendations.Count > 0)
+            {
+                <ul class="readiness-notes">
+                    @foreach (var recommendation in _onboardingReadiness.Recommendations.Take(3))
+                    {
+                        <li>@recommendation</li>
+                    }
+                </ul>
+            }
+        }
 
         @if (_selectedProject?.Roadmaps.Count > 0)
         {
@@ -781,6 +813,7 @@
     private AnalyzeDocumentResponse? _lastAnalysis;
     private ExtractKnowledgeResponse? _lastExtraction;
     private KnowledgeReviewSummaryResponse? _reviewSummary;
+    private OnboardingReadinessResponse? _onboardingReadiness;
     private HealthResponse? _health;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
@@ -1287,6 +1320,9 @@
         _reviewSummary = _selectedProjectId == Guid.Empty
             ? null
             : await ReviewSummary.GetAsync(_selectedProjectId, CancellationToken.None);
+        _onboardingReadiness = _selectedProjectId == Guid.Empty
+            ? null
+            : await OnboardingReadiness.GetAsync(_selectedProjectId, CancellationToken.None);
         _traceability = null;
         _compliance = null;
         _export = null;
