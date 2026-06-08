@@ -350,6 +350,11 @@ button:disabled {
     padding-bottom: .55rem;
 }
 
+.bulk-review-actions {
+    border-bottom: 1px solid #e1e6ed;
+    padding-bottom: .8rem;
+}
+
 .knowledge-row {
     align-items: start;
     display: grid;

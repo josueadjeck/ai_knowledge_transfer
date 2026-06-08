@@ -235,6 +235,11 @@
                 </label>
                 <span>@FilteredKnowledgeItems.Count() von @_selectedProject.KnowledgeItems.Count Elementen</span>
             </div>
+            <div class="button-row bulk-review-actions">
+                <button @onclick="SubmitFilteredReviewAsync" disabled="@(!CanBulkSubmitReview)">Gefilterte in Review</button>
+                <button @onclick="ApproveFilteredAsync" disabled="@(!CanBulkApprove)">Gefilterte freigeben</button>
+                <button @onclick="RejectFilteredAsync" disabled="@(!CanBulkReject)">Gefilterte ablehnen</button>
+            </div>
             <div class="knowledge-table">
                 @foreach (var item in FilteredKnowledgeItems)
                 {
@@ -668,6 +673,14 @@
     private bool CanPreviewBackup => CanOperateBackups
         && !string.IsNullOrWhiteSpace(_selectedBackupFileName);
 
+    private bool HasFilteredKnowledgeItems => FilteredKnowledgeItems.Any();
+
+    private bool CanBulkSubmitReview => Can(Permission.SubmitKnowledgeReview) && HasFilteredKnowledgeItems;
+
+    private bool CanBulkApprove => Can(Permission.ApproveKnowledge) && HasFilteredKnowledgeItems;
+
+    private bool CanBulkReject => Can(Permission.RejectKnowledge) && HasFilteredKnowledgeItems;
+
     private IEnumerable<string> KnowledgeTypes => _selectedProject?.KnowledgeItems
         .Select(item => item.Type)
         .Distinct(StringComparer.Ordinal)
@@ -877,6 +890,86 @@
             await Review.RejectAsync(_selectedProjectId, knowledgeItemId, request, CancellationToken.None);
             await LoadSelectedProjectAsync();
             SetStatus("Wissen abgelehnt", knowledgeItemId.ToString());
+        });
+    }
+
+    private async Task SubmitFilteredReviewAsync()
+    {
+        if (!Can(Permission.SubmitKnowledgeReview))
+        {
+            SetStatus("Keine Berechtigung", "Diese Rolle darf keinen Review starten.", isError: true);
+            return;
+        }
+
+        var request = BuildReviewRequest("NeedsClarification");
+        if (request is null)
+        {
+            return;
+        }
+
+        await RunBulkReviewAsync(
+            "Gefilterte in Review setzen",
+            ids => Review.SubmitManyForReviewAsync(_selectedProjectId, ids, request, CancellationToken.None),
+            "Gefilterte in Review");
+    }
+
+    private async Task ApproveFilteredAsync()
+    {
+        if (!Can(Permission.ApproveKnowledge))
+        {
+            SetStatus("Keine Berechtigung", "Diese Rolle darf kein Wissen freigeben.", isError: true);
+            return;
+        }
+
+        var request = BuildReviewRequest("Verified");
+        if (request is null)
+        {
+            return;
+        }
+
+        await RunBulkReviewAsync(
+            "Gefilterte freigeben",
+            ids => Review.ApproveManyAsync(_selectedProjectId, ids, request, CancellationToken.None),
+            "Gefilterte freigegeben");
+    }
+
+    private async Task RejectFilteredAsync()
+    {
+        if (!Can(Permission.RejectKnowledge))
+        {
+            SetStatus("Keine Berechtigung", "Diese Rolle darf kein Wissen ablehnen.", isError: true);
+            return;
+        }
+
+        var request = BuildReviewRequest("RejectedSource");
+        if (request is null)
+        {
+            return;
+        }
+
+        await RunBulkReviewAsync(
+            "Gefilterte ablehnen",
+            ids => Review.RejectManyAsync(_selectedProjectId, ids, request, CancellationToken.None),
+            "Gefilterte abgelehnt");
+    }
+
+    private async Task RunBulkReviewAsync(
+        string action,
+        Func<IReadOnlyCollection<Guid>, Task<IReadOnlyCollection<KnowledgeItemResponse>>> execute,
+        string status)
+    {
+        var ids = FilteredKnowledgeItems.Select(item => item.Id).ToArray();
+        if (ids.Length == 0)
+        {
+            SetStatus("Keine Wissenselemente", "Der aktuelle Filter enthaelt keine Elemente.", isError: true);
+            return;
+        }
+
+        await RunSafelyAsync(action, async () =>
+        {
+            var updated = await execute(ids);
+            await LoadSelectedProjectAsync();
+            SetStatus(status, $"{updated.Count} Elemente");
         });
     }
 

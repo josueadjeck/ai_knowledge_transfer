@@ -119,6 +119,7 @@ Aktueller Implementierungsstand:
 - Phase 4 ist erweitert: Wissenselemente speichern Herkunfts- und Qualitaetsmetadaten wie Source Chunk, Provider, Modell, Fallback und Review-Qualitaet.
 - Phase 6 ist erweitert: Die Blazor-UI kann Knowledge-Review-Elemente nach Typ und Review-Status filtern.
 - Phase 6 ist erweitert: Die Blazor-UI kann Knowledge-Review-Elemente auch nach Qualitaetsstatus filtern.
+- Phase 6 ist erweitert: Gefilterte Knowledge-Review-Elemente koennen gesammelt in Review gesetzt, freigegeben oder abgelehnt werden.
 - Phase 5 ist gestartet: Roadmaps verwenden freigegebenes Wissen bevorzugt und markieren nicht freigegebene Wissenselemente als Review-Hinweise.
 - Phase 5 ist erweitert: Die Blazor-UI zeigt Roadmap-Wochen mit Lernzielen, Uebungen, Abschlusskriterien und Review-Hinweisen als Vorschau.
 - Phase 5 ist erweitert: Roadmaps verwenden nur freigegebenes und als Verified markiertes Wissen als finale Lerninhalte; andere Qualitaetsstatus bleiben Review-Risiken.

@@ -179,6 +179,55 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task KnowledgeReviewService_bulk_approves_items_with_verified_quality()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+        var reviewService = new KnowledgeReviewService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Bulk Review Project", "Bulk review test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("""
+            CTU communication is unknown.
+
+            Deployment workflow must be reviewed by senior engineers.
+            """u8.ToArray());
+
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("bulk-review.md", "text/markdown", "Manual upload", content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        var itemIds = extraction.KnowledgeItems.Take(2).Select(item => item.Id).ToArray();
+
+        var updated = await reviewService.ApproveManyAsync(
+            project.Id,
+            itemIds,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Bulk confirmed."),
+            CancellationToken.None);
+
+        Assert.Equal(itemIds.Length, updated.Count);
+        Assert.All(updated, item =>
+        {
+            Assert.Equal("Approved", item.ReviewStatus);
+            Assert.Equal("Verified", item.ExtractionQuality);
+            Assert.Equal("Senior Engineer", item.ReviewedBy);
+        });
+    }
+
+    [Fact]
     public async Task AnalyzeAsync_parses_uploaded_text_document_into_chunks()
     {
         var repository = new InMemoryProjectRepository();

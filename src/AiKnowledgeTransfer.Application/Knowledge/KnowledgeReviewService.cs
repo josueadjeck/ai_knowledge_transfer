@@ -30,6 +30,25 @@ public sealed class KnowledgeReviewService(
             cancellationToken);
     }
 
+    public Task<IReadOnlyCollection<KnowledgeItemResponse>> SubmitManyForReviewAsync(
+        Guid projectId,
+        IReadOnlyCollection<Guid> knowledgeItemIds,
+        ReviewKnowledgeItemRequest request,
+        CancellationToken cancellationToken)
+    {
+        return UpdateManyReviewStatusesAsync(
+            projectId,
+            knowledgeItemIds,
+            item =>
+            {
+                item.SubmitForReview(request.Reviewer, request.Comment);
+                ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.NeedsClarification);
+            },
+            "KnowledgeReviewBulkSubmitted",
+            request.Reviewer,
+            cancellationToken);
+    }
+
     public Task<KnowledgeItemResponse?> ApproveAsync(
         Guid projectId,
         Guid knowledgeItemId,
@@ -49,6 +68,25 @@ public sealed class KnowledgeReviewService(
             cancellationToken);
     }
 
+    public Task<IReadOnlyCollection<KnowledgeItemResponse>> ApproveManyAsync(
+        Guid projectId,
+        IReadOnlyCollection<Guid> knowledgeItemIds,
+        ReviewKnowledgeItemRequest request,
+        CancellationToken cancellationToken)
+    {
+        return UpdateManyReviewStatusesAsync(
+            projectId,
+            knowledgeItemIds,
+            item =>
+            {
+                item.Approve(request.Reviewer, request.Comment);
+                ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.Verified);
+            },
+            "KnowledgeBulkApproved",
+            request.Reviewer,
+            cancellationToken);
+    }
+
     public Task<KnowledgeItemResponse?> RejectAsync(
         Guid projectId,
         Guid knowledgeItemId,
@@ -64,6 +102,25 @@ public sealed class KnowledgeReviewService(
                 ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.RejectedSource);
             },
             "KnowledgeRejected",
+            request.Reviewer,
+            cancellationToken);
+    }
+
+    public Task<IReadOnlyCollection<KnowledgeItemResponse>> RejectManyAsync(
+        Guid projectId,
+        IReadOnlyCollection<Guid> knowledgeItemIds,
+        ReviewKnowledgeItemRequest request,
+        CancellationToken cancellationToken)
+    {
+        return UpdateManyReviewStatusesAsync(
+            projectId,
+            knowledgeItemIds,
+            item =>
+            {
+                item.Reject(request.Reviewer, request.Comment);
+                ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.RejectedSource);
+            },
+            "KnowledgeBulkRejected",
             request.Reviewer,
             cancellationToken);
     }
@@ -90,6 +147,43 @@ public sealed class KnowledgeReviewService(
             cancellationToken);
 
         return ProjectMapper.ToResponse(item);
+    }
+
+    private async Task<IReadOnlyCollection<KnowledgeItemResponse>> UpdateManyReviewStatusesAsync(
+        Guid projectId,
+        IReadOnlyCollection<Guid> knowledgeItemIds,
+        Action<KnowledgeItem> update,
+        string action,
+        string actor,
+        CancellationToken cancellationToken)
+    {
+        if (knowledgeItemIds.Count == 0)
+        {
+            return [];
+        }
+
+        var project = await projects.GetAsync(projectId, cancellationToken);
+        if (project is null)
+        {
+            return [];
+        }
+
+        var requestedIds = knowledgeItemIds.ToHashSet();
+        var items = project.KnowledgeItems
+            .Where(item => requestedIds.Contains(item.Id))
+            .ToArray();
+
+        foreach (var item in items)
+        {
+            update(item);
+        }
+
+        await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, action, actor, "Project", project.Id, $"{items.Length} knowledge items were changed by bulk review action."),
+            cancellationToken);
+
+        return items.Select(ProjectMapper.ToResponse).ToArray();
     }
 
     private static void ApplyQualityStatus(KnowledgeItem item, string? qualityStatus, string defaultQualityStatus)
