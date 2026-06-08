@@ -74,6 +74,7 @@ public sealed class EntityFrameworkProjectRepository : IProjectRepository
             .Include(project => project.Documents)
                 .ThenInclude(document => document.Chunks)
             .Include(project => project.KnowledgeItems)
+                .ThenInclude(item => item.ReviewHistory)
             .Include(project => project.Roadmaps)
                 .ThenInclude(roadmap => roadmap.Weeks)
                     .ThenInclude(week => week.TextItems);
@@ -142,7 +143,22 @@ public sealed class EntityFrameworkProjectRepository : IProjectRepository
             CreatedAt = item.CreatedAt,
             ReviewedBy = item.ReviewedBy,
             ReviewComment = item.ReviewComment,
-            ReviewedAt = item.ReviewedAt
+            ReviewedAt = item.ReviewedAt,
+            ReviewHistory = item.ReviewHistory.Select(ToRecord).ToList()
+        };
+    }
+
+    private static KnowledgeReviewHistoryRecord ToRecord(KnowledgeReviewHistoryEntry history)
+    {
+        return new KnowledgeReviewHistoryRecord
+        {
+            Id = history.Id,
+            Action = history.Action,
+            ReviewStatus = history.ReviewStatus.ToString(),
+            QualityStatus = history.QualityStatus,
+            Reviewer = history.Reviewer,
+            Comment = history.Comment,
+            CreatedAt = history.CreatedAt
         };
     }
 
@@ -243,7 +259,20 @@ public sealed class EntityFrameworkProjectRepository : IProjectRepository
             record.CreatedAt,
             record.ReviewedBy,
             record.ReviewComment,
-            record.ReviewedAt);
+            record.ReviewedAt,
+            record.ReviewHistory.OrderBy(history => history.CreatedAt).Select(ToDomain));
+    }
+
+    private static KnowledgeReviewHistoryEntry ToDomain(KnowledgeReviewHistoryRecord record)
+    {
+        return new KnowledgeReviewHistoryEntry(
+            record.Id,
+            record.Action,
+            Enum.Parse<KnowledgeReviewStatus>(record.ReviewStatus),
+            record.QualityStatus,
+            record.Reviewer,
+            record.Comment,
+            record.CreatedAt);
     }
 
     private static OnboardingRoadmap ToDomain(RoadmapRecord record)

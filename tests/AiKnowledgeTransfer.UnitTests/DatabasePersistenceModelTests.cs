@@ -20,6 +20,7 @@ public sealed class DatabasePersistenceModelTests
         Assert.NotNull(context.Model.FindEntityType(typeof(ProjectRecord)));
         Assert.NotNull(context.Model.FindEntityType(typeof(DocumentRecord)));
         Assert.NotNull(context.Model.FindEntityType(typeof(KnowledgeItemRecord)));
+        Assert.NotNull(context.Model.FindEntityType(typeof(KnowledgeReviewHistoryRecord)));
         Assert.NotNull(context.Model.FindEntityType(typeof(RoadmapRecord)));
         Assert.NotNull(context.Model.FindEntityType(typeof(AuditEventRecord)));
     }

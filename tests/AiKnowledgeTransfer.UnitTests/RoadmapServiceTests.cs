@@ -176,6 +176,15 @@ public sealed class RoadmapServiceTests
         Assert.Equal("Confirmed against source.", approved.ReviewComment);
         Assert.Equal("Verified", approved.ExtractionQuality);
         Assert.NotNull(approved.ReviewedAt);
+        Assert.Equal(2, approved.ReviewHistory.Count);
+        Assert.Contains(approved.ReviewHistory, history =>
+            history.Action == "SubmitForReview"
+            && history.ReviewStatus == "InReview"
+            && history.QualityStatus == "NeedsClarification");
+        Assert.Contains(approved.ReviewHistory, history =>
+            history.Action == "Approve"
+            && history.ReviewStatus == "Approved"
+            && history.QualityStatus == "Verified");
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 namespace AiKnowledgeTransfer.UnitTests;
 
 using AiKnowledgeTransfer.Application.Projects;
+using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Infrastructure.Persistence;
 using AiKnowledgeTransfer.Infrastructure.Storage;
@@ -32,5 +33,39 @@ public sealed class JsonProjectRepositoryTests
         Assert.Equal("Persistent Project", reloaded.Name);
         Assert.Single(reloaded.Documents);
         Assert.True(File.Exists(storePath));
+    }
+
+    [Fact]
+    public async Task SaveChangesAsync_persists_knowledge_review_history()
+    {
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storePath = Path.Combine(storageRoot, "projects.json");
+        var repository = new JsonProjectRepository(storePath);
+        var storage = new LocalFileStorage(Path.Combine(storageRoot, "uploads"));
+        var projectService = new ProjectService(repository, storage);
+        var reviewService = new KnowledgeReviewService(repository);
+
+        var created = await projectService.CreateAsync(
+            new CreateProjectRequest("Review History Project", "Persistence test", "Engineering"),
+            CancellationToken.None);
+        var details = await projectService.GetAsync(created.Id, CancellationToken.None);
+
+        Assert.NotNull(details);
+        var itemId = details.KnowledgeItems.First().Id;
+        await reviewService.ApproveAsync(
+            created.Id,
+            itemId,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Persisted review."),
+            CancellationToken.None);
+
+        var reloadedRepository = new JsonProjectRepository(storePath);
+        var reloaded = await reloadedRepository.GetAsync(created.Id, CancellationToken.None);
+
+        Assert.NotNull(reloaded);
+        var item = reloaded.KnowledgeItems.Single(candidate => candidate.Id == itemId);
+        var history = Assert.Single(item.ReviewHistory);
+        Assert.Equal("Approve", history.Action);
+        Assert.Equal("Senior Engineer", history.Reviewer);
+        Assert.Equal("Verified", history.QualityStatus);
     }
 }

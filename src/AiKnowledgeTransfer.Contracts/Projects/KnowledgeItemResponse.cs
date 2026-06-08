@@ -15,4 +15,5 @@ public sealed record KnowledgeItemResponse(
     string? ReviewedBy,
     string? ReviewComment,
     DateTimeOffset? ReviewedAt,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    IReadOnlyCollection<KnowledgeReviewHistoryResponse> ReviewHistory);

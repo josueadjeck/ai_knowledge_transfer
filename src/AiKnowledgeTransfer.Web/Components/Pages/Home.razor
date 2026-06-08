@@ -285,6 +285,23 @@
                                     }
                                 </div>
                             }
+                            @if (item.ReviewHistory.Count > 0)
+                            {
+                                <details class="review-history">
+                                    <summary>@item.ReviewHistory.Count Review-Eintraege</summary>
+                                    @foreach (var history in item.ReviewHistory.OrderByDescending(history => history.CreatedAt).Take(5))
+                                    {
+                                        <article>
+                                            <strong>@history.Action | @history.ReviewStatus | @history.QualityStatus</strong>
+                                            <span>@history.Reviewer | @history.CreatedAt.LocalDateTime:g</span>
+                                            @if (!string.IsNullOrWhiteSpace(history.Comment))
+                                            {
+                                                <p>@history.Comment</p>
+                                            }
+                                        </article>
+                                    }
+                                </details>
+                            }
                         </div>
                         <div class="button-row">
                             <button @onclick="() => SubmitReviewAsync(item.Id)" disabled="@(!Can(Permission.SubmitKnowledgeReview))">Review</button>

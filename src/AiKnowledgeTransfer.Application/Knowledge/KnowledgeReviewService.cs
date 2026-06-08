@@ -24,6 +24,7 @@ public sealed class KnowledgeReviewService(
             {
                 item.SubmitForReview(request.Reviewer, request.Comment);
                 ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.NeedsClarification);
+                item.RecordReviewHistory("SubmitForReview");
             },
             "KnowledgeReviewSubmitted",
             request.Reviewer,
@@ -43,6 +44,7 @@ public sealed class KnowledgeReviewService(
             {
                 item.SubmitForReview(request.Reviewer, request.Comment);
                 ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.NeedsClarification);
+                item.RecordReviewHistory("SubmitForReview");
             },
             "KnowledgeReviewBulkSubmitted",
             request.Reviewer,
@@ -62,6 +64,7 @@ public sealed class KnowledgeReviewService(
             {
                 item.Approve(request.Reviewer, request.Comment);
                 ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.Verified);
+                item.RecordReviewHistory("Approve");
             },
             "KnowledgeApproved",
             request.Reviewer,
@@ -81,6 +84,7 @@ public sealed class KnowledgeReviewService(
             {
                 item.Approve(request.Reviewer, request.Comment);
                 ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.Verified);
+                item.RecordReviewHistory("Approve");
             },
             "KnowledgeBulkApproved",
             request.Reviewer,
@@ -100,6 +104,7 @@ public sealed class KnowledgeReviewService(
             {
                 item.Reject(request.Reviewer, request.Comment);
                 ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.RejectedSource);
+                item.RecordReviewHistory("Reject");
             },
             "KnowledgeRejected",
             request.Reviewer,
@@ -119,6 +124,7 @@ public sealed class KnowledgeReviewService(
             {
                 item.Reject(request.Reviewer, request.Comment);
                 ApplyQualityStatus(item, request.QualityStatus, KnowledgeQualityPolicy.RejectedSource);
+                item.RecordReviewHistory("Reject");
             },
             "KnowledgeBulkRejected",
             request.Reviewer,

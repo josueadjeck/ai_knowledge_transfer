@@ -2,6 +2,8 @@ namespace AiKnowledgeTransfer.Domain.Knowledge;
 
 public sealed class KnowledgeItem
 {
+    private readonly List<KnowledgeReviewHistoryEntry> _reviewHistory = [];
+
     private KnowledgeItem(
         Guid id,
         KnowledgeItemType type,
@@ -17,7 +19,8 @@ public sealed class KnowledgeItem
         DateTimeOffset createdAt,
         string? reviewedBy,
         string? reviewComment,
-        DateTimeOffset? reviewedAt)
+        DateTimeOffset? reviewedAt,
+        IEnumerable<KnowledgeReviewHistoryEntry>? reviewHistory = null)
     {
         Id = id;
         Type = type;
@@ -34,6 +37,7 @@ public sealed class KnowledgeItem
         ReviewedBy = reviewedBy;
         ReviewComment = reviewComment;
         ReviewedAt = reviewedAt;
+        _reviewHistory.AddRange(reviewHistory ?? []);
     }
 
     public KnowledgeItem(
@@ -96,6 +100,8 @@ public sealed class KnowledgeItem
 
     public DateTimeOffset? ReviewedAt { get; private set; }
 
+    public IReadOnlyCollection<KnowledgeReviewHistoryEntry> ReviewHistory => _reviewHistory;
+
     public void SubmitForReview(string reviewer, string comment)
     {
         ReviewStatus = KnowledgeReviewStatus.InReview;
@@ -123,6 +129,21 @@ public sealed class KnowledgeItem
     public void UpdateExtractionQuality(string qualityStatus)
     {
         ExtractionQuality = RequireText(qualityStatus, nameof(qualityStatus));
+    }
+
+    public void RecordReviewHistory(string action)
+    {
+        if (string.IsNullOrWhiteSpace(ReviewedBy))
+        {
+            return;
+        }
+
+        _reviewHistory.Add(KnowledgeReviewHistoryEntry.Create(
+            action,
+            ReviewStatus,
+            ExtractionQuality,
+            ReviewedBy,
+            ReviewComment ?? string.Empty));
     }
 
     private static string RequireReviewer(string reviewer)
@@ -155,7 +176,8 @@ public sealed class KnowledgeItem
         DateTimeOffset createdAt,
         string? reviewedBy,
         string? reviewComment,
-        DateTimeOffset? reviewedAt)
+        DateTimeOffset? reviewedAt,
+        IEnumerable<KnowledgeReviewHistoryEntry>? reviewHistory = null)
     {
         return new KnowledgeItem(
             id,
@@ -172,6 +194,7 @@ public sealed class KnowledgeItem
             createdAt,
             reviewedBy,
             reviewComment,
-            reviewedAt);
+            reviewedAt,
+            reviewHistory);
     }
 }

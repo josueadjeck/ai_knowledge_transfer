@@ -435,6 +435,50 @@ button:disabled {
     margin: .35rem 0 0;
 }
 
+.review-history {
+    background: #ffffff;
+    border: 1px solid #e6ebf1;
+    border-radius: 6px;
+    margin-top: .55rem;
+    padding: .55rem;
+}
+
+.review-history summary {
+    color: #244f8f;
+    cursor: pointer;
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.review-history article {
+    border-top: 1px solid #edf1f5;
+    margin-top: .5rem;
+    padding-top: .5rem;
+}
+
+.review-history strong,
+.review-history span {
+    display: block;
+}
+
+.review-history strong {
+    color: #1f2933;
+    font-size: .86rem;
+}
+
+.review-history span {
+    color: #617080;
+    font-size: .78rem;
+    font-weight: 700;
+    margin-top: .15rem;
+}
+
+.review-history p {
+    color: #2f3b49;
+    font-size: .86rem;
+    margin: .3rem 0 0;
+}
+
 .review-inputs {
     border-top: 1px solid #e1e6ed;
     display: grid;

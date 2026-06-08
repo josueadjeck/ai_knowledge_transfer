@@ -137,7 +137,20 @@ public sealed class JsonProjectRepository : IProjectRepository
             item.ExtractionProvider,
             item.ExtractionModel,
             item.ExtractionUsedFallback,
-            item.ExtractionQuality);
+            item.ExtractionQuality,
+            item.ReviewHistory.Select(ToSnapshot).ToArray());
+    }
+
+    private static KnowledgeReviewHistorySnapshot ToSnapshot(KnowledgeReviewHistoryEntry history)
+    {
+        return new KnowledgeReviewHistorySnapshot(
+            history.Id,
+            history.Action,
+            history.ReviewStatus,
+            history.QualityStatus,
+            history.Reviewer,
+            history.Comment,
+            history.CreatedAt);
     }
 
     private static RoadmapSnapshot ToSnapshot(OnboardingRoadmap roadmap)
@@ -218,7 +231,20 @@ public sealed class JsonProjectRepository : IProjectRepository
             snapshot.CreatedAt,
             snapshot.ReviewedBy,
             snapshot.ReviewComment,
-            snapshot.ReviewedAt);
+            snapshot.ReviewedAt,
+            (snapshot.ReviewHistory ?? []).Select(FromSnapshot));
+    }
+
+    private static KnowledgeReviewHistoryEntry FromSnapshot(KnowledgeReviewHistorySnapshot snapshot)
+    {
+        return new KnowledgeReviewHistoryEntry(
+            snapshot.Id,
+            snapshot.Action,
+            snapshot.ReviewStatus,
+            snapshot.QualityStatus,
+            snapshot.Reviewer,
+            snapshot.Comment,
+            snapshot.CreatedAt);
     }
 
     private static OnboardingRoadmap FromSnapshot(RoadmapSnapshot snapshot)
@@ -290,7 +316,17 @@ public sealed class JsonProjectRepository : IProjectRepository
         string ExtractionProvider = "Legacy",
         string? ExtractionModel = null,
         bool ExtractionUsedFallback = false,
-        string ExtractionQuality = "LegacyImported");
+        string ExtractionQuality = "LegacyImported",
+        IReadOnlyCollection<KnowledgeReviewHistorySnapshot>? ReviewHistory = null);
+
+    private sealed record KnowledgeReviewHistorySnapshot(
+        Guid Id,
+        string Action,
+        KnowledgeReviewStatus ReviewStatus,
+        string QualityStatus,
+        string Reviewer,
+        string Comment,
+        DateTimeOffset CreatedAt);
 
     private sealed record RoadmapSnapshot(
         Guid Id,

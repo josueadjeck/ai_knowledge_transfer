@@ -22,6 +22,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Review workflow for extracted knowledge items.
 - Editable reviewer and review comment fields in the Blazor review workflow.
 - Review actions can update knowledge quality status such as `NeedsClarification`, `Verified` or `RejectedSource`.
+- Knowledge items keep review history entries for submit, approve and reject actions.
 - Review summary endpoint and dashboard cards show counts by review status, quality status, type and final usable knowledge.
 - Roadmap generation that uses approved and verified knowledge as final content and marks other items as review notes.
 - Markdown export for project handover documents.
@@ -86,6 +87,7 @@ The web UI can run the MVP workflow directly:
 - Filter knowledge review items by type and review status.
 - Submit, approve or reject knowledge items.
 - Set or automatically derive review quality status while submitting, approving or rejecting knowledge items.
+- Inspect the latest review history entries per knowledge item.
 - Generate a review-aware roadmap.
 - Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
 - Load traceability and Markdown export output.

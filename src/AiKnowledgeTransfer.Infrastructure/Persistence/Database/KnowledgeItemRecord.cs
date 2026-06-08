@@ -35,4 +35,6 @@ public sealed class KnowledgeItemRecord
     public string? ReviewComment { get; set; }
 
     public DateTimeOffset? ReviewedAt { get; set; }
+
+    public List<KnowledgeReviewHistoryRecord> ReviewHistory { get; set; } = [];
 }

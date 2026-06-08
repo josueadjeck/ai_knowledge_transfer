@@ -84,6 +84,22 @@ public static class ProjectMapper
             item.ReviewedBy,
             item.ReviewComment,
             item.ReviewedAt,
-            item.CreatedAt);
+            item.CreatedAt,
+            item.ReviewHistory
+                .OrderByDescending(history => history.CreatedAt)
+                .Select(ToResponse)
+                .ToArray());
+    }
+
+    private static KnowledgeReviewHistoryResponse ToResponse(KnowledgeReviewHistoryEntry history)
+    {
+        return new KnowledgeReviewHistoryResponse(
+            history.Id,
+            history.Action,
+            history.ReviewStatus.ToString(),
+            history.QualityStatus,
+            history.Reviewer,
+            history.Comment,
+            history.CreatedAt);
     }
 }

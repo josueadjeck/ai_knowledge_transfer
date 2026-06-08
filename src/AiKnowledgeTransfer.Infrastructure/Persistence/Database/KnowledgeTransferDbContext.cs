@@ -17,6 +17,8 @@ public sealed class KnowledgeTransferDbContext : DbContext
 
     public DbSet<KnowledgeItemRecord> KnowledgeItems => Set<KnowledgeItemRecord>();
 
+    public DbSet<KnowledgeReviewHistoryRecord> KnowledgeReviewHistory => Set<KnowledgeReviewHistoryRecord>();
+
     public DbSet<RoadmapRecord> Roadmaps => Set<RoadmapRecord>();
 
     public DbSet<RoadmapWeekRecord> RoadmapWeeks => Set<RoadmapWeekRecord>();
@@ -71,6 +73,18 @@ public sealed class KnowledgeTransferDbContext : DbContext
             entity.Property(item => item.ReviewStatus).HasMaxLength(80).IsRequired();
             entity.Property(item => item.ReviewedBy).HasMaxLength(240);
             entity.Property(item => item.ReviewComment).HasMaxLength(2000);
+            entity.HasMany(item => item.ReviewHistory).WithOne(history => history.KnowledgeItem).HasForeignKey(history => history.KnowledgeItemId);
+        });
+
+        modelBuilder.Entity<KnowledgeReviewHistoryRecord>(entity =>
+        {
+            entity.ToTable("KnowledgeReviewHistory");
+            entity.HasKey(history => history.Id);
+            entity.Property(history => history.Action).HasMaxLength(160).IsRequired();
+            entity.Property(history => history.ReviewStatus).HasMaxLength(80).IsRequired();
+            entity.Property(history => history.QualityStatus).HasMaxLength(120).IsRequired();
+            entity.Property(history => history.Reviewer).HasMaxLength(240).IsRequired();
+            entity.Property(history => history.Comment).HasMaxLength(2000).IsRequired();
         });
 
         modelBuilder.Entity<RoadmapRecord>(entity =>
