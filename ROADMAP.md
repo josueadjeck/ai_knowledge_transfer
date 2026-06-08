@@ -141,7 +141,9 @@ Aktueller Implementierungsstand:
 - Phase 7 ist erweitert: Traceability und Markdown Export enthalten Extraktionsherkunft und Qualitaetsstatus je Wissenselement.
 - Phase 7 ist erweitert: Traceability zeigt Review-Historien-Metadaten wie Anzahl und letzte Review-Aktion je Wissenselement.
 - Phase 7 ist erweitert: Markdown-Exportlaeufe werden als Export-Historie per API und Blazor-UI sichtbar.
+- Phase 7 ist erweitert: Markdown-Exporte koennen explizit freigegeben werden; Freigaben werden als Audit-Nachweis per API und Blazor-UI sichtbar.
 - Phase 8 ist gestartet: Eine erste Compliance Matrix bewertet Nachweise als Compliant oder OpenIssue anhand von Quelle, Review, Qualitaet, Review-Historie und Export-Faehigkeit.
+- Phase 8 ist erweitert: Die Compliance Matrix verlangt fuer exportbereite Nachweise eine explizite Export-Freigabe.
 - Phase 8 ist gestartet: Projektuebergaben koennen als Markdown exportiert werden.
 - Phase 8 ist erweitert: Die Blazor-UI zeigt Markdown-Export-Metadaten, Abschnittsvorschau und vollstaendigen Exporttext.
 - Phase 8 ist erweitert: Markdown Export behandelt nur Verified-Wissen als final exportiert und fuehrt nicht verifizierte Inhalte als Review Notes.

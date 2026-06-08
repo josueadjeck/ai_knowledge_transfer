@@ -7,6 +7,7 @@ using AiKnowledgeTransfer.Application.Exports;
 using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Application.Traceability;
+using AiKnowledgeTransfer.Contracts.Exports;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
 using AiKnowledgeTransfer.Infrastructure.Knowledge;
@@ -600,6 +601,7 @@ public sealed class RoadmapServiceTests
         var roadmapService = new RoadmapService(repository);
         var exportService = new MarkdownExportService(repository, auditLog);
         var exportHistoryService = new ExportHistoryService(auditLog);
+        var exportApprovalService = new ExportApprovalService(repository, auditLog);
 
         var project = await projectService.CreateAsync(
             new CreateProjectRequest("Export Project", "Markdown export test", "Engineering"),
@@ -652,6 +654,20 @@ public sealed class RoadmapServiceTests
         Assert.Equal(export.FileName, exportRun.FileName);
         Assert.Equal("text/markdown", exportRun.ContentType);
         Assert.Contains("Markdown export", exportRun.Summary, StringComparison.Ordinal);
+
+        var approval = await exportApprovalService.ApproveAsync(
+            project.Id,
+            new ApproveExportRequest(export.FileName, "Senior Engineer", "Ready for supervised onboarding."),
+            CancellationToken.None);
+
+        Assert.NotNull(approval);
+        Assert.Equal(export.FileName, approval.FileName);
+        Assert.Equal("Senior Engineer", approval.Reviewer);
+
+        var approvals = await exportApprovalService.ListAsync(project.Id, CancellationToken.None);
+        var listedApproval = Assert.Single(approvals);
+        Assert.Equal(approval.Id, listedApproval.Id);
+        Assert.Contains("Ready for supervised onboarding", listedApproval.Summary, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -718,12 +734,14 @@ public sealed class RoadmapServiceTests
         var repository = new InMemoryProjectRepository();
         var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
         var storage = new LocalFileStorage(storageRoot);
+        var auditLog = new JsonAuditLog(Path.Combine(storageRoot, "audit-log.json"));
         var parser = new PlainTextDocumentParser();
         var projectService = new ProjectService(repository, storage);
         var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
         var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
         var reviewService = new KnowledgeReviewService(repository);
-        var complianceService = new ComplianceMatrixService(repository);
+        var exportApprovalService = new ExportApprovalService(repository, auditLog);
+        var complianceService = new ComplianceMatrixService(repository, auditLog);
 
         var project = await projectService.CreateAsync(
             new CreateProjectRequest("Compliance Project", "Compliance matrix test", "Engineering"),
@@ -750,6 +768,19 @@ public sealed class RoadmapServiceTests
             project.Id,
             workflow.Id,
             new ReviewKnowledgeItemRequest("Senior Engineer", "Workflow confirmed."),
+            CancellationToken.None);
+
+        var matrixBeforeApproval = await complianceService.GetMatrixAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(matrixBeforeApproval);
+        var rowBeforeApproval = matrixBeforeApproval.Rows.Single(row => row.KnowledgeItemId == workflow.Id);
+        Assert.False(rowBeforeApproval.ExportReady);
+        Assert.Equal("OpenIssue", rowBeforeApproval.ComplianceStatus);
+        Assert.Equal("Export wurde noch nicht explizit freigegeben.", rowBeforeApproval.Gap);
+
+        await exportApprovalService.ApproveAsync(
+            project.Id,
+            new ApproveExportRequest("compliance-project-knowledge-transfer.md", "Senior Engineer", "Export evidence approved."),
             CancellationToken.None);
 
         var matrix = await complianceService.GetMatrixAsync(project.Id, CancellationToken.None);

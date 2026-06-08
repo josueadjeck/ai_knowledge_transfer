@@ -12,6 +12,7 @@ using AiKnowledgeTransfer.Application.Roadmaps;
 using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Application.Traceability;
 using AiKnowledgeTransfer.Contracts.Projects;
+using AiKnowledgeTransfer.Contracts.Exports;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
 using AiKnowledgeTransfer.Contracts.Validation;
 using AiKnowledgeTransfer.Infrastructure;
@@ -322,6 +323,31 @@ projects.MapGet("/{projectId:guid}/exports/markdown", async Task<IResult> (
 projects.MapGet("/{projectId:guid}/exports/history", async Task<IResult> (
     Guid projectId,
     ExportHistoryService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.ListAsync(projectId, cancellationToken);
+    return Results.Ok(result);
+});
+
+projects.MapPost("/{projectId:guid}/exports/approvals", async Task<IResult> (
+    Guid projectId,
+    ApproveExportRequest request,
+    ExportApprovalService service,
+    CancellationToken cancellationToken) =>
+{
+    var errors = RequestValidation.Validate(request);
+    if (errors.Count > 0)
+    {
+        return ApiResponses.ValidationProblem(errors);
+    }
+
+    var result = await service.ApproveAsync(projectId, request, cancellationToken);
+    return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Created($"/api/projects/{projectId}/exports/approvals/{result.Id}", result);
+});
+
+projects.MapGet("/{projectId:guid}/exports/approvals", async Task<IResult> (
+    Guid projectId,
+    ExportApprovalService service,
     CancellationToken cancellationToken) =>
 {
     var result = await service.ListAsync(projectId, cancellationToken);

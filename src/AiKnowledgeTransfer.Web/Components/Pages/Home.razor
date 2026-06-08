@@ -33,6 +33,7 @@
 @inject OnboardingReadinessService OnboardingReadiness
 @inject OnboardingStartPackageService OnboardingStartPackages
 @inject MarkdownExportService MarkdownExports
+@inject ExportApprovalService ExportApprovals
 @inject ExportHistoryService ExportHistory
 @inject TraceabilityService Traceability
 @inject ComplianceMatrixService Compliance
@@ -515,6 +516,7 @@
             <button @onclick="LoadComplianceAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Compliance Matrix</button>
             <button @onclick="ExportMarkdownAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Markdown Export</button>
             <button @onclick="LoadExportHistoryAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Export-Historie</button>
+            <button @onclick="LoadExportApprovalsAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Freigaben laden</button>
             <button @onclick="LoadAuditAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Audit Log</button>
         </div>
         @if (_compliance is not null)
@@ -694,6 +696,17 @@
                 <summary>Vollstaendiges Markdown anzeigen</summary>
                 <textarea class="export-preview" readonly>@_export.Markdown</textarea>
             </details>
+            <div class="review-inputs export-approval-inputs">
+                <label>
+                    Reviewer
+                    <input @bind="_exportApprovalReviewer" />
+                </label>
+                <label>
+                    Kommentar
+                    <textarea @bind="_exportApprovalComment"></textarea>
+                </label>
+                <button class="primary-action" @onclick="ApproveCurrentExportAsync" disabled="@(!Can(Permission.ExportProject))">Export freigeben</button>
+            </div>
         }
         @if (_exportHistory.Count > 0)
         {
@@ -704,6 +717,19 @@
                         <strong>@export.FileName</strong>
                         <span>@export.ContentType | @export.ExportedAt.LocalDateTime:g</span>
                         <span>@export.Summary</span>
+                    </div>
+                }
+            </div>
+        }
+        @if (_exportApprovals.Count > 0)
+        {
+            <div class="compact-list">
+                @foreach (var approval in _exportApprovals.Take(5))
+                {
+                    <div>
+                        <strong>@approval.FileName</strong>
+                        <span>@approval.Reviewer | @approval.ApprovedAt.LocalDateTime:g</span>
+                        <span>@approval.Summary</span>
                     </div>
                 }
             </div>
@@ -862,6 +888,9 @@
     private ComplianceMatrixResponse? _compliance;
     private ExportProjectMarkdownResponse? _export;
     private IReadOnlyCollection<ExportHistoryResponse> _exportHistory = [];
+    private IReadOnlyCollection<ExportApprovalResponse> _exportApprovals = [];
+    private string _exportApprovalReviewer = "Senior Engineer";
+    private string _exportApprovalComment = "Export reviewed for pilot onboarding.";
     private AnalyzeDocumentResponse? _lastAnalysis;
     private ExtractKnowledgeResponse? _lastExtraction;
     private KnowledgeReviewSummaryResponse? _reviewSummary;
@@ -1245,6 +1274,7 @@
         {
             _export = await MarkdownExports.ExportProjectAsync(_selectedProject.Id, CancellationToken.None);
             _exportHistory = await ExportHistory.ListAsync(_selectedProject.Id, CancellationToken.None);
+            _exportApprovals = await ExportApprovals.ListAsync(_selectedProject.Id, CancellationToken.None);
             SetStatus("Markdown Export erzeugt", _export?.FileName ?? "Export");
         });
     }
@@ -1260,6 +1290,48 @@
         {
             _exportHistory = await ExportHistory.ListAsync(_selectedProject.Id, CancellationToken.None);
             SetStatus("Export-Historie geladen", $"{_exportHistory.Count} Exporte");
+        });
+    }
+
+    private async Task LoadExportApprovalsAsync()
+    {
+        if (_selectedProject is null || !Can(Permission.ExportProject))
+        {
+            return;
+        }
+
+        await RunSafelyAsync("Export-Freigaben laden", async () =>
+        {
+            _exportApprovals = await ExportApprovals.ListAsync(_selectedProject.Id, CancellationToken.None);
+            SetStatus("Export-Freigaben geladen", $"{_exportApprovals.Count} Freigaben");
+        });
+    }
+
+    private async Task ApproveCurrentExportAsync()
+    {
+        if (_selectedProject is null || _export is null || !Can(Permission.ExportProject))
+        {
+            return;
+        }
+
+        var request = new ApproveExportRequest(_export.FileName, _exportApprovalReviewer, _exportApprovalComment);
+        var errors = RequestValidation.Validate(request);
+        if (errors.Count > 0)
+        {
+            SetStatus("Export-Freigabe unvollstaendig", ToValidationMessage(errors), isError: true);
+            return;
+        }
+
+        await RunSafelyAsync("Export freigeben", async () =>
+        {
+            var approval = await ExportApprovals.ApproveAsync(_selectedProject.Id, request, CancellationToken.None);
+            _exportApprovals = await ExportApprovals.ListAsync(_selectedProject.Id, CancellationToken.None);
+            if (_compliance is not null)
+            {
+                _compliance = await Compliance.GetMatrixAsync(_selectedProject.Id, CancellationToken.None);
+            }
+
+            SetStatus("Export freigegeben", approval?.FileName ?? _export.FileName);
         });
     }
 
@@ -1398,6 +1470,7 @@
         _compliance = null;
         _export = null;
         _exportHistory = [];
+        _exportApprovals = [];
         _lastAnalysis = null;
         _lastExtraction = null;
         _auditEvents = [];

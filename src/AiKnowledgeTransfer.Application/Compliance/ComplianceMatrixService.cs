@@ -20,7 +20,9 @@ public sealed class ComplianceMatrixService(
             return null;
         }
 
-        var rows = BuildRows(project);
+        var auditEvents = await _auditLog.ListAsync(project.Id, cancellationToken);
+        var hasExportApproval = auditEvents.Any(auditEvent => auditEvent.Action == "ExportApproved");
+        var rows = BuildRows(project, hasExportApproval);
         var matrix = new ComplianceMatrixResponse(
             project.Id,
             project.Name,
@@ -37,14 +39,14 @@ public sealed class ComplianceMatrixService(
         return matrix;
     }
 
-    private static IReadOnlyCollection<ComplianceMatrixRowResponse> BuildRows(KnowledgeProject project)
+    private static IReadOnlyCollection<ComplianceMatrixRowResponse> BuildRows(KnowledgeProject project, bool hasExportApproval)
     {
         var rows = project.KnowledgeItems
             .OrderBy(item => item.SourceDocumentId is null)
             .ThenBy(item => SourceName(project, item))
             .ThenBy(item => item.Type)
             .ThenBy(item => item.Title)
-            .Select(item => ToKnowledgeRow(project, item))
+            .Select(item => ToKnowledgeRow(project, item, hasExportApproval))
             .ToList();
 
         var documentIdsWithKnowledge = project.KnowledgeItems
@@ -71,10 +73,10 @@ public sealed class ComplianceMatrixService(
         return rows.ToArray();
     }
 
-    private static ComplianceMatrixRowResponse ToKnowledgeRow(KnowledgeProject project, KnowledgeItem item)
+    private static ComplianceMatrixRowResponse ToKnowledgeRow(KnowledgeProject project, KnowledgeItem item, bool hasExportApproval)
     {
         var source = SourceName(project, item);
-        var exportReady = KnowledgeQualityPolicy.IsFinal(item);
+        var exportReady = KnowledgeQualityPolicy.IsFinal(item) && hasExportApproval;
         var status = GetStatus(item, source, exportReady);
 
         return new ComplianceMatrixRowResponse(
@@ -88,7 +90,7 @@ public sealed class ComplianceMatrixService(
             item.ReviewHistory.Count,
             exportReady,
             status,
-            GetGap(item, source, exportReady, status));
+            GetGap(item, source, exportReady, status, hasExportApproval));
     }
 
     private static string SourceName(KnowledgeProject project, KnowledgeItem item)
@@ -117,7 +119,7 @@ public sealed class ComplianceMatrixService(
         return item.ReviewHistory.Count == 0 ? "OpenIssue" : "Compliant";
     }
 
-    private static string GetGap(KnowledgeItem item, string source, bool exportReady, string status)
+    private static string GetGap(KnowledgeItem item, string source, bool exportReady, string status, bool hasExportApproval)
     {
         if (status == "Compliant")
         {
@@ -129,9 +131,14 @@ public sealed class ComplianceMatrixService(
             return "Wissenselement braucht eine belegbare Quelle.";
         }
 
-        if (!exportReady)
+        if (!KnowledgeQualityPolicy.IsFinal(item))
         {
             return "Wissenselement ist nicht freigegeben und Verified.";
+        }
+
+        if (!hasExportApproval)
+        {
+            return "Export wurde noch nicht explizit freigegeben.";
         }
 
         return item.ReviewHistory.Count == 0

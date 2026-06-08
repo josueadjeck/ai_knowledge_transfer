@@ -35,8 +35,9 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Onboarding start package with first-week roadmap content, starter tasks and review warnings.
 - Markdown export for project handover documents.
 - Export history endpoint and dashboard list for generated Markdown exports.
+- Export approvals for generated Markdown handover documents.
 - Traceability matrix for source, knowledge, review, review history and roadmap/export usage.
-- Compliance matrix endpoint and Blazor view for compliant vs open evidence.
+- Compliance matrix endpoint and Blazor view for compliant vs open evidence, including explicit export approval as a gate.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
 - Domain model for projects, document versions, knowledge items and onboarding roadmaps.
 - Application services for project creation, document registration and deterministic roadmap generation.
@@ -106,8 +107,9 @@ The web UI can run the MVP workflow directly:
 - Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
 - Load traceability and Markdown export output.
 - Inspect export history after generated Markdown exports.
+- Approve a generated Markdown export and inspect export approval history.
 - Inspect traceability rows with source, knowledge, review state, review history, roadmap usage and export state.
-- Inspect compliance rows with evidence status, export readiness and open gaps.
+- Inspect compliance rows with evidence status, export readiness, export approval and open gaps.
 - Inspect and filter audit log events by action and target type.
 - Inspect Markdown export metadata and section previews before reading the full export text.
 
@@ -280,6 +282,21 @@ Get export history:
 
 ```http
 GET http://localhost:5256/api/projects/{projectId}/exports/history
+```
+
+Approve and list Markdown export approvals:
+
+```http
+POST http://localhost:5256/api/projects/{projectId}/exports/approvals
+Content-Type: application/json
+
+{
+  "fileName": "project-knowledge-transfer.md",
+  "reviewer": "Senior Engineer",
+  "comment": "Ready for supervised onboarding."
+}
+
+GET http://localhost:5256/api/projects/{projectId}/exports/approvals
 ```
 
 Get the traceability matrix:

@@ -1,4 +1,5 @@
 using AiKnowledgeTransfer.Contracts.Projects;
+using AiKnowledgeTransfer.Contracts.Exports;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
 
 namespace AiKnowledgeTransfer.Contracts.Validation;
@@ -78,6 +79,17 @@ public static class RequestValidation
         AddRequired(errors, nameof(request.Reviewer), request.Reviewer);
         AddRequired(errors, nameof(request.Comment), request.Comment);
         AddKnowledgeQualityStatus(errors, nameof(request.QualityStatus), request.QualityStatus);
+
+        return errors;
+    }
+
+    public static IReadOnlyDictionary<string, string[]> Validate(ApproveExportRequest request)
+    {
+        var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
+        AddRequired(errors, nameof(request.FileName), request.FileName);
+        AddRequired(errors, nameof(request.Reviewer), request.Reviewer);
+        AddRequired(errors, nameof(request.Comment), request.Comment);
 
         return errors;
     }

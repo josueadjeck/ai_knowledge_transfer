@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<DocumentAnalysisService>();
         services.AddScoped<DocumentParserCapabilityService>();
         services.AddScoped<MarkdownExportService>();
+        services.AddScoped<ExportApprovalService>();
         services.AddScoped<ExportHistoryService>();
         services.AddScoped<KnowledgeExtractionService>();
         services.AddScoped<KnowledgeReviewService>();

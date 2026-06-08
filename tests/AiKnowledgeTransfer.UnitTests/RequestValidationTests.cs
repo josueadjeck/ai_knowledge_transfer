@@ -1,3 +1,4 @@
+using AiKnowledgeTransfer.Contracts.Exports;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
 using AiKnowledgeTransfer.Contracts.Validation;
@@ -97,5 +98,15 @@ public sealed class RequestValidationTests
         var errors = RequestValidation.Validate(new BulkReviewKnowledgeItemsRequest([Guid.NewGuid()], "Reviewer", "Comment", "Guessed"));
 
         Assert.Contains(nameof(BulkReviewKnowledgeItemsRequest.QualityStatus), errors.Keys);
+    }
+
+    [Fact]
+    public void Validate_export_approval_requires_file_reviewer_and_comment()
+    {
+        var errors = RequestValidation.Validate(new ApproveExportRequest("", " ", ""));
+
+        Assert.Contains(nameof(ApproveExportRequest.FileName), errors.Keys);
+        Assert.Contains(nameof(ApproveExportRequest.Reviewer), errors.Keys);
+        Assert.Contains(nameof(ApproveExportRequest.Comment), errors.Keys);
     }
 }
