@@ -329,6 +329,38 @@ button:disabled {
     margin: .35rem 0 0;
 }
 
+.review-meta {
+    background: #ffffff;
+    border: 1px solid #e6ebf1;
+    border-radius: 6px;
+    margin-top: .55rem;
+    padding: .55rem;
+}
+
+.review-meta span {
+    color: #617080;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.review-meta p {
+    color: #2f3b49;
+    font-size: .9rem;
+    margin: .35rem 0 0;
+}
+
+.review-inputs {
+    border-top: 1px solid #e1e6ed;
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);
+    padding-top: .9rem;
+}
+
+.review-inputs textarea {
+    min-height: 2.7rem;
+}
+
 .roadmap-preview {
     border-top: 1px solid #e1e6ed;
     margin-top: .55rem;
@@ -738,6 +770,7 @@ button:disabled {
     .health-overview,
     .document-card-header,
     .document-meta,
+    .review-inputs,
     .roadmap-week-grid,
     .traceability-header,
     .traceability-row,

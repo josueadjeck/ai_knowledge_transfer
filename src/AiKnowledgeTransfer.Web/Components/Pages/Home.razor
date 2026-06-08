@@ -212,6 +212,16 @@
                             <strong>@item.Title</strong>
                             <span>@item.Type | @item.ReviewStatus</span>
                             <p>@item.Summary</p>
+                            @if (!string.IsNullOrWhiteSpace(item.ReviewedBy) || !string.IsNullOrWhiteSpace(item.ReviewComment))
+                            {
+                                <div class="review-meta">
+                                    <span>@ReviewItemDetail(item)</span>
+                                    @if (!string.IsNullOrWhiteSpace(item.ReviewComment))
+                                    {
+                                        <p>@item.ReviewComment</p>
+                                    }
+                                </div>
+                            }
                         </div>
                         <div class="button-row">
                             <button @onclick="() => SubmitReviewAsync(item.Id)" disabled="@(!Can(Permission.SubmitKnowledgeReview))">Review</button>
@@ -230,6 +240,16 @@
         {
             <p class="muted">Noch keine Wissenselemente vorhanden.</p>
         }
+        <div class="review-inputs">
+            <label>
+                Reviewer
+                <input @bind="_reviewerName" />
+            </label>
+            <label>
+                Kommentar
+                <textarea @bind="_reviewComment"></textarea>
+            </label>
+        </div>
     </div>
 
     <div class="workflow-panel">
@@ -565,6 +585,8 @@
     private string _knowledgeStatusFilter = string.Empty;
     private string _auditActionFilter = string.Empty;
     private string _auditTargetTypeFilter = string.Empty;
+    private string _reviewerName = "Senior Engineer";
+    private string _reviewComment = "Reviewed from UI.";
     private UserRole _currentRole = UserRole.Admin;
     private string StatusText { get; set; } = "Bereit";
     private string StatusDetail { get; set; } = "Lege ein Projekt an oder waehle ein bestehendes Projekt.";
@@ -737,9 +759,15 @@
             return;
         }
 
+        var request = BuildReviewRequest();
+        if (request is null)
+        {
+            return;
+        }
+
         await RunSafelyAsync("Review starten", async () =>
         {
-            await Review.SubmitForReviewAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Review requested from UI."), CancellationToken.None);
+            await Review.SubmitForReviewAsync(_selectedProjectId, knowledgeItemId, request, CancellationToken.None);
             await LoadSelectedProjectAsync();
             SetStatus("Review gestartet", knowledgeItemId.ToString());
         });
@@ -753,9 +781,15 @@
             return;
         }
 
+        var request = BuildReviewRequest();
+        if (request is null)
+        {
+            return;
+        }
+
         await RunSafelyAsync("Wissen freigeben", async () =>
         {
-            await Review.ApproveAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Approved from UI."), CancellationToken.None);
+            await Review.ApproveAsync(_selectedProjectId, knowledgeItemId, request, CancellationToken.None);
             await LoadSelectedProjectAsync();
             SetStatus("Wissen freigegeben", knowledgeItemId.ToString());
         });
@@ -769,9 +803,15 @@
             return;
         }
 
+        var request = BuildReviewRequest();
+        if (request is null)
+        {
+            return;
+        }
+
         await RunSafelyAsync("Wissen ablehnen", async () =>
         {
-            await Review.RejectAsync(_selectedProjectId, knowledgeItemId, new ReviewKnowledgeItemRequest("Senior Engineer", "Rejected from UI."), CancellationToken.None);
+            await Review.RejectAsync(_selectedProjectId, knowledgeItemId, request, CancellationToken.None);
             await LoadSelectedProjectAsync();
             SetStatus("Wissen abgelehnt", knowledgeItemId.ToString());
         });
@@ -1077,6 +1117,31 @@
         return row.ReviewedAt is null
             ? row.ReviewedBy
             : $"{row.ReviewedBy} | {row.ReviewedAt.Value.LocalDateTime:g}";
+    }
+
+    private ReviewKnowledgeItemRequest? BuildReviewRequest()
+    {
+        var request = new ReviewKnowledgeItemRequest(_reviewerName, _reviewComment);
+        var errors = RequestValidation.Validate(request);
+        if (errors.Count == 0)
+        {
+            return request;
+        }
+
+        SetStatus("Review-Angaben unvollstaendig", ToValidationMessage(errors), isError: true);
+        return null;
+    }
+
+    private static string ReviewItemDetail(KnowledgeItemResponse item)
+    {
+        if (string.IsNullOrWhiteSpace(item.ReviewedBy))
+        {
+            return "Noch kein Reviewer gespeichert.";
+        }
+
+        return item.ReviewedAt is null
+            ? item.ReviewedBy
+            : $"{item.ReviewedBy} | {item.ReviewedAt.Value.LocalDateTime:g}";
     }
 
     private static int MarkdownLineCount(string markdown)

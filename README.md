@@ -18,6 +18,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Shared chunking logic across text, PDF and Word parsers.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
 - Review workflow for extracted knowledge items.
+- Editable reviewer and review comment fields in the Blazor review workflow.
 - Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
 - Markdown export for project handover documents.
 - Traceability matrix for source, knowledge, review and roadmap/export usage.
