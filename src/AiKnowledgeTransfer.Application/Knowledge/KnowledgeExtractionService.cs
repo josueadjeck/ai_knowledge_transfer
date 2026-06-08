@@ -38,6 +38,9 @@ public sealed class KnowledgeExtractionService(
         return new ExtractKnowledgeResponse(
             document.Id,
             createdItems.Length,
+            extraction.ProviderName,
+            extraction.UsedFallback,
+            extraction.Detail,
             createdItems.Select(ProjectMapper.ToResponse).ToArray());
     }
 }

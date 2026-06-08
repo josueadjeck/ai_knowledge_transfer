@@ -17,6 +17,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Word `.docx` text extraction into document chunks.
 - Shared chunking logic across text, PDF and Word parsers.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
+- Knowledge extraction responses and the Blazor workflow show the active provider and whether fallback was used.
 - Review workflow for extracted knowledge items.
 - Editable reviewer and review comment fields in the Blazor review workflow.
 - Roadmap generation that prefers approved knowledge and marks unapproved items as review notes.
@@ -109,6 +110,7 @@ dotnet test AiKnowledgeTransfer.slnx
 ## AI provider configuration
 
 Knowledge extraction is provider-independent. OpenAI is the first implemented AI provider. If `OPENAI_API_KEY` is set, the API uses OpenAI first and falls back to the local heuristic extractor if the provider returns no items or fails. If no key is set, the local heuristic extractor is used directly.
+The extraction API response and Blazor workflow report the provider name, fallback flag and provider detail for each extraction run.
 
 Environment variables:
 

@@ -122,6 +122,27 @@
             <button @onclick="AnalyzeLatestDocumentAsync" disabled="@(!CanAnalyze)">Analysieren</button>
             <button @onclick="ExtractKnowledgeAsync" disabled="@(!CanExtract)">Wissen extrahieren</button>
         </div>
+        @if (_lastExtraction is not null)
+        {
+            <div class="extraction-summary">
+                <div>
+                    <span>Provider</span>
+                    <strong>@_lastExtraction.ProviderName</strong>
+                </div>
+                <div>
+                    <span>Fallback</span>
+                    <strong>@(_lastExtraction.UsedFallback ? "Ja" : "Nein")</strong>
+                </div>
+                <div>
+                    <span>Ergebnis</span>
+                    <strong>@_lastExtraction.CreatedItemCount Wissenselemente</strong>
+                </div>
+                <div class="span-2">
+                    <span>Hinweis</span>
+                    <strong>@ExtractionDetail(_lastExtraction)</strong>
+                </div>
+            </div>
+        }
 
         @if (_selectedProject?.Documents.Count > 0)
         {
@@ -593,6 +614,7 @@
     private bool HasError { get; set; }
     private TraceabilityMatrixResponse? _traceability;
     private ExportProjectMarkdownResponse? _export;
+    private ExtractKnowledgeResponse? _lastExtraction;
     private HealthResponse? _health;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
@@ -747,7 +769,8 @@
         {
             var extraction = await Extraction.ExtractAsync(_selectedProject.Id, document.Id, CancellationToken.None);
             await LoadSelectedProjectAsync();
-            SetStatus("Wissen extrahiert", $"{extraction?.CreatedItemCount ?? 0} Elemente");
+            _lastExtraction = extraction;
+            SetStatus("Wissen extrahiert", ExtractionStatusDetail(extraction));
         });
     }
 
@@ -984,6 +1007,7 @@
             : await Projects.GetAsync(_selectedProjectId, CancellationToken.None);
         _traceability = null;
         _export = null;
+        _lastExtraction = null;
         _auditEvents = [];
         ResetKnowledgeFiltersIfNeeded();
         ResetAuditFiltersIfNeeded();
@@ -1142,6 +1166,24 @@
         return item.ReviewedAt is null
             ? item.ReviewedBy
             : $"{item.ReviewedBy} | {item.ReviewedAt.Value.LocalDateTime:g}";
+    }
+
+    private static string ExtractionStatusDetail(ExtractKnowledgeResponse? extraction)
+    {
+        if (extraction is null)
+        {
+            return "Keine Extraktion erzeugt.";
+        }
+
+        var fallback = extraction.UsedFallback ? ", Fallback aktiv" : string.Empty;
+        return $"{extraction.CreatedItemCount} Elemente via {extraction.ProviderName}{fallback}";
+    }
+
+    private static string ExtractionDetail(ExtractKnowledgeResponse extraction)
+    {
+        return string.IsNullOrWhiteSpace(extraction.Detail)
+            ? "Keine weiteren Provider-Details."
+            : extraction.Detail;
     }
 
     private static int MarkdownLineCount(string markdown)

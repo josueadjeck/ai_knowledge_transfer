@@ -301,6 +301,38 @@ button:disabled {
     overflow-wrap: anywhere;
 }
 
+.extraction-summary {
+    display: grid;
+    gap: .45rem .75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.extraction-summary div {
+    background: #f8fafc;
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .6rem;
+}
+
+.extraction-summary span,
+.extraction-summary strong {
+    display: block;
+}
+
+.extraction-summary span {
+    color: #617080;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.extraction-summary strong {
+    color: #1f2933;
+    font-size: .88rem;
+    margin-top: .15rem;
+    overflow-wrap: anywhere;
+}
+
 .knowledge-filters,
 .audit-filters {
     align-items: end;
@@ -768,6 +800,7 @@ button:disabled {
     .export-summary,
     .backup-preview,
     .health-overview,
+    .extraction-summary,
     .document-card-header,
     .document-meta,
     .review-inputs,

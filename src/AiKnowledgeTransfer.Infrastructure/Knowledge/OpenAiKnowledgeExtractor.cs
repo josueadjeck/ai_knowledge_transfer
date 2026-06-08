@@ -34,7 +34,10 @@ public sealed class OpenAiKnowledgeExtractor(
         var outputText = ExtractOutputText(document.RootElement);
         var extractedItems = ParseItems(outputText);
 
-        return new KnowledgeExtractionResult(extractedItems);
+        return new KnowledgeExtractionResult(
+            extractedItems,
+            "OpenAI",
+            Detail: $"Model: {options.Model}");
     }
 
     private static object CreateRequestBody(string documentText, string model)

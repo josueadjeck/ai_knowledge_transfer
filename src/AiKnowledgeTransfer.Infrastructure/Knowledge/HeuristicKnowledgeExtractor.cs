@@ -24,7 +24,10 @@ public sealed partial class HeuristicKnowledgeExtractor : IKnowledgeExtractor
             .Take(20)
             .ToArray();
 
-        return Task.FromResult(new KnowledgeExtractionResult(distinctItems));
+        return Task.FromResult(new KnowledgeExtractionResult(
+            distinctItems,
+            "Heuristic",
+            Detail: "Local rule-based extractor."));
     }
 
     private static void AddTechnicalTerms(string text, List<ExtractedKnowledgeItem> items)
