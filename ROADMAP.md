@@ -127,6 +127,7 @@ Aktueller Implementierungsstand:
 - Phase 6 ist gestartet: Wissenselemente koennen in Review gesetzt, freigegeben oder abgelehnt werden; Review-Metadaten werden gespeichert.
 - Phase 6 ist erweitert: Reviewer und Review-Kommentar koennen in der Blazor-UI eingegeben und an Review/Freigabe/Ablehnung uebergeben werden.
 - Phase 6 ist erweitert: Review-Aktionen koennen den Qualitaetsstatus von Wissenselementen setzen, z. B. NeedsClarification, Verified oder RejectedSource.
+- Phase 6 ist erweitert: Review-Statistiken zeigen final nutzbares Wissen sowie Verteilung nach Review-Status, Qualitaetsstatus und Wissensart in API und Blazor-UI.
 - Phase 7 ist gestartet: Traceability Matrix verknuepft Quellen, Chunks, Wissenselemente, Review-Status und Roadmap-/Export-Nutzung.
 - Phase 7 ist erweitert: Die Blazor-UI zeigt Traceability-Zeilen mit Quelle, Wissen, Review-Status, Roadmap-Nutzung und Export-Markierung.
 - Phase 7 ist erweitert: Traceability und Markdown Export enthalten Extraktionsherkunft und Qualitaetsstatus je Wissenselement.

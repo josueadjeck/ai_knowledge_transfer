@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<MarkdownExportService>();
         services.AddScoped<KnowledgeExtractionService>();
         services.AddScoped<KnowledgeReviewService>();
+        services.AddScoped<KnowledgeReviewSummaryService>();
         services.AddScoped<PersistenceBackupService>();
         services.AddScoped<RoadmapService>();
         services.AddScoped<RolePermissionService>();

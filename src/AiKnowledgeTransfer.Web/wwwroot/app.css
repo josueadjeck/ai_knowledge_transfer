@@ -333,6 +333,38 @@ button:disabled {
     overflow-wrap: anywhere;
 }
 
+.review-summary {
+    display: grid;
+    gap: .55rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.review-summary div {
+    background: #f8fafc;
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .65rem;
+}
+
+.review-summary span,
+.review-summary strong {
+    display: block;
+}
+
+.review-summary span {
+    color: #617080;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.review-summary strong {
+    color: #1f2933;
+    font-size: .9rem;
+    margin-top: .2rem;
+    overflow-wrap: anywhere;
+}
+
 .knowledge-filters,
 .audit-filters {
     align-items: end;
@@ -823,6 +855,7 @@ button:disabled {
     .backup-preview,
     .health-overview,
     .extraction-summary,
+    .review-summary,
     .document-card-header,
     .document-meta,
     .review-inputs,

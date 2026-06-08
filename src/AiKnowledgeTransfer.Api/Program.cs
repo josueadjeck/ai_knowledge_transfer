@@ -266,6 +266,15 @@ projects.MapPost("/{projectId:guid}/knowledge-items/bulk-reject", async Task<IRe
     return result.Count == 0 ? ApiResponses.NotFound("Project or knowledge items were not found.") : Results.Ok(result);
 });
 
+projects.MapGet("/{projectId:guid}/knowledge-items/review-summary", async Task<IResult> (
+    Guid projectId,
+    KnowledgeReviewSummaryService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.GetAsync(projectId, cancellationToken);
+    return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
+});
+
 projects.MapPost("/{projectId:guid}/roadmaps", async Task<IResult> (
     Guid projectId,
     GenerateRoadmapRequest request,

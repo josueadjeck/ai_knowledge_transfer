@@ -228,6 +228,67 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task KnowledgeReviewSummaryService_counts_review_quality_type_and_final_items()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+        var reviewService = new KnowledgeReviewService(repository);
+        var summaryService = new KnowledgeReviewSummaryService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Review Summary Project", "Review statistics test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("""
+            CTU communication is unknown.
+
+            Deployment workflow must be reviewed by senior engineers.
+            """u8.ToArray());
+
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("review-summary.md", "text/markdown", "Manual upload", content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        var workflow = extraction.KnowledgeItems.First(item => item.Type == "Workflow");
+        var openQuestion = extraction.KnowledgeItems.First(item => item.Type == "OpenQuestion");
+
+        await reviewService.ApproveAsync(
+            project.Id,
+            workflow.Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Workflow confirmed."),
+            CancellationToken.None);
+
+        await reviewService.SubmitForReviewAsync(
+            project.Id,
+            openQuestion.Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Open question needs clarification."),
+            CancellationToken.None);
+
+        var summary = await summaryService.GetAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(summary);
+        Assert.True(summary.TotalCount >= extraction.KnowledgeItems.Count);
+        Assert.Equal(1, summary.FinalCount);
+        Assert.Equal(1, CountFor(summary.ByReviewStatus, "Approved"));
+        Assert.Equal(1, CountFor(summary.ByReviewStatus, "InReview"));
+        Assert.Equal(1, CountFor(summary.ByQualityStatus, "Verified"));
+        Assert.Equal(1, CountFor(summary.ByQualityStatus, "NeedsClarification"));
+        Assert.True(CountFor(summary.ByType, "Workflow") >= 1);
+        Assert.True(CountFor(summary.ByType, "OpenQuestion") >= 1);
+    }
+
+    [Fact]
     public async Task AnalyzeAsync_parses_uploaded_text_document_into_chunks()
     {
         var repository = new InMemoryProjectRepository();
@@ -501,5 +562,10 @@ public sealed class RoadmapServiceTests
         Assert.Equal("Senior Engineer", workflowRow.ReviewedBy);
         Assert.True(workflowRow.RoadmapUsageCount > 0);
         Assert.True(workflowRow.IncludedInExport);
+    }
+
+    private static int CountFor(IReadOnlyCollection<KnowledgeReviewSummaryGroupResponse> groups, string name)
+    {
+        return groups.FirstOrDefault(group => group.Name == name)?.Count ?? 0;
     }
 }

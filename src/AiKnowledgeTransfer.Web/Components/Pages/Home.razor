@@ -26,6 +26,7 @@
 @inject DocumentAnalysisService Analysis
 @inject KnowledgeExtractionService Extraction
 @inject KnowledgeReviewService Review
+@inject KnowledgeReviewSummaryService ReviewSummary
 @inject RoadmapService Roadmaps
 @inject MarkdownExportService MarkdownExports
 @inject TraceabilityService Traceability
@@ -202,6 +203,27 @@
         <h2>Knowledge Review</h2>
         @if (_selectedProject?.KnowledgeItems.Count > 0)
         {
+            @if (_reviewSummary is not null)
+            {
+                <div class="review-summary">
+                    <div>
+                        <span>Final</span>
+                        <strong>@_reviewSummary.FinalCount / @_reviewSummary.TotalCount</strong>
+                    </div>
+                    <div>
+                        <span>Review Status</span>
+                        <strong>@SummaryText(_reviewSummary.ByReviewStatus)</strong>
+                    </div>
+                    <div>
+                        <span>Qualitaet</span>
+                        <strong>@SummaryText(_reviewSummary.ByQualityStatus)</strong>
+                    </div>
+                    <div>
+                        <span>Typen</span>
+                        <strong>@SummaryText(_reviewSummary.ByType)</strong>
+                    </div>
+                </div>
+            }
             <div class="knowledge-filters">
                 <label>
                     Typ
@@ -652,6 +674,7 @@
     private TraceabilityMatrixResponse? _traceability;
     private ExportProjectMarkdownResponse? _export;
     private ExtractKnowledgeResponse? _lastExtraction;
+    private KnowledgeReviewSummaryResponse? _reviewSummary;
     private HealthResponse? _health;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
@@ -1138,6 +1161,9 @@
         _selectedProject = _selectedProjectId == Guid.Empty
             ? null
             : await Projects.GetAsync(_selectedProjectId, CancellationToken.None);
+        _reviewSummary = _selectedProjectId == Guid.Empty
+            ? null
+            : await ReviewSummary.GetAsync(_selectedProjectId, CancellationToken.None);
         _traceability = null;
         _export = null;
         _lastExtraction = null;
@@ -1366,6 +1392,13 @@
         return string.IsNullOrWhiteSpace(extraction.Detail)
             ? "Keine weiteren Provider-Details."
             : extraction.Detail;
+    }
+
+    private static string SummaryText(IReadOnlyCollection<KnowledgeReviewSummaryGroupResponse> groups)
+    {
+        return groups.Count == 0
+            ? "Keine Elemente"
+            : string.Join(", ", groups.Select(group => $"{group.Name}: {group.Count}"));
     }
 
     private static int MarkdownLineCount(string markdown)
