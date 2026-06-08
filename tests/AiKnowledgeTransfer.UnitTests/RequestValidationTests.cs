@@ -82,4 +82,20 @@ public sealed class RequestValidationTests
 
         Assert.Contains(nameof(ReviewKnowledgeItemRequest.QualityStatus), errors.Keys);
     }
+
+    [Fact]
+    public void Validate_bulk_review_requires_item_ids()
+    {
+        var errors = RequestValidation.Validate(new BulkReviewKnowledgeItemsRequest([], "Reviewer", "Comment"));
+
+        Assert.Contains(nameof(BulkReviewKnowledgeItemsRequest.KnowledgeItemIds), errors.Keys);
+    }
+
+    [Fact]
+    public void Validate_bulk_review_rejects_unknown_quality_status()
+    {
+        var errors = RequestValidation.Validate(new BulkReviewKnowledgeItemsRequest([Guid.NewGuid()], "Reviewer", "Comment", "Guessed"));
+
+        Assert.Contains(nameof(BulkReviewKnowledgeItemsRequest.QualityStatus), errors.Keys);
+    }
 }

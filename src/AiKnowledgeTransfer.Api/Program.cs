@@ -203,6 +203,69 @@ projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/rejec
     return result is null ? ApiResponses.NotFound("Project or knowledge item was not found.") : Results.Ok(result);
 });
 
+projects.MapPost("/{projectId:guid}/knowledge-items/bulk-submit-review", async Task<IResult> (
+    Guid projectId,
+    BulkReviewKnowledgeItemsRequest request,
+    KnowledgeReviewService service,
+    CancellationToken cancellationToken) =>
+{
+    var errors = RequestValidation.Validate(request);
+    if (errors.Count > 0)
+    {
+        return ApiResponses.ValidationProblem(errors);
+    }
+
+    var result = await service.SubmitManyForReviewAsync(
+        projectId,
+        request.KnowledgeItemIds,
+        ToReviewRequest(request),
+        cancellationToken);
+
+    return result.Count == 0 ? ApiResponses.NotFound("Project or knowledge items were not found.") : Results.Ok(result);
+});
+
+projects.MapPost("/{projectId:guid}/knowledge-items/bulk-approve", async Task<IResult> (
+    Guid projectId,
+    BulkReviewKnowledgeItemsRequest request,
+    KnowledgeReviewService service,
+    CancellationToken cancellationToken) =>
+{
+    var errors = RequestValidation.Validate(request);
+    if (errors.Count > 0)
+    {
+        return ApiResponses.ValidationProblem(errors);
+    }
+
+    var result = await service.ApproveManyAsync(
+        projectId,
+        request.KnowledgeItemIds,
+        ToReviewRequest(request),
+        cancellationToken);
+
+    return result.Count == 0 ? ApiResponses.NotFound("Project or knowledge items were not found.") : Results.Ok(result);
+});
+
+projects.MapPost("/{projectId:guid}/knowledge-items/bulk-reject", async Task<IResult> (
+    Guid projectId,
+    BulkReviewKnowledgeItemsRequest request,
+    KnowledgeReviewService service,
+    CancellationToken cancellationToken) =>
+{
+    var errors = RequestValidation.Validate(request);
+    if (errors.Count > 0)
+    {
+        return ApiResponses.ValidationProblem(errors);
+    }
+
+    var result = await service.RejectManyAsync(
+        projectId,
+        request.KnowledgeItemIds,
+        ToReviewRequest(request),
+        cancellationToken);
+
+    return result.Count == 0 ? ApiResponses.NotFound("Project or knowledge items were not found.") : Results.Ok(result);
+});
+
 projects.MapPost("/{projectId:guid}/roadmaps", async Task<IResult> (
     Guid projectId,
     GenerateRoadmapRequest request,
@@ -313,3 +376,8 @@ operations.MapPost("/backups/{fileName}/restore", async Task<IResult> (
 });
 
 app.Run();
+
+static ReviewKnowledgeItemRequest ToReviewRequest(BulkReviewKnowledgeItemsRequest request)
+{
+    return new ReviewKnowledgeItemRequest(request.Reviewer, request.Comment, request.QualityStatus);
+}

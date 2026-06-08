@@ -61,12 +61,23 @@ public static class RequestValidation
 
         AddRequired(errors, nameof(request.Reviewer), request.Reviewer);
         AddRequired(errors, nameof(request.Comment), request.Comment);
+        AddKnowledgeQualityStatus(errors, nameof(request.QualityStatus), request.QualityStatus);
 
-        if (!string.IsNullOrWhiteSpace(request.QualityStatus)
-            && !AllowedKnowledgeQualityStatuses.Contains(request.QualityStatus, StringComparer.Ordinal))
+        return errors;
+    }
+
+    public static IReadOnlyDictionary<string, string[]> Validate(BulkReviewKnowledgeItemsRequest request)
+    {
+        var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
+        if (request.KnowledgeItemIds.Count == 0)
         {
-            errors[nameof(request.QualityStatus)] = [$"QualityStatus must be one of: {string.Join(", ", AllowedKnowledgeQualityStatuses)}."];
+            errors[nameof(request.KnowledgeItemIds)] = ["At least one knowledge item id is required."];
         }
+
+        AddRequired(errors, nameof(request.Reviewer), request.Reviewer);
+        AddRequired(errors, nameof(request.Comment), request.Comment);
+        AddKnowledgeQualityStatus(errors, nameof(request.QualityStatus), request.QualityStatus);
 
         return errors;
     }
@@ -90,6 +101,15 @@ public static class RequestValidation
         if (string.IsNullOrWhiteSpace(value))
         {
             errors[fieldName] = ["Value is required."];
+        }
+    }
+
+    private static void AddKnowledgeQualityStatus(IDictionary<string, string[]> errors, string fieldName, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value)
+            && !AllowedKnowledgeQualityStatuses.Contains(value, StringComparer.Ordinal))
+        {
+            errors[fieldName] = [$"QualityStatus must be one of: {string.Join(", ", AllowedKnowledgeQualityStatuses)}."];
         }
     }
 }

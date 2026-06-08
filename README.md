@@ -194,6 +194,24 @@ Content-Type: application/json
 }
 ```
 
+Bulk submit, approve or reject knowledge items:
+
+```http
+POST http://localhost:5256/api/projects/{projectId}/knowledge-items/bulk-submit-review
+POST http://localhost:5256/api/projects/{projectId}/knowledge-items/bulk-approve
+POST http://localhost:5256/api/projects/{projectId}/knowledge-items/bulk-reject
+Content-Type: application/json
+
+{
+  "knowledgeItemIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "reviewer": "Senior Engineer",
+  "comment": "Batch confirmed against source.",
+  "qualityStatus": "Verified"
+}
+```
+
 Generate a roadmap:
 
 ```http
