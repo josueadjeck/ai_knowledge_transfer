@@ -4,4 +4,5 @@ public sealed record ParsedDocumentChunk(
     int ChunkNumber,
     string Text,
     int StartCharacter,
-    int EndCharacter);
+    int EndCharacter,
+    string SourceReference = "Document text");

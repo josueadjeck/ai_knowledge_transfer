@@ -16,5 +16,7 @@ public sealed class DocumentChunkRecord
 
     public int EndCharacter { get; set; }
 
+    public string SourceReference { get; set; } = string.Empty;
+
     public DateTimeOffset CreatedAt { get; set; }
 }

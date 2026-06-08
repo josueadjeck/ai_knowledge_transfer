@@ -6,7 +6,9 @@ internal static class DocumentChunker
 {
     private const int MaxChunkLength = 1200;
 
-    public static IReadOnlyCollection<ParsedDocumentChunk> SplitIntoChunks(string text)
+    public static IReadOnlyCollection<ParsedDocumentChunk> SplitIntoChunks(
+        string text,
+        string sourceReference = "Document text")
     {
         var chunks = new List<ParsedDocumentChunk>();
         var chunkNumber = 1;
@@ -27,7 +29,8 @@ internal static class DocumentChunker
                         chunkNumber++,
                         chunkText,
                         start,
-                        start + chunkText.Length));
+                        start + chunkText.Length,
+                        $"{sourceReference}, characters {start}-{start + chunkText.Length}"));
                 }
 
                 remaining = remaining[length..].TrimStart();

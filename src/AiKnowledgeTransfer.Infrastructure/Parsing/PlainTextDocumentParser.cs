@@ -41,7 +41,7 @@ public sealed class PlainTextDocumentParser : IDocumentParser
     {
         using var reader = new StreamReader(content, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
         var text = await reader.ReadToEndAsync(cancellationToken);
-        var chunks = DocumentChunker.SplitIntoChunks(text);
+        var chunks = DocumentChunker.SplitIntoChunks(text, "Plain text body");
 
         return new ParsedDocument(
             chunks,

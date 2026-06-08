@@ -63,6 +63,7 @@ public sealed class DocumentAnalysisService(
             chunk.ChunkNumber,
             chunk.Text,
             chunk.StartCharacter,
-            chunk.EndCharacter);
+            chunk.EndCharacter,
+            chunk.SourceReference);
     }
 }

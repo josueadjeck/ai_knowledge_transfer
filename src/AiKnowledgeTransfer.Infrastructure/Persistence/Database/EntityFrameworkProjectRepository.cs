@@ -121,6 +121,7 @@ public sealed class EntityFrameworkProjectRepository : IProjectRepository
             Text = chunk.Text,
             StartCharacter = chunk.StartCharacter,
             EndCharacter = chunk.EndCharacter,
+            SourceReference = chunk.SourceReference,
             CreatedAt = chunk.CreatedAt
         };
     }
@@ -239,7 +240,8 @@ public sealed class EntityFrameworkProjectRepository : IProjectRepository
             record.Text,
             record.StartCharacter,
             record.EndCharacter,
-            record.CreatedAt);
+            record.CreatedAt,
+            record.SourceReference);
     }
 
     private static KnowledgeItem ToDomain(KnowledgeItemRecord record)

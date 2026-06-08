@@ -17,6 +17,7 @@ public sealed class DocumentChunkerTests
         Assert.Equal([1, 2], chunks.Select(chunk => chunk.ChunkNumber));
         Assert.Contains(chunks, chunk => chunk.Text == "System overview");
         Assert.Contains(chunks, chunk => chunk.Text == "Deployment workflow");
+        Assert.All(chunks, chunk => Assert.Contains("Document text", chunk.SourceReference, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -31,5 +32,15 @@ public sealed class DocumentChunkerTests
         Assert.Equal(100, chunks.Last().Text.Length);
         Assert.Equal(0, chunks.First().StartCharacter);
         Assert.Equal(1200, chunks.Last().StartCharacter);
+        Assert.Contains("characters 1200-1300", chunks.Last().SourceReference, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SplitIntoChunks_uses_custom_source_reference()
+    {
+        var chunks = DocumentChunker.SplitIntoChunks("System overview", "Word document body");
+
+        Assert.Single(chunks);
+        Assert.Equal("Word document body, characters 0-15", chunks.Single().SourceReference);
     }
 }

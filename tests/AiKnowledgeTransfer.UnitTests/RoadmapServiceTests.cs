@@ -339,6 +339,7 @@ public sealed class RoadmapServiceTests
         Assert.Equal(nameof(PlainTextDocumentParser), analysis.ParserName);
         Assert.Contains("Text parser created", analysis.Detail, StringComparison.Ordinal);
         Assert.All(analysis.Chunks, chunk => Assert.Equal(upload.Document.Id, chunk.DocumentId));
+        Assert.All(analysis.Chunks, chunk => Assert.Contains("Plain text body", chunk.SourceReference, StringComparison.Ordinal));
         Assert.Contains(analysis.Chunks, chunk => chunk.Text.Contains("Deployment", StringComparison.Ordinal));
     }
 

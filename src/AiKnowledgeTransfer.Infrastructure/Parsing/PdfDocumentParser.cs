@@ -34,7 +34,7 @@ public sealed class PdfDocumentParser : IDocumentParser
         CancellationToken cancellationToken)
     {
         var text = ExtractText(content, cancellationToken);
-        var chunks = DocumentChunker.SplitIntoChunks(text);
+        var chunks = DocumentChunker.SplitIntoChunks(text, "PDF extractable text");
         if (chunks.Count == 0)
         {
             throw new InvalidOperationException("PDF did not contain extractable text. Scanned PDFs need OCR before analysis.");

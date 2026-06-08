@@ -7,4 +7,5 @@ public sealed record DocumentChunkResponse(
     string Text,
     int StartCharacter,
     int EndCharacter,
+    string SourceReference,
     DateTimeOffset CreatedAt);

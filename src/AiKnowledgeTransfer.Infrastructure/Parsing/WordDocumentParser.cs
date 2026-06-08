@@ -36,7 +36,7 @@ public sealed class WordDocumentParser : IDocumentParser
         CancellationToken cancellationToken)
     {
         var text = ExtractText(content, cancellationToken);
-        var chunks = DocumentChunker.SplitIntoChunks(text);
+        var chunks = DocumentChunker.SplitIntoChunks(text, "Word document body");
         if (chunks.Count == 0)
         {
             throw new InvalidOperationException("Word document did not contain extractable text.");

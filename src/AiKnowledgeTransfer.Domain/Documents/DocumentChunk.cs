@@ -8,6 +8,7 @@ public sealed class DocumentChunk
         string text,
         int startCharacter,
         int endCharacter,
+        string sourceReference,
         DateTimeOffset createdAt)
     {
         Id = id;
@@ -15,10 +16,18 @@ public sealed class DocumentChunk
         Text = text;
         StartCharacter = startCharacter;
         EndCharacter = endCharacter;
+        SourceReference = string.IsNullOrWhiteSpace(sourceReference)
+            ? "Imported legacy chunk"
+            : sourceReference.Trim();
         CreatedAt = createdAt;
     }
 
-    public DocumentChunk(int chunkNumber, string text, int startCharacter, int endCharacter)
+    public DocumentChunk(
+        int chunkNumber,
+        string text,
+        int startCharacter,
+        int endCharacter,
+        string sourceReference = "Document text")
     {
         if (chunkNumber <= 0)
         {
@@ -40,6 +49,9 @@ public sealed class DocumentChunk
         Text = text.Trim();
         StartCharacter = startCharacter;
         EndCharacter = endCharacter;
+        SourceReference = string.IsNullOrWhiteSpace(sourceReference)
+            ? "Document text"
+            : sourceReference.Trim();
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
@@ -53,6 +65,8 @@ public sealed class DocumentChunk
 
     public int EndCharacter { get; }
 
+    public string SourceReference { get; }
+
     public DateTimeOffset CreatedAt { get; }
 
     public static DocumentChunk Rehydrate(
@@ -61,7 +75,8 @@ public sealed class DocumentChunk
         string text,
         int startCharacter,
         int endCharacter,
-        DateTimeOffset createdAt)
+        DateTimeOffset createdAt,
+        string sourceReference = "Imported legacy chunk")
     {
         return new DocumentChunk(
             id,
@@ -69,6 +84,7 @@ public sealed class DocumentChunk
             text,
             startCharacter,
             endCharacter,
+            sourceReference,
             createdAt);
     }
 }

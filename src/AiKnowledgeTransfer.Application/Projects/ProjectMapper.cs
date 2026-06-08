@@ -64,6 +64,7 @@ public static class ProjectMapper
             chunk.Text,
             chunk.StartCharacter,
             chunk.EndCharacter,
+            chunk.SourceReference,
             chunk.CreatedAt);
     }
 
