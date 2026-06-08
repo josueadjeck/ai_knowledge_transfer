@@ -33,6 +33,7 @@
 @inject OnboardingReadinessService OnboardingReadiness
 @inject OnboardingStartPackageService OnboardingStartPackages
 @inject MarkdownExportService MarkdownExports
+@inject ExportHistoryService ExportHistory
 @inject TraceabilityService Traceability
 @inject ComplianceMatrixService Compliance
 @inject RolePermissionService Permissions
@@ -513,6 +514,7 @@
             <button @onclick="LoadTraceabilityAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Traceability laden</button>
             <button @onclick="LoadComplianceAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Compliance Matrix</button>
             <button @onclick="ExportMarkdownAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Markdown Export</button>
+            <button @onclick="LoadExportHistoryAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Export-Historie</button>
             <button @onclick="LoadAuditAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Audit Log</button>
         </div>
         @if (_compliance is not null)
@@ -693,6 +695,19 @@
                 <textarea class="export-preview" readonly>@_export.Markdown</textarea>
             </details>
         }
+        @if (_exportHistory.Count > 0)
+        {
+            <div class="compact-list">
+                @foreach (var export in _exportHistory.Take(5))
+                {
+                    <div>
+                        <strong>@export.FileName</strong>
+                        <span>@export.ContentType | @export.ExportedAt.LocalDateTime:g</span>
+                        <span>@export.Summary</span>
+                    </div>
+                }
+            </div>
+        }
     </div>
 
     <div class="workflow-panel span-2">
@@ -846,6 +861,7 @@
     private TraceabilityMatrixResponse? _traceability;
     private ComplianceMatrixResponse? _compliance;
     private ExportProjectMarkdownResponse? _export;
+    private IReadOnlyCollection<ExportHistoryResponse> _exportHistory = [];
     private AnalyzeDocumentResponse? _lastAnalysis;
     private ExtractKnowledgeResponse? _lastExtraction;
     private KnowledgeReviewSummaryResponse? _reviewSummary;
@@ -1228,7 +1244,22 @@
         await RunSafelyAsync("Markdown exportieren", async () =>
         {
             _export = await MarkdownExports.ExportProjectAsync(_selectedProject.Id, CancellationToken.None);
+            _exportHistory = await ExportHistory.ListAsync(_selectedProject.Id, CancellationToken.None);
             SetStatus("Markdown Export erzeugt", _export?.FileName ?? "Export");
+        });
+    }
+
+    private async Task LoadExportHistoryAsync()
+    {
+        if (_selectedProject is null || !Can(Permission.ExportProject))
+        {
+            return;
+        }
+
+        await RunSafelyAsync("Export-Historie laden", async () =>
+        {
+            _exportHistory = await ExportHistory.ListAsync(_selectedProject.Id, CancellationToken.None);
+            SetStatus("Export-Historie geladen", $"{_exportHistory.Count} Exporte");
         });
     }
 
@@ -1366,6 +1397,7 @@
         _traceability = null;
         _compliance = null;
         _export = null;
+        _exportHistory = [];
         _lastAnalysis = null;
         _lastExtraction = null;
         _auditEvents = [];

@@ -13,6 +13,7 @@ using AiKnowledgeTransfer.Infrastructure.Knowledge;
 using AiKnowledgeTransfer.Infrastructure.Parsing;
 using AiKnowledgeTransfer.Infrastructure.Storage;
 using AiKnowledgeTransfer.Infrastructure.Persistence;
+using AiKnowledgeTransfer.Infrastructure.Audit;
 
 public sealed class RoadmapServiceTests
 {
@@ -590,13 +591,15 @@ public sealed class RoadmapServiceTests
         var repository = new InMemoryProjectRepository();
         var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
         var storage = new LocalFileStorage(storageRoot);
+        var auditLog = new JsonAuditLog(Path.Combine(storageRoot, "audit-log.json"));
         var parser = new PlainTextDocumentParser();
         var projectService = new ProjectService(repository, storage);
         var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
         var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
         var reviewService = new KnowledgeReviewService(repository);
         var roadmapService = new RoadmapService(repository);
-        var exportService = new MarkdownExportService(repository);
+        var exportService = new MarkdownExportService(repository, auditLog);
+        var exportHistoryService = new ExportHistoryService(auditLog);
 
         var project = await projectService.CreateAsync(
             new CreateProjectRequest("Export Project", "Markdown export test", "Engineering"),
@@ -642,6 +645,13 @@ public sealed class RoadmapServiceTests
         Assert.Contains("Approve", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("Review History", export.Markdown, StringComparison.Ordinal);
         Assert.Contains("Support Engineer", export.Markdown, StringComparison.Ordinal);
+
+        var history = await exportHistoryService.ListAsync(project.Id, CancellationToken.None);
+
+        var exportRun = Assert.Single(history);
+        Assert.Equal(export.FileName, exportRun.FileName);
+        Assert.Equal("text/markdown", exportRun.ContentType);
+        Assert.Contains("Markdown export", exportRun.Summary, StringComparison.Ordinal);
     }
 
     [Fact]

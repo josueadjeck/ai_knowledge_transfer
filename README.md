@@ -34,6 +34,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Onboarding readiness check for whether a project can start a supervised pilot onboarding.
 - Onboarding start package with first-week roadmap content, starter tasks and review warnings.
 - Markdown export for project handover documents.
+- Export history endpoint and dashboard list for generated Markdown exports.
 - Traceability matrix for source, knowledge, review, review history and roadmap/export usage.
 - Compliance matrix endpoint and Blazor view for compliant vs open evidence.
 - Project details endpoint with documents, knowledge items and generated roadmaps.
@@ -104,6 +105,7 @@ The web UI can run the MVP workflow directly:
 - Inspect the onboarding start package for the first supervised onboarding steps.
 - Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
 - Load traceability and Markdown export output.
+- Inspect export history after generated Markdown exports.
 - Inspect traceability rows with source, knowledge, review state, review history, roadmap usage and export state.
 - Inspect compliance rows with evidence status, export readiness and open gaps.
 - Inspect and filter audit log events by action and target type.
@@ -272,6 +274,12 @@ Export a project handover document as Markdown:
 
 ```http
 GET http://localhost:5256/api/projects/{projectId}/exports/markdown
+```
+
+Get export history:
+
+```http
+GET http://localhost:5256/api/projects/{projectId}/exports/history
 ```
 
 Get the traceability matrix:

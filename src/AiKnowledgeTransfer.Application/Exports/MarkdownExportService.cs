@@ -22,14 +22,15 @@ public sealed class MarkdownExportService(
         }
 
         var generatedAt = DateTimeOffset.UtcNow;
+        var fileName = $"{ToSafeFileName(project.Name)}-knowledge-transfer.md";
         var markdown = BuildMarkdown(project, generatedAt);
         await _auditLog.AppendAsync(
-            AuditEvent.Create(project.Id, "ProjectExported", "system", "Project", project.Id, $"Markdown export for '{project.Name}' was generated."),
+            AuditEvent.Create(project.Id, "ProjectExported", "system", fileName, project.Id, $"Markdown export for '{project.Name}' was generated."),
             cancellationToken);
 
         return new ExportProjectMarkdownResponse(
             project.Id,
-            $"{ToSafeFileName(project.Name)}-knowledge-transfer.md",
+            fileName,
             "text/markdown",
             markdown,
             generatedAt);

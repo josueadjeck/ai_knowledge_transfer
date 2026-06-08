@@ -319,6 +319,15 @@ projects.MapGet("/{projectId:guid}/exports/markdown", async Task<IResult> (
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
 });
 
+projects.MapGet("/{projectId:guid}/exports/history", async Task<IResult> (
+    Guid projectId,
+    ExportHistoryService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.ListAsync(projectId, cancellationToken);
+    return Results.Ok(result);
+});
+
 projects.MapGet("/{projectId:guid}/traceability", async Task<IResult> (
     Guid projectId,
     TraceabilityService service,
