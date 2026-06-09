@@ -1658,6 +1658,7 @@
     {
         return exception switch
         {
+            DocumentAnalysisLimitExceededException => $"{exception.Message} Bitte Dokument teilen, kuerzen oder die Analyse-Limits im Betrieb kontrolliert erhoehen.",
             NotSupportedException => exception.Message,
             InvalidOperationException => exception.Message,
             IOException => "Datei oder lokaler Speicher ist gerade nicht verfuegbar.",

@@ -140,6 +140,10 @@ projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/analyze", async 
     {
         return ApiResponses.BadRequest(exception.Message);
     }
+    catch (DocumentAnalysisLimitExceededException exception)
+    {
+        return ApiResponses.BadRequest("document_analysis_limit_exceeded", exception.Message);
+    }
     catch (InvalidOperationException exception)
     {
         return ApiResponses.BadRequest(exception.Message);

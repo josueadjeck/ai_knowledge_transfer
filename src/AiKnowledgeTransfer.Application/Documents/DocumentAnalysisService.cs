@@ -80,15 +80,21 @@ public sealed class DocumentAnalysisService(
     {
         if (parsedDocument.Chunks.Count > _options.MaxChunksPerDocument)
         {
-            throw new InvalidOperationException(
-                $"Document '{fileName}' produced {parsedDocument.Chunks.Count} chunks. The configured analysis limit is {_options.MaxChunksPerDocument} chunks.");
+            throw new DocumentAnalysisLimitExceededException(
+                fileName,
+                "chunks",
+                parsedDocument.Chunks.Count,
+                _options.MaxChunksPerDocument);
         }
 
         var totalExtractedCharacters = parsedDocument.Chunks.Sum(chunk => chunk.Text.Length);
         if (totalExtractedCharacters > _options.MaxTotalExtractedCharacters)
         {
-            throw new InvalidOperationException(
-                $"Document '{fileName}' produced {totalExtractedCharacters} extracted characters. The configured analysis limit is {_options.MaxTotalExtractedCharacters} characters.");
+            throw new DocumentAnalysisLimitExceededException(
+                fileName,
+                "extracted characters",
+                totalExtractedCharacters,
+                _options.MaxTotalExtractedCharacters);
         }
     }
 }

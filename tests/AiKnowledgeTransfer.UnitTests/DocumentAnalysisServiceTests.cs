@@ -24,10 +24,13 @@ public sealed class DocumentAnalysisServiceTests
 
         var upload = await UploadTextDocumentAsync(projectService);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var exception = await Assert.ThrowsAsync<DocumentAnalysisLimitExceededException>(() =>
             analysisService.AnalyzeAsync(upload.ProjectId, upload.DocumentId, CancellationToken.None));
 
         Assert.Contains("configured analysis limit is 2 chunks", exception.Message);
+        Assert.Equal("chunks", exception.LimitName);
+        Assert.Equal(3, exception.ActualValue);
+        Assert.Equal(2, exception.ConfiguredLimit);
 
         var project = await repository.GetAsync(upload.ProjectId, CancellationToken.None);
         Assert.Empty(project!.Documents.Single().Chunks);
@@ -48,10 +51,13 @@ public sealed class DocumentAnalysisServiceTests
 
         var upload = await UploadTextDocumentAsync(projectService);
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var exception = await Assert.ThrowsAsync<DocumentAnalysisLimitExceededException>(() =>
             analysisService.AnalyzeAsync(upload.ProjectId, upload.DocumentId, CancellationToken.None));
 
-        Assert.Contains("configured analysis limit is 30 characters", exception.Message);
+        Assert.Contains("configured analysis limit is 30 extracted characters", exception.Message);
+        Assert.Equal("extracted characters", exception.LimitName);
+        Assert.Equal(40, exception.ActualValue);
+        Assert.Equal(30, exception.ConfiguredLimit);
 
         var project = await repository.GetAsync(upload.ProjectId, CancellationToken.None);
         Assert.Empty(project!.Documents.Single().Chunks);

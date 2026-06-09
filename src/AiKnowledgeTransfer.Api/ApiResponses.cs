@@ -14,6 +14,11 @@ internal static class ApiResponses
         return Results.BadRequest(new ErrorResponse("bad_request", message));
     }
 
+    public static IResult BadRequest(string code, string message)
+    {
+        return Results.BadRequest(new ErrorResponse(code, message));
+    }
+
     public static IResult Forbidden(string message)
     {
         return Results.Json(new ErrorResponse("forbidden", message), statusCode: StatusCodes.Status403Forbidden);

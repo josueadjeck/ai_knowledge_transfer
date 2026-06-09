@@ -9,6 +9,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - User-facing error feedback for failed workflow operations.
 - ASP.NET Core API with project, document and roadmap endpoints.
 - Consistent API validation and JSON error responses for common failure cases.
+- Document analysis limit violations return a stable `document_analysis_limit_exceeded` API error code.
 - Multipart document upload with local file storage.
 - Central upload validation for supported file types and 10 MB maximum file size.
 - Document cards show source, content type, file size, version, upload time and storage status.
@@ -166,6 +167,7 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 ## Document analysis limits
 
 Uploads are capped at 10 MB. Parsed analysis output is additionally limited so unexpectedly large or noisy documents cannot create oversized analysis jobs.
+If a parsed document exceeds these limits, the API returns `document_analysis_limit_exceeded` and the web UI recommends splitting, shortening or deliberately raising the configured limit.
 
 Optional environment variables:
 
