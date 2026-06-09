@@ -180,6 +180,7 @@ Aktueller Implementierungsstand:
 - Auth-/Rollenhaertung ist erweitert: Die Web-App aktiviert im OIDC-Modus Cookie- und OpenID-Connect-Redirect-Login mit Login-/Logout-Endpunkten.
 - Release-/Security-Haertung ist erweitert: Release-Readiness warnt bei aktivem Demo-Auth-Modus und bewertet konfigurierte OIDC-Authentifizierung explizit als release-tauglich.
 - Performance-Grundlage ist gestartet: Dokumentanalysen haben konfigurierbare Schutzgrenzen fuer maximale Chunk-Anzahl und extrahierte Gesamtzeichen pro Dokument.
+- Performance-Grundlage ist erweitert: Analyse-Preflight bewertet Parser-Verfuegbarkeit und erwartete Last grosser Dokumente vor teuren Parser- oder AI-Aufrufen.
 - Betriebs-Grundlage ist erweitert: Health und Blazor-Operationsbereich zeigen die aktiven Analyse-Schutzgrenzen fuer grosse Dokumente.
 - UX-/API-Haertung ist erweitert: Analyseabbrueche durch Schutzgrenzen liefern einen stabilen Fehlercode und klare Handlungshinweise in API und Blazor-UI.
 - Performance-Grundlage ist erweitert: Knowledge Extraction hat konfigurierbare Schutzgrenzen vor AI-Provider-Aufrufen und meldet Limitverletzungen mit stabilem API-Fehlercode.

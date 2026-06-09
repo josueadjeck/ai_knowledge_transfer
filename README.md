@@ -21,6 +21,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Document chunks include deterministic quality labels such as `UsableText` and `ReviewShortText`.
 - Document analysis responses and the Blazor workflow summarize chunk quality counts.
 - Document analysis has configurable guardrails for maximum chunks and extracted characters per document.
+- Document analysis preflight estimates workload and parser readiness before running parser or AI work.
 - Supported parser capabilities are available through API and visible in the Blazor document workflow.
 - Document analysis responses and the Blazor workflow show parser name, chunk count and parser detail.
 - PDF analysis reports that scanned PDFs need OCR when no extractable text is available.
@@ -177,6 +178,7 @@ For pilot and enterprise deployments, inject `OPENAI_API_KEY` and other sensitiv
 ## Document analysis limits
 
 Uploads are capped at 10 MB. Parsed analysis output is additionally limited so unexpectedly large or noisy documents cannot create oversized analysis jobs.
+The analysis preflight check estimates parser readiness and workload from document metadata before the expensive parser and AI path runs.
 If a parsed document exceeds these limits, the API returns `document_analysis_limit_exceeded` and the web UI recommends splitting, shortening or deliberately raising the configured limit.
 
 Optional environment variables:
@@ -412,6 +414,12 @@ Get audit events:
 ```http
 GET http://localhost:5256/api/audit
 GET http://localhost:5256/api/projects/{projectId}/audit
+```
+
+Get document analysis preflight:
+
+```http
+GET http://localhost:5256/api/projects/{projectId}/documents/{documentId}/analysis-preflight
 ```
 
 Get operational health:

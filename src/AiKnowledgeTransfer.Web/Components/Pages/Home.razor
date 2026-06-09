@@ -28,6 +28,7 @@
 
 @inject ProjectService Projects
 @inject DocumentAnalysisService Analysis
+@inject DocumentAnalysisPreflightService AnalysisPreflight
 @inject KnowledgeExtractionService Extraction
 @inject KnowledgeReviewService Review
 @inject KnowledgeReviewSummaryService ReviewSummary
@@ -168,9 +169,35 @@
             </details>
         }
         <div class="button-row">
+            <button @onclick="LoadAnalysisPreflightAsync" disabled="@(!CanAnalyze)">Preflight pruefen</button>
             <button @onclick="AnalyzeLatestDocumentAsync" disabled="@(!CanAnalyze)">Analysieren</button>
             <button @onclick="ExtractKnowledgeAsync" disabled="@(!CanExtract)">Wissen extrahieren</button>
         </div>
+        @if (_analysisPreflight is not null)
+        {
+            <div class="analysis-summary">
+                <div>
+                    <span>Preflight</span>
+                    <strong class="@PreflightStatusClass(_analysisPreflight.Status)">@_analysisPreflight.Status</strong>
+                </div>
+                <div>
+                    <span>Last</span>
+                    <strong>@_analysisPreflight.WorkloadClass</strong>
+                </div>
+                <div>
+                    <span>Parser</span>
+                    <strong>@_analysisPreflight.ParserName</strong>
+                </div>
+                <div>
+                    <span>Extraction Limit</span>
+                    <strong>@_analysisPreflight.ExtractionLimitUtilizationPercent%</strong>
+                </div>
+                <div class="span-2">
+                    <span>Empfehlung</span>
+                    <strong>@string.Join(" ", _analysisPreflight.Recommendations)</strong>
+                </div>
+            </div>
+        }
         @if (_lastAnalysis is not null)
         {
             <div class="analysis-summary">
@@ -1023,6 +1050,7 @@
     private string _exportApprovalReviewer = "Senior Engineer";
     private string _exportApprovalComment = "Export reviewed for pilot onboarding.";
     private AnalyzeDocumentResponse? _lastAnalysis;
+    private DocumentAnalysisPreflightResponse? _analysisPreflight;
     private ExtractKnowledgeResponse? _lastExtraction;
     private KnowledgeReviewSummaryResponse? _reviewSummary;
     private OnboardingReadinessResponse? _onboardingReadiness;
@@ -1205,6 +1233,21 @@
             await LoadSelectedProjectAsync();
             _lastAnalysis = analysis;
             SetStatus("Analyse abgeschlossen", AnalysisStatusDetail(analysis));
+        });
+    }
+
+    private async Task LoadAnalysisPreflightAsync()
+    {
+        var document = _selectedProject?.Documents.LastOrDefault(candidate => candidate.Status == "Registered");
+        if (_selectedProject is null || document is null)
+        {
+            return;
+        }
+
+        await RunSafelyAsync("Analyse-Preflight pruefen", async () =>
+        {
+            _analysisPreflight = await AnalysisPreflight.GetAsync(_selectedProject.Id, document.Id, CancellationToken.None);
+            SetStatus("Preflight abgeschlossen", PreflightStatusDetail(_analysisPreflight));
         });
     }
 
@@ -1757,6 +1800,15 @@
                     : "health-error";
     }
 
+    private static string PreflightStatusClass(string status)
+    {
+        return status.Equals("Ready", StringComparison.OrdinalIgnoreCase)
+            ? "health-ok"
+            : status.Equals("ReviewRecommended", StringComparison.OrdinalIgnoreCase)
+                ? "health-warning"
+                : "health-error";
+    }
+
     private static string ReadinessStatusClass(string status)
     {
         return status.Equals("Ready", StringComparison.OrdinalIgnoreCase)
@@ -1936,6 +1988,16 @@
         return analysis is null
             ? "Keine Analyse erzeugt."
             : $"{analysis.ChunkCount} Chunks via {analysis.ParserName} | {AnalysisQualitySummary(analysis)}";
+    }
+
+    private static string PreflightStatusDetail(DocumentAnalysisPreflightResponse? preflight)
+    {
+        if (preflight is null)
+        {
+            return "Kein Preflight-Ergebnis.";
+        }
+
+        return $"{preflight.Status}, {preflight.WorkloadClass}, Extraction {preflight.ExtractionLimitUtilizationPercent}%";
     }
 
     private static string AnalysisDetail(AnalyzeDocumentResponse analysis)

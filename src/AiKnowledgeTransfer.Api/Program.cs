@@ -151,6 +151,17 @@ projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/analyze", async 
 })
 .RequirePermission(Permission.AnalyzeDocument);
 
+projects.MapGet("/{projectId:guid}/documents/{documentId:guid}/analysis-preflight", async Task<IResult> (
+    Guid projectId,
+    Guid documentId,
+    DocumentAnalysisPreflightService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.GetAsync(projectId, documentId, cancellationToken);
+    return result is null ? ApiResponses.NotFound("Project or document was not found.") : Results.Ok(result);
+})
+.RequirePermission(Permission.AnalyzeDocument);
+
 projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/extract-knowledge", async Task<IResult> (
     Guid projectId,
     Guid documentId,
