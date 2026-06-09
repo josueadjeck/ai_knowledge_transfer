@@ -7,6 +7,7 @@ var storageRootPath = Path.Combine(builder.Environment.ContentRootPath, "App_Dat
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddCascadingAuthenticationState();
 
 builder.Services
     .AddApplication()

@@ -23,6 +23,8 @@
 @using AiKnowledgeTransfer.Contracts.Traceability
 @using AiKnowledgeTransfer.Contracts.Validation
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 
 @inject ProjectService Projects
 @inject DocumentAnalysisService Analysis
@@ -43,6 +45,9 @@
 @inject ReleaseReadinessService ReleaseReadiness
 @inject OperationalHealthService Health
 @inject DocumentParserCapabilityService ParserCapabilities
+@inject AuthenticationOptions AuthOptions
+@inject PermissionAuthorizationService Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>AI Knowledge Transfer</PageTitle>
 
@@ -59,15 +64,19 @@
         <strong>@StatusText</strong>
         <span class="@StatusCssClass">@StatusDetail</span>
         <span>@CurrentUser.DisplayName | @CurrentUser.Source</span>
-        <label class="role-select">
-            Rolle
-            <select @bind="_currentRole">
-                @foreach (var role in Enum.GetValues<UserRole>())
-                {
-                    <option value="@role">@role</option>
-                }
-            </select>
-        </label>
+        <span>Auth: @AuthOptions.Mode</span>
+        @if (!AuthOptions.IsOidc)
+        {
+            <label class="role-select">
+                Rolle
+                <select @bind="_currentRole">
+                    @foreach (var role in Enum.GetValues<UserRole>())
+                    {
+                        <option value="@role">@role</option>
+                    }
+                </select>
+            </label>
+        }
     </div>
 </section>
 
@@ -935,6 +944,7 @@
     private IReadOnlyCollection<DocumentParserCapabilityResponse> _parserCapabilities = [];
     private BackupPreviewResponse? _backupPreview;
     private string? _selectedBackupFileName;
+    private ClaimsPrincipal _authenticatedPrincipal = new(new ClaimsIdentity());
 
     private bool CanAnalyze => Can(Permission.AnalyzeDocument)
         && _selectedProject?.Documents.Any(document => document.Status == "Registered") == true;
@@ -942,7 +952,7 @@
     private bool CanExtract => Can(Permission.ExtractKnowledge)
         && _selectedProject?.Documents.Any(document => document.Status == "Analyzed") == true;
 
-    private bool CanOperateBackups => _currentRole == UserRole.Admin;
+    private bool CanOperateBackups => Can(Permission.ManageUsers);
 
     private bool CanRestoreBackup => CanOperateBackups
         && !string.IsNullOrWhiteSpace(_selectedBackupFileName)
@@ -953,7 +963,13 @@
 
     private bool HasFilteredKnowledgeItems => FilteredKnowledgeItems.Any();
 
-    private CurrentUserResponse CurrentUser => Identity.CreateDemoUser(_currentRole);
+    private CurrentUserResponse CurrentUser => AuthOptions.IsOidc
+        ? Identity.Resolve(CurrentPrincipal)
+        : Identity.CreateDemoUser(_currentRole);
+
+    private ClaimsPrincipal CurrentPrincipal => AuthOptions.IsOidc
+        ? _authenticatedPrincipal
+        : CreateDemoPrincipal(_currentRole);
 
     private bool CanBulkSubmitReview => Can(Permission.SubmitKnowledgeReview) && HasFilteredKnowledgeItems;
 
@@ -1006,11 +1022,19 @@
 
     private bool Can(Permission permission)
     {
-        return CurrentUser.Permissions.Contains(permission);
+        return Authorization.HasPermission(CurrentPrincipal, permission);
+    }
+
+    private static ClaimsPrincipal CreateDemoPrincipal(UserRole role)
+    {
+        return new ClaimsPrincipal(new ClaimsIdentity(
+            [new Claim(ClaimTypes.Role, role.ToString())],
+            authenticationType: "Demo"));
     }
 
     protected override async Task OnInitializedAsync()
     {
+        _authenticatedPrincipal = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
         _parserCapabilities = ParserCapabilities.List();
         await LoadProjectsAsync();
         await LoadBackupsAsync();

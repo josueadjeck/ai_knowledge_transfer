@@ -173,6 +173,7 @@ Aktueller Implementierungsstand:
 - Auth-/Rollenhaertung ist erweitert: API-Endpunkte pruefen Berechtigungen serverseitig ueber den Identity-/Claims-Kontext.
 - Auth-/Rollenhaertung ist erweitert: OIDC-/Entra-Konfiguration ist ueber Umgebungsvariablen vorbereitet und wird in Health sowie Release-Readiness bewertet.
 - Auth-/Rollenhaertung ist erweitert: Die API aktiviert im OIDC-Modus JWT-Bearer-Validierung und blockiert anonyme Zugriffe an Permission-Gates.
+- Auth-/Rollenhaertung ist erweitert: Die Blazor-UI zeigt den aktiven Auth-Modus, nutzt Demo-Rollen nur im Demo-Modus und prueft Aktionen ueber denselben Authorization-Service wie die API.
 
 ### Phase 0: Produktklaerung
 
