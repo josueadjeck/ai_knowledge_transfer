@@ -54,6 +54,15 @@ $env:AKT_AUTH_CLIENT_ID="<application-client-id>"
 $env:AKT_AUTH_ROLE_CLAIM="roles"
 ```
 
+For a SQL Server backed pilot or production-like deployment, use `AKT_DB_PROVIDER=SqlServer` and provide a SQL Server connection string through the approved secret manager or hosting platform:
+
+```powershell
+$env:AKT_PERSISTENCE_PROVIDER="Database"
+$env:AKT_DB_PROVIDER="SqlServer"
+$env:AKT_DB_CONNECTION_STRING="<sql-server-connection-string>"
+$env:AKT_DB_SCHEMA_MODE="Migrations"
+```
+
 Optional AI provider configuration:
 
 ```powershell
@@ -73,7 +82,7 @@ Before deploying:
 5. Confirm `OPENAI_API_KEY`, database credentials and OIDC/client credentials are injected by an approved secret manager or platform secret store.
 6. Confirm warning and manual checks are accepted by a release owner.
 
-Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the managed EF initial migration. `EnsureCreated` remains available for local MVP runs but is reported as a release-readiness warning in database mode.
+Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the managed EF initial migration. `EnsureCreated` remains available for local MVP runs but is reported as a release-readiness warning in database mode. Release readiness warns for SQLite and passes SQL Server as the current production-capable relational provider.
 
 ## Current Limits
 

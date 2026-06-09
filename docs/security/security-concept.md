@@ -34,9 +34,10 @@ Current storage options:
 
 - JSON persistence for local MVP and demo runs.
 - SQLite database persistence for local relational pilots.
+- SQL Server database persistence for production-like enterprise deployments.
 - Local file storage for uploads and backup archives.
 
-Database mode supports `AKT_DB_SCHEMA_MODE=Migrations` for managed EF schema application. JSON mode remains the default for quick local setup but is not the target for enterprise production.
+Database mode supports `AKT_DB_SCHEMA_MODE=Migrations` for managed EF schema application. JSON mode remains the default for quick local setup but is not the target for enterprise production. SQLite is treated as local pilot persistence; SQL Server is the current production-capable relational provider.
 
 ## Secret Management
 

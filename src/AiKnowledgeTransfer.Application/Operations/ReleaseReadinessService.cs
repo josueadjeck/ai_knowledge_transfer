@@ -21,6 +21,7 @@ public sealed class ReleaseReadinessService(
             BuildHealthCheck(healthStatus),
             BuildPersistenceCheck(healthStatus),
             BuildDatabaseSchemaCheck(healthStatus),
+            BuildDatabaseProviderCheck(healthStatus),
             BuildAuthenticationCheck(authentication),
             BuildTenancyCheck(healthStatus),
             BuildBackupCheck(backupList),
@@ -152,6 +153,54 @@ public sealed class ReleaseReadinessService(
             Required: true,
             "Unsupported database schema mode.",
             $"Schema mode: {schemaMode}");
+    }
+
+    private static ReleaseReadinessCheckResponse BuildDatabaseProviderCheck(HealthResponse healthStatus)
+    {
+        var persistence = healthStatus.Components.FirstOrDefault(component => component.Name == "persistence");
+        var provider = persistence?.Metadata.TryGetValue("provider", out var providerValue) == true
+            ? providerValue
+            : "unknown";
+        var databaseProvider = persistence?.Metadata.TryGetValue("databaseProvider", out var databaseProviderValue) == true
+            ? databaseProviderValue
+            : string.Empty;
+
+        if (!provider.Equals("Database", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Database provider",
+                "Manual",
+                Required: false,
+                "JSON persistence is active; database provider review does not apply to this deployment.",
+                $"Persistence: {provider}");
+        }
+
+        if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Database provider",
+                "Pass",
+                Required: true,
+                "SQL Server is configured as a production-capable relational provider.",
+                $"Database provider: {databaseProvider}");
+        }
+
+        if (databaseProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Database provider",
+                "Warning",
+                Required: false,
+                "SQLite is configured; use it for local pilots, not enterprise production.",
+                $"Database provider: {databaseProvider}");
+        }
+
+        return new ReleaseReadinessCheckResponse(
+            "Database provider",
+            "Fail",
+            Required: true,
+            "Unsupported database provider for release.",
+            $"Database provider: {databaseProvider}");
     }
 
     private static ReleaseReadinessCheckResponse BuildBackupCheck(IReadOnlyCollection<BackupResponse> backupList)

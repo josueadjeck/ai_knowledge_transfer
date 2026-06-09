@@ -32,6 +32,11 @@ public static class DatabaseInfrastructureRegistration
             return services.AddDatabasePersistence(builder => builder.UseSqlite(options.ConnectionString));
         }
 
-        throw new InvalidOperationException("Unsupported AKT_DB_PROVIDER. Currently supported: Sqlite.");
+        if (options.ProviderName?.Equals("SqlServer", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            return services.AddDatabasePersistence(builder => builder.UseSqlServer(options.ConnectionString));
+        }
+
+        throw new InvalidOperationException("Unsupported AKT_DB_PROVIDER. Currently supported: Sqlite, SqlServer.");
     }
 }

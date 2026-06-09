@@ -29,6 +29,7 @@ Expected result:
 - Storage is reachable.
 - Persistence is configured.
 - Database schema mode is visible when database persistence is active.
+- Database provider is reviewed: SQLite for local pilots, SQL Server for production-like deployments.
 - AI provider is either configured or the fallback decision is accepted.
 
 ## Backup and restore
