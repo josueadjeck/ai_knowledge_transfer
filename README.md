@@ -49,6 +49,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - SQLite-backed audit log foundation for local relational persistence tests.
 - Database initialization for SQLite-backed local relational runs.
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
+- Identity resolution foundation for claim-based roles with the MVP role selector as a demo fallback.
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.
 - Health output reports active persistence mode and database provider configuration.
@@ -88,6 +89,7 @@ http://localhost:5280
 The web UI can run the MVP workflow directly:
 
 - Select an MVP role and see actions enabled or disabled by permission.
+- Inspect the active demo identity source while the platform is prepared for claim-based roles.
 - Create or select a project.
 - Upload a text, Markdown, text-based PDF or Word `.docx` document.
 - Inspect supported parser formats before analysis.
@@ -321,6 +323,12 @@ Get the MVP role permission matrix:
 
 ```http
 GET http://localhost:5256/api/security/roles
+```
+
+Get the current resolved user:
+
+```http
+GET http://localhost:5256/api/security/current-user
 ```
 
 Get audit events:

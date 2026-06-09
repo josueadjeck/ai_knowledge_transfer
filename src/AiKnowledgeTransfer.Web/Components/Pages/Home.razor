@@ -37,7 +37,7 @@
 @inject ExportHistoryService ExportHistory
 @inject TraceabilityService Traceability
 @inject ComplianceMatrixService Compliance
-@inject RolePermissionService Permissions
+@inject UserIdentityService Identity
 @inject AuditLogService Audit
 @inject PersistenceBackupService Backups
 @inject ReleaseReadinessService ReleaseReadiness
@@ -58,6 +58,7 @@
         <span class="status-label">Status</span>
         <strong>@StatusText</strong>
         <span class="@StatusCssClass">@StatusDetail</span>
+        <span>@CurrentUser.DisplayName | @CurrentUser.Source</span>
         <label class="role-select">
             Rolle
             <select @bind="_currentRole">
@@ -952,6 +953,8 @@
 
     private bool HasFilteredKnowledgeItems => FilteredKnowledgeItems.Any();
 
+    private CurrentUserResponse CurrentUser => Identity.CreateDemoUser(_currentRole);
+
     private bool CanBulkSubmitReview => Can(Permission.SubmitKnowledgeReview) && HasFilteredKnowledgeItems;
 
     private bool CanBulkApprove => Can(Permission.ApproveKnowledge) && HasFilteredKnowledgeItems;
@@ -1003,7 +1006,7 @@
 
     private bool Can(Permission permission)
     {
-        return Permissions.HasPermission(_currentRole, permission);
+        return CurrentUser.Permissions.Contains(permission);
     }
 
     protected override async Task OnInitializedAsync()

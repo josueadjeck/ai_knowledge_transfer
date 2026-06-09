@@ -397,6 +397,11 @@ app.MapGet("/api/security/roles", (RolePermissionService service) =>
     return Results.Ok(service.GetMatrix());
 });
 
+app.MapGet("/api/security/current-user", (HttpContext httpContext, UserIdentityService service) =>
+{
+    return Results.Ok(service.Resolve(httpContext.User));
+});
+
 app.MapGet("/api/audit", async Task<IResult> (
     AuditLogService service,
     CancellationToken cancellationToken) =>

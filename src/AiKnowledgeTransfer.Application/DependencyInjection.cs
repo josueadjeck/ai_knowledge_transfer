@@ -35,6 +35,7 @@ public static class DependencyInjection
         services.AddScoped<OnboardingReadinessService>();
         services.AddScoped<OnboardingStartPackageService>();
         services.AddScoped<RolePermissionService>();
+        services.AddScoped<UserIdentityService>();
         services.AddScoped<TraceabilityService>();
 
         return services;
