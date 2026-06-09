@@ -45,6 +45,7 @@
 @inject AuditLogService Audit
 @inject PersistenceBackupService Backups
 @inject ReleaseReadinessService ReleaseReadiness
+@inject RoadmapReadinessService RoadmapReadiness
 @inject TenantIsolationReviewService TenantIsolationReview
 @inject OperationalHealthService Health
 @inject RuntimeMetricsService RuntimeMetrics
@@ -799,6 +800,7 @@
             <button @onclick="LoadRuntimeMetricsAsync" disabled="@(!CanOperateBackups)">Metriken laden</button>
             <button @onclick="LoadRolePermissionReviewAsync" disabled="@(!CanOperateBackups)">Rollenreview</button>
             <button @onclick="LoadTenantIsolationReviewAsync" disabled="@(!CanOperateBackups)">Tenant-Review</button>
+            <button @onclick="LoadRoadmapReadinessAsync" disabled="@(!CanOperateBackups)">Roadmap-Audit</button>
             <button @onclick="CreateBackupAsync" disabled="@(!CanOperateBackups)">Backup erstellen</button>
             <button @onclick="LoadBackupsAsync" disabled="@(!CanOperateBackups)">Backups laden</button>
             <button @onclick="PreviewBackupAsync" disabled="@(!CanPreviewBackup)">Backup pruefen</button>
@@ -1018,6 +1020,38 @@
             </div>
         }
 
+        @if (_roadmapReadiness is not null)
+        {
+            <div class="health-overview">
+                <div>
+                    <span>Roadmap-Audit</span>
+                    <strong class="@ReadinessStatusClass(_roadmapReadiness.Status)">@_roadmapReadiness.Status</strong>
+                </div>
+                <div>
+                    <span>Phasen</span>
+                    <strong>@_roadmapReadiness.ReadyPhaseCount / @_roadmapReadiness.PhaseCount</strong>
+                </div>
+                <div>
+                    <span>Offen</span>
+                    <strong>@_roadmapReadiness.NeedsWorkPhaseCount</strong>
+                </div>
+            </div>
+            <div class="readiness-list">
+                @foreach (var phase in _roadmapReadiness.Phases)
+                {
+                    <div>
+                        <strong>Phase @phase.Phase: @phase.Name</strong>
+                        <span class="@ReadinessStatusClass(phase.Status)">@phase.Status | @phase.CompletedCriteria / @phase.TotalCriteria</span>
+                        <p>@string.Join(" ", phase.Evidence.Take(1))</p>
+                        @if (phase.Gaps.Count > 0)
+                        {
+                            <span>@string.Join(" ", phase.Gaps)</span>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
         @if (_backups.Count > 0)
         {
             <label class="select-label">
@@ -1129,6 +1163,7 @@
     private MonitoringSummaryResponse? _monitoringSummary;
     private RolePermissionReviewResponse? _rolePermissionReview;
     private TenantIsolationReviewResponse? _tenantIsolationReview;
+    private RoadmapReadinessResponse? _roadmapReadiness;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
     private IReadOnlyCollection<DocumentParserCapabilityResponse> _parserCapabilities = [];
@@ -1672,6 +1707,13 @@
         return Task.CompletedTask;
     }
 
+    private Task LoadRoadmapReadinessAsync()
+    {
+        _roadmapReadiness = RoadmapReadiness.GetStatus();
+        SetStatus("Roadmap-Audit geladen", $"{_roadmapReadiness.Status}, {_roadmapReadiness.NeedsWorkPhaseCount} offene Phasen");
+        return Task.CompletedTask;
+    }
+
     private async Task LoadBackupsAsync()
     {
         await RunSafelyAsync("Backups laden", () =>
@@ -1896,9 +1938,11 @@
     private static string ReadinessStatusClass(string status)
     {
         return status.Equals("Ready", StringComparison.OrdinalIgnoreCase)
+            || status.Equals("Complete", StringComparison.OrdinalIgnoreCase)
             || status.Equals("Pass", StringComparison.OrdinalIgnoreCase)
                 ? "health-ok"
                 : status.Equals("NeedsReview", StringComparison.OrdinalIgnoreCase)
+                    || status.Equals("ReadyWithNotes", StringComparison.OrdinalIgnoreCase)
                     || status.Equals("Warning", StringComparison.OrdinalIgnoreCase)
                     || status.Equals("Manual", StringComparison.OrdinalIgnoreCase)
                         ? "health-warning"

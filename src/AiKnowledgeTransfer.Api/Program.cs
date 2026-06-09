@@ -489,6 +489,12 @@ operations.MapGet("/release-readiness", (ReleaseReadinessService service) =>
 })
 .RequirePermission(Permission.ManageUsers);
 
+operations.MapGet("/roadmap-readiness", (RoadmapReadinessService service) =>
+{
+    return Results.Ok(service.GetStatus());
+})
+.RequirePermission(Permission.ManageUsers);
+
 operations.MapGet("/runtime-metrics", (RuntimeMetricsService service) =>
 {
     return Results.Ok(service.GetSnapshot("AiKnowledgeTransfer.Api"));

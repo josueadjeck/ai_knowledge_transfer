@@ -23,6 +23,7 @@ Use:
 GET /health
 GET /api/operations/runtime-metrics
 GET /api/operations/monitoring-summary
+GET /api/operations/roadmap-readiness
 ```
 
 Expected result:
@@ -34,6 +35,7 @@ Expected result:
 - Database provider is reviewed: SQLite for local pilots, SQL Server or PostgreSQL for production-like deployments.
 - AI provider is either configured or the fallback decision is accepted.
 - Monitoring summary is `ok` or contains only accepted manual release-review signals.
+- Roadmap readiness identifies no unexpected gaps for the release scope.
 
 ## Backup and restore
 

@@ -201,6 +201,7 @@ Aktueller Implementierungsstand:
 - Container-Security-Grundlage ist erweitert: CI scannt gebaute API- und Web-Images mit Trivy auf High-/Critical-Vulnerabilities und archiviert JSON-Scanartefakte.
 - Secret-Management-Grundlage ist dokumentiert: Runtime-Secrets wie AI-Provider-Key, Datenbank-Credentials und OIDC-/Provider-Konfiguration muessen fuer Pilot-/Enterprise-Betrieb ueber einen freigegebenen Secret Store injiziert und in Release-Readiness geprueft werden.
 - Produktionsnahe Datenbank-Grundlage ist erweitert: SQL Server und PostgreSQL sind als EF-Core-Provider konfigurierbar; Release-Readiness warnt fuer SQLite-Pilotbetrieb und bewertet SQL Server/PostgreSQL als produktionsfaehige relationale Provider.
+- Roadmap-Abschlusspruefung ist gestartet: Ein Roadmap-Readiness-Audit zeigt per API und Blazor-Operationsbereich, welche Phasen bereit sind und welche Restluecken vor einem vollstaendigen Abschluss bleiben.
 
 ### Phase 0: Produktklaerung
 

@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<PersistenceBackupService>();
         services.AddScoped<MonitoringSummaryService>();
         services.AddScoped<ReleaseReadinessService>();
+        services.AddScoped<RoadmapReadinessService>();
         services.AddScoped<RuntimeMetricsService>();
         services.AddScoped<TenantIsolationReviewService>();
         services.AddScoped<RoadmapService>();

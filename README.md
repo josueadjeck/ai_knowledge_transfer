@@ -65,6 +65,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Health output reports the active knowledge extraction guardrails.
 - Blazor operations panel shows health components for storage, persistence and AI provider status.
 - Monitoring summary endpoint and Blazor operations panel combine health, runtime metrics and release-readiness signals.
+- Roadmap readiness audit summarizes completed phases and remaining implementation gaps.
 - Runtime metrics endpoint and Blazor operations panel show uptime, process and memory indicators.
 - Structured operational logs for backup, restore, backup preview and release-readiness checks.
 - JSON persistence backup and restore endpoints for local MVP operation.
@@ -439,6 +440,12 @@ Get release readiness:
 
 ```http
 GET http://localhost:5256/api/operations/release-readiness
+```
+
+Get roadmap readiness audit:
+
+```http
+GET http://localhost:5256/api/operations/roadmap-readiness
 ```
 
 Get runtime metrics:
