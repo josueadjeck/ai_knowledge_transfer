@@ -55,4 +55,20 @@ public sealed class UserIdentityServiceTests
         Assert.Equal("DemoRoleSelector", user.Source);
         Assert.Contains(Permission.ManageUsers, user.Permissions);
     }
+
+    [Fact]
+    public void Resolve_uses_configured_role_claim_type()
+    {
+        var service = new UserIdentityService(
+            new RolePermissionService(),
+            new AuthenticationOptions("Oidc", "https://login.example.test", "client-id", "groups"));
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(
+            [new Claim("groups", "Admin")],
+            authenticationType: "TestAuth"));
+
+        var user = service.Resolve(principal);
+
+        Assert.Equal(UserRole.Admin, user.Role);
+        Assert.Contains(Permission.ManageUsers, user.Permissions);
+    }
 }

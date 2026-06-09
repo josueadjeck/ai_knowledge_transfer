@@ -19,7 +19,11 @@ public sealed class OperationalHealthServiceTests
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
-            AiApiKeyConfigured: false);
+            AiApiKeyConfigured: false,
+            "Demo",
+            null,
+            null,
+            "role");
         var service = new OperationalHealthService(options);
 
         var health = service.GetStatus("TestService");
@@ -46,7 +50,11 @@ public sealed class OperationalHealthServiceTests
             "OpenAI",
             "custom-model",
             "https://example.test/v1/",
-            AiApiKeyConfigured: true);
+            AiApiKeyConfigured: true,
+            "Demo",
+            null,
+            null,
+            "role");
         var service = new OperationalHealthService(options);
 
         var health = service.GetStatus("TestService");
@@ -72,7 +80,11 @@ public sealed class OperationalHealthServiceTests
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
-            AiApiKeyConfigured: false);
+            AiApiKeyConfigured: false,
+            "Demo",
+            null,
+            null,
+            "role");
         var service = new OperationalHealthService(options);
 
         var health = service.GetStatus("TestService");
@@ -84,5 +96,36 @@ public sealed class OperationalHealthServiceTests
             && component.Metadata["connectionStringConfigured"] == "True");
         Assert.Contains(health.Components, component => component.Name == "projectStore" && component.Status == "database");
         Assert.Contains(health.Components, component => component.Name == "auditLog" && component.Status == "database");
+    }
+
+    [Fact]
+    public void GetStatus_reports_oidc_authentication_configuration_errors()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-health-tests", Guid.NewGuid().ToString("N"));
+        var options = new OperationalHealthOptions(
+            root,
+            Path.Combine(root, "uploads"),
+            Path.Combine(root, "projects.json"),
+            Path.Combine(root, "audit-log.json"),
+            "Json",
+            null,
+            null,
+            "OpenAI",
+            "gpt-5.4-mini",
+            "https://api.openai.com/v1/",
+            AiApiKeyConfigured: false,
+            "Oidc",
+            null,
+            null,
+            "roles");
+        var service = new OperationalHealthService(options);
+
+        var health = service.GetStatus("TestService");
+
+        Assert.Equal("degraded", health.Status);
+        Assert.Contains(health.Components, component =>
+            component.Name == "authentication"
+            && component.Status == "error"
+            && component.Metadata["roleClaimType"] == "roles");
     }
 }

@@ -2,6 +2,7 @@ namespace AiKnowledgeTransfer.UnitTests;
 
 using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Operations;
+using AiKnowledgeTransfer.Application.Security;
 
 public sealed class ReleaseReadinessServiceTests
 {
@@ -39,8 +40,28 @@ public sealed class ReleaseReadinessServiceTests
         Assert.Contains(readiness.Checks, check => check.Name == "CI security gates" && check.Status == "Manual");
     }
 
-    private static ReleaseReadinessService CreateService(string root, bool aiApiKeyConfigured)
+    [Fact]
+    public void GetStatus_blocks_release_when_oidc_configuration_is_incomplete()
     {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            new AuthenticationOptions("Oidc", null, null, "roles"))
+            .GetStatus("TestService");
+
+        Assert.Equal("Blocked", readiness.Status);
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Authentication configuration"
+            && check.Status == "Fail");
+    }
+
+    private static ReleaseReadinessService CreateService(
+        string root,
+        bool aiApiKeyConfigured,
+        AuthenticationOptions? authentication = null)
+    {
+        authentication ??= new AuthenticationOptions("Demo", null, null, "role");
         var health = new OperationalHealthService(new OperationalHealthOptions(
             root,
             Path.Combine(root, "uploads"),
@@ -52,10 +73,14 @@ public sealed class ReleaseReadinessServiceTests
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
-            aiApiKeyConfigured));
+            aiApiKeyConfigured,
+            authentication.Mode,
+            authentication.Authority,
+            authentication.ClientId,
+            authentication.RoleClaimType));
         var backups = new PersistenceBackupService(CreateBackupOptions(root));
 
-        return new ReleaseReadinessService(health, backups);
+        return new ReleaseReadinessService(health, backups, authentication);
     }
 
     private static PersistenceBackupOptions CreateBackupOptions(string root)

@@ -171,6 +171,7 @@ Aktueller Implementierungsstand:
 - Release-/Betriebsprozess ist gestartet: Betriebshandbuch und Release-Readiness-Check pruefen Health, Persistenz, Backup, CI-Gates und manuelle Release-Freigabe.
 - Auth-/Rollenhaertung ist gestartet: Rollen koennen aus Claims aufgeloest werden; der MVP-Rollenselektor bleibt als Demo-Fallback fuer die Web-UI erhalten.
 - Auth-/Rollenhaertung ist erweitert: API-Endpunkte pruefen Berechtigungen serverseitig ueber den Identity-/Claims-Kontext.
+- Auth-/Rollenhaertung ist erweitert: OIDC-/Entra-Konfiguration ist ueber Umgebungsvariablen vorbereitet und wird in Health sowie Release-Readiness bewertet.
 
 ### Phase 0: Produktklaerung
 

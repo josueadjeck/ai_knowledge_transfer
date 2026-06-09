@@ -159,6 +159,21 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 
 `OPENAI_MODEL` and `OPENAI_BASE_URL` are optional. `OPENAI_BASE_URL` is intentionally configurable so future providers such as Azure OpenAI, customer-hosted AI gateways, or local model gateways can be added without changing the application layer.
 
+## Authentication configuration
+
+The local MVP defaults to demo identity mode. In demo mode, anonymous API requests resolve to the Viewer role and the Web UI role selector creates a demo identity for workflow testing.
+
+OIDC configuration is prepared through environment variables:
+
+```powershell
+$env:AKT_AUTH_MODE="Oidc"
+$env:AKT_AUTH_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
+$env:AKT_AUTH_CLIENT_ID="<application-client-id>"
+$env:AKT_AUTH_ROLE_CLAIM="roles"
+```
+
+When `AKT_AUTH_MODE=Oidc`, health and release-readiness checks require authority and client id to be configured. Middleware wiring for production sign-in/token validation is the next hardening step.
+
 ## API examples
 
 Create a project:

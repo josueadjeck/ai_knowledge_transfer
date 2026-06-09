@@ -1,12 +1,14 @@
 namespace AiKnowledgeTransfer.Application.Operations;
 
 using AiKnowledgeTransfer.Application.Diagnostics;
+using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Contracts.Diagnostics;
 using AiKnowledgeTransfer.Contracts.Operations;
 
 public sealed class ReleaseReadinessService(
     OperationalHealthService health,
-    PersistenceBackupService backups)
+    PersistenceBackupService backups,
+    AuthenticationOptions authentication)
 {
     public ReleaseReadinessResponse GetStatus(string serviceName)
     {
@@ -16,6 +18,7 @@ public sealed class ReleaseReadinessService(
         {
             BuildHealthCheck(healthStatus),
             BuildPersistenceCheck(healthStatus),
+            BuildAuthenticationCheck(authentication),
             BuildBackupCheck(backupList),
             BuildAiProviderCheck(healthStatus),
             new(
@@ -88,6 +91,28 @@ public sealed class ReleaseReadinessService(
             Required: true,
             "At least one local backup exists.",
             $"{latestBackup.FileName}, {latestBackup.CreatedAt:u}");
+    }
+
+    private static ReleaseReadinessCheckResponse BuildAuthenticationCheck(AuthenticationOptions authentication)
+    {
+        if (authentication.IsConfigured)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Authentication configuration",
+                "Pass",
+                Required: true,
+                authentication.IsOidc
+                    ? "OIDC authentication settings are configured."
+                    : "Demo authentication mode is active.",
+                $"Mode: {authentication.Mode}, role claim: {authentication.RoleClaimType}");
+        }
+
+        return new ReleaseReadinessCheckResponse(
+            "Authentication configuration",
+            "Fail",
+            Required: true,
+            "OIDC mode requires authority and client id before release.",
+            $"Mode: {authentication.Mode}");
     }
 
     private static ReleaseReadinessCheckResponse BuildAiProviderCheck(HealthResponse healthStatus)

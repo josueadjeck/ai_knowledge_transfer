@@ -11,4 +11,8 @@ public sealed record OperationalHealthOptions(
     string AiProvider,
     string AiModel,
     string AiBaseUrl,
-    bool AiApiKeyConfigured);
+    bool AiApiKeyConfigured,
+    string AuthMode,
+    string? AuthAuthority,
+    string? AuthClientId,
+    string AuthRoleClaimType);

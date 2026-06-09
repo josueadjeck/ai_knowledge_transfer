@@ -19,6 +19,7 @@ public sealed class OperationalHealthService
             GetPersistenceComponent(),
             GetProjectStoreComponent(),
             GetAuditLogComponent(),
+            GetAuthComponent(),
             GetAiProviderComponent()
         };
 
@@ -149,6 +150,30 @@ public sealed class OperationalHealthService
                 ["model"] = _options.AiModel,
                 ["baseUrl"] = _options.AiBaseUrl,
                 ["apiKeyConfigured"] = _options.AiApiKeyConfigured.ToString()
+            });
+    }
+
+    private HealthComponentResponse GetAuthComponent()
+    {
+        var isOidc = _options.AuthMode.Equals("Oidc", StringComparison.OrdinalIgnoreCase);
+        var isConfigured = !isOidc
+            || (!string.IsNullOrWhiteSpace(_options.AuthAuthority)
+                && !string.IsNullOrWhiteSpace(_options.AuthClientId));
+        var status = isConfigured ? "ok" : "error";
+        var detail = isOidc
+            ? "OIDC authentication mode is selected."
+            : "Demo authentication mode is active; roles are resolved from fallback or demo selector.";
+
+        return new HealthComponentResponse(
+            "authentication",
+            status,
+            detail,
+            new Dictionary<string, string>
+            {
+                ["mode"] = _options.AuthMode,
+                ["authorityConfigured"] = (!string.IsNullOrWhiteSpace(_options.AuthAuthority)).ToString(),
+                ["clientIdConfigured"] = (!string.IsNullOrWhiteSpace(_options.AuthClientId)).ToString(),
+                ["roleClaimType"] = _options.AuthRoleClaimType
             });
     }
 }
