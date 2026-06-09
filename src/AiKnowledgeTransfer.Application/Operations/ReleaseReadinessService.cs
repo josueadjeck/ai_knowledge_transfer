@@ -44,6 +44,12 @@ public sealed class ReleaseReadinessService(
                 "Confirm the CI security-inventory artifact includes metadata for the API and Web container images.",
                 "Expected artifact entry: container-images.json for ai-knowledge-transfer-api:ci and ai-knowledge-transfer-web:ci."),
             new(
+                "Security and data protection review",
+                "Manual",
+                Required: true,
+                "Confirm the security concept and data protection concept were reviewed for this release.",
+                "Review docs/security/security-concept.md and docs/security/data-protection-concept.md."),
+            new(
                 "Release approval",
                 "Manual",
                 Required: true,

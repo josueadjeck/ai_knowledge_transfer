@@ -190,6 +190,8 @@ Aktueller Implementierungsstand:
 - Security-Gates sind erweitert: CI erzeugt ein transitive .NET Dependency Inventory und archiviert Security-Inventar-Artefakte fuer Release-Nachvollziehbarkeit.
 - Release-/Security-Haertung ist erweitert: Release-Readiness verlangt eine manuelle Pruefung des CI-Artefakts `security-inventory`.
 - Container-Security-Grundlage ist erweitert: CI archiviert Container-Image-Metadaten und Release-Readiness verlangt deren manuelle Pruefung.
+- Security-/Datenschutzkonzept ist dokumentiert: MVP-Sicherheitsmodell, Datenkategorien, AI-Provider-Datenfluss, Backup-/Retention-Annahmen und aktuelle Betriebsgrenzen sind als Release-Review-Grundlage festgehalten.
+- Release-/Security-Haertung ist erweitert: Release-Readiness verlangt eine manuelle Security- und Datenschutzpruefung gegen die Dokumente unter `docs/security`.
 
 ### Phase 0: Produktklaerung
 

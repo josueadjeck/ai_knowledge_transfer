@@ -6,12 +6,13 @@ This runbook describes the MVP operating flow for local or pilot deployments.
 
 1. Run the CI workflow on `main` and confirm restore, build, publish, dependency inventory, container image inventory, container build, tests, vulnerability check and secret scan passed.
 2. Confirm API, Web and `security-inventory` artifacts were produced by CI.
-3. Start the application in the target persistence mode.
-4. Open the operations panel or call `GET /api/operations/release-readiness`.
-5. Create and preview a backup before deploying or restoring data.
-6. Resolve every `Fail` readiness check.
-7. Review every `Manual` or `Warning` readiness check with the release owner.
-8. Approve the deployment only after runtime health, persistence and backup checks are acceptable.
+3. Review `docs/security/security-concept.md` and `docs/security/data-protection-concept.md` for the target deployment.
+4. Start the application in the target persistence mode.
+5. Open the operations panel or call `GET /api/operations/release-readiness`.
+6. Create and preview a backup before deploying or restoring data.
+7. Resolve every `Fail` readiness check.
+8. Review every `Manual` or `Warning` readiness check with the release owner.
+9. Approve the deployment only after runtime health, persistence and backup checks are acceptable.
 
 ## Runtime health
 
@@ -56,10 +57,11 @@ Status meanings:
 - `NeedsReview`: automated release blockers are clear, but warning or manual checks still need a human decision.
 - `Blocked`: at least one required check failed.
 
-Current required checks cover runtime health, persistence configuration, authentication, tenancy, backups, CI security gates and release approval.
+Current required checks cover runtime health, persistence configuration, authentication, tenancy, backups, CI security gates, security and data protection review and release approval.
 Database mode with `AKT_DB_SCHEMA_MODE=Migrations` applies managed EF migrations. `EnsureCreated` remains available for local MVP runs but appears as a warning for release review.
 
 The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `dotnet-package-inventory.json`, `vulnerable-packages.json` and `container-images.json` are present for the release candidate.
+The `Security and data protection review` check is manual. Review the concepts under `docs/security` and document accepted residual risks for the target deployment.
 
 ## Deployment baseline
 
