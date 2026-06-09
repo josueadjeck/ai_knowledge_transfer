@@ -66,7 +66,7 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 
 Before deploying:
 
-1. Confirm CI restore, build, publish, container build, tests, vulnerability scan and secret scan passed.
+1. Confirm CI restore, build, publish, dependency inventory, container build, tests, vulnerability scan and secret scan passed.
 2. Confirm `GET /health` is `ok`.
 3. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
 4. Create and preview a backup.
@@ -76,4 +76,4 @@ Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the manage
 
 ## Current Limits
 
-The MVP deployment baseline does not yet provide image signing, SBOM export, external secret management, managed database migrations, blue/green deployment or tenant-isolated production storage. Those remain Phase 9 follow-up work.
+The MVP deployment baseline does not yet provide image signing, full CycloneDX/SPDX SBOM export, external secret management, blue/green deployment or tenant-isolated production storage. Those remain Phase 9 follow-up work.

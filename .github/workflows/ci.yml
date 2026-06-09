@@ -37,6 +37,11 @@ jobs:
       - name: Publish Web artifact
         run: dotnet publish src/AiKnowledgeTransfer.Web/AiKnowledgeTransfer.Web.csproj --configuration Release --no-build --output artifacts/web
 
+      - name: Generate dependency inventory
+        run: |
+          mkdir -p artifacts/security
+          dotnet list AiKnowledgeTransfer.slnx package --include-transitive --format json > artifacts/security/dotnet-package-inventory.json
+
       - name: Build API container image
         run: docker build --file Dockerfile.api --tag ai-knowledge-transfer-api:ci .
 
@@ -50,12 +55,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          dotnet list AiKnowledgeTransfer.slnx package --vulnerable --include-transitive --format json > vulnerable-packages.json
+          dotnet list AiKnowledgeTransfer.slnx package --vulnerable --include-transitive --format json > artifacts/security/vulnerable-packages.json
           python - <<'PY'
           import json
           import sys
 
-          with open("vulnerable-packages.json", encoding="utf-8") as handle:
+          with open("artifacts/security/vulnerable-packages.json", encoding="utf-8") as handle:
               payload = json.load(handle)
 
           findings = []
@@ -100,3 +105,9 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Upload security inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-inventory
+          path: artifacts/security

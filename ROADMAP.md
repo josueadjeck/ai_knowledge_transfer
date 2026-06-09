@@ -187,6 +187,7 @@ Aktueller Implementierungsstand:
 - Container-Grundlage ist gestartet: API und Web haben eigene Dockerfiles; CI baut beide Images ohne Push als Runtime-Haertungscheck.
 - Datenbank-Betrieb ist erweitert: Health und Release-Readiness zeigen den aktuellen Schema-Modus `EnsureCreated` und warnen, dass produktionsnahe EF-Migrations noch fehlen.
 - EF-Migrations-Grundlage ist gestartet: Eine initiale SQLite/EF-Migration ist vorhanden und `AKT_DB_SCHEMA_MODE=Migrations` wendet sie beim Start kontrolliert an.
+- Security-Gates sind erweitert: CI erzeugt ein transitive .NET Dependency Inventory und archiviert Security-Inventar-Artefakte fuer Release-Nachvollziehbarkeit.
 
 ### Phase 0: Produktklaerung
 
