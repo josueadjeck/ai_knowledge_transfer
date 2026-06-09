@@ -86,10 +86,11 @@ Before deploying:
 
 1. Confirm CI restore, build, publish, dependency inventory, SPDX SBOM generation, container policy scan, container image vulnerability scan, container image inventory, container build, tests, vulnerability scan, static source security scan and secret scan passed.
 2. Confirm `GET /health` is `ok`.
-3. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
-4. Create and preview a backup.
-5. Confirm `OPENAI_API_KEY`, database credentials and OIDC/client credentials are injected by an approved secret manager or platform secret store.
-6. Confirm warning and manual checks are accepted by a release owner.
+3. Confirm `GET /api/operations/monitoring-summary` is `ok` or contains only accepted manual release-review signals.
+4. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
+5. Create and preview a backup.
+6. Confirm `OPENAI_API_KEY`, database credentials and OIDC/client credentials are injected by an approved secret manager or platform secret store.
+7. Confirm warning and manual checks are accepted by a release owner.
 
 Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the managed EF initial migration. `EnsureCreated` remains available for local MVP runs but is reported as a release-readiness warning in database mode. Release readiness warns for SQLite and passes SQL Server or PostgreSQL as production-capable relational providers.
 

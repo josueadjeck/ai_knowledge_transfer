@@ -478,6 +478,12 @@ operations.MapGet("/runtime-metrics", (RuntimeMetricsService service) =>
 })
 .RequirePermission(Permission.ManageUsers);
 
+operations.MapGet("/monitoring-summary", (MonitoringSummaryService service) =>
+{
+    return Results.Ok(service.GetSummary("AiKnowledgeTransfer.Api"));
+})
+.RequirePermission(Permission.ManageUsers);
+
 operations.MapGet("/backups/{fileName}/preview", async Task<IResult> (
     string fileName,
     PersistenceBackupService service,

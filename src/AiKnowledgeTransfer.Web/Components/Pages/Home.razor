@@ -45,6 +45,7 @@
 @inject ReleaseReadinessService ReleaseReadiness
 @inject OperationalHealthService Health
 @inject RuntimeMetricsService RuntimeMetrics
+@inject MonitoringSummaryService MonitoringSummary
 @inject DocumentParserCapabilityService ParserCapabilities
 @inject AuthenticationOptions AuthOptions
 @inject PermissionAuthorizationService Authorization
@@ -764,6 +765,7 @@
     <div class="workflow-panel span-2">
         <h2>Betrieb & Backups</h2>
         <div class="button-row">
+            <button @onclick="LoadMonitoringSummaryAsync" disabled="@(!CanOperateBackups)">Monitoring laden</button>
             <button @onclick="LoadHealthAsync" disabled="@(!CanOperateBackups)">Status laden</button>
             <button @onclick="LoadRuntimeMetricsAsync" disabled="@(!CanOperateBackups)">Metriken laden</button>
             <button @onclick="CreateBackupAsync" disabled="@(!CanOperateBackups)">Backup erstellen</button>
@@ -772,6 +774,49 @@
             <button @onclick="RestoreBackupAsync" disabled="@(!CanRestoreBackup)">Backup wiederherstellen</button>
             <button @onclick="LoadReleaseReadinessAsync" disabled="@(!CanOperateBackups)">Release pruefen</button>
         </div>
+
+        @if (_monitoringSummary is not null)
+        {
+            <div class="health-overview">
+                <div>
+                    <span>Monitoring</span>
+                    <strong class="@MonitoringStatusClass(_monitoringSummary.Status)">@_monitoringSummary.Status</strong>
+                </div>
+                <div>
+                    <span>Health</span>
+                    <strong class="@HealthStatusClass(_monitoringSummary.HealthStatus)">@_monitoringSummary.HealthStatus</strong>
+                </div>
+                <div>
+                    <span>Release</span>
+                    <strong class="@ReadinessStatusClass(_monitoringSummary.ReleaseReadinessStatus)">@_monitoringSummary.ReleaseReadinessStatus</strong>
+                </div>
+                <div>
+                    <span>Uptime</span>
+                    <strong>@FormatDuration(_monitoringSummary.UptimeSeconds)</strong>
+                </div>
+                <div>
+                    <span>Speicher</span>
+                    <strong>@FormatFileSize(_monitoringSummary.WorkingSetBytes)</strong>
+                </div>
+                <div>
+                    <span>Signale</span>
+                    <strong>@_monitoringSummary.ErrorCount / @_monitoringSummary.WarningCount / @_monitoringSummary.ManualReviewCount</strong>
+                </div>
+            </div>
+            @if (_monitoringSummary.Signals.Count > 0)
+            {
+                <div class="readiness-list">
+                    @foreach (var signal in _monitoringSummary.Signals.Take(6))
+                    {
+                        <div>
+                            <strong>@signal.Name</strong>
+                            <span class="@MonitoringStatusClass(signal.Status)">@signal.Status</span>
+                            <p>@signal.Detail</p>
+                        </div>
+                    }
+                </div>
+            }
+        }
 
         @if (_health is not null)
         {
@@ -985,6 +1030,7 @@
     private HealthResponse? _health;
     private ReleaseReadinessResponse? _releaseReadiness;
     private RuntimeMetricsResponse? _runtimeMetrics;
+    private MonitoringSummaryResponse? _monitoringSummary;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
     private IReadOnlyCollection<DocumentParserCapabilityResponse> _parserCapabilities = [];
@@ -1485,6 +1531,13 @@
         return Task.CompletedTask;
     }
 
+    private Task LoadMonitoringSummaryAsync()
+    {
+        _monitoringSummary = MonitoringSummary.GetSummary("AiKnowledgeTransfer.Web");
+        SetStatus("Monitoring geladen", $"{_monitoringSummary.Status}, {_monitoringSummary.Signals.Count} Signale");
+        return Task.CompletedTask;
+    }
+
     private Task LoadReleaseReadinessAsync()
     {
         _releaseReadiness = ReleaseReadiness.GetStatus("AiKnowledgeTransfer.Web");
@@ -1710,6 +1763,20 @@
             || status.Equals("Pass", StringComparison.OrdinalIgnoreCase)
                 ? "health-ok"
                 : status.Equals("NeedsReview", StringComparison.OrdinalIgnoreCase)
+                    || status.Equals("Warning", StringComparison.OrdinalIgnoreCase)
+                    || status.Equals("Manual", StringComparison.OrdinalIgnoreCase)
+                        ? "health-warning"
+                        : "health-error";
+    }
+
+    private static string MonitoringStatusClass(string status)
+    {
+        return status.Equals("ok", StringComparison.OrdinalIgnoreCase)
+            || status.Equals("Ready", StringComparison.OrdinalIgnoreCase)
+            || status.Equals("Pass", StringComparison.OrdinalIgnoreCase)
+                ? "health-ok"
+                : status.Equals("needsReview", StringComparison.OrdinalIgnoreCase)
+                    || status.Equals("NeedsReview", StringComparison.OrdinalIgnoreCase)
                     || status.Equals("Warning", StringComparison.OrdinalIgnoreCase)
                     || status.Equals("Manual", StringComparison.OrdinalIgnoreCase)
                         ? "health-warning"

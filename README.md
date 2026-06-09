@@ -62,6 +62,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Health output reports the active document analysis guardrails.
 - Health output reports the active knowledge extraction guardrails.
 - Blazor operations panel shows health components for storage, persistence and AI provider status.
+- Monitoring summary endpoint and Blazor operations panel combine health, runtime metrics and release-readiness signals.
 - Runtime metrics endpoint and Blazor operations panel show uptime, process and memory indicators.
 - Structured operational logs for backup, restore, backup preview and release-readiness checks.
 - JSON persistence backup and restore endpoints for local MVP operation.
@@ -429,6 +430,12 @@ Get runtime metrics:
 
 ```http
 GET http://localhost:5256/api/operations/runtime-metrics
+```
+
+Get monitoring summary:
+
+```http
+GET http://localhost:5256/api/operations/monitoring-summary
 ```
 
 Create, list and restore local JSON persistence backups:

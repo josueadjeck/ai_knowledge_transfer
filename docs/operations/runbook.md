@@ -21,6 +21,8 @@ Use:
 
 ```http
 GET /health
+GET /api/operations/runtime-metrics
+GET /api/operations/monitoring-summary
 ```
 
 Expected result:
@@ -31,6 +33,7 @@ Expected result:
 - Database schema mode is visible when database persistence is active.
 - Database provider is reviewed: SQLite for local pilots, SQL Server or PostgreSQL for production-like deployments.
 - AI provider is either configured or the fallback decision is accepted.
+- Monitoring summary is `ok` or contains only accepted manual release-review signals.
 
 ## Backup and restore
 
