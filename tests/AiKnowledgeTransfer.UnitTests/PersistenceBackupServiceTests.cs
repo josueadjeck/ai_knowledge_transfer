@@ -1,4 +1,5 @@
 using AiKnowledgeTransfer.Application.Operations;
+using Microsoft.Extensions.Logging;
 
 namespace AiKnowledgeTransfer.UnitTests;
 
@@ -94,6 +95,41 @@ public sealed class PersistenceBackupServiceTests
             service.RestoreAsync("../backup.zip", CancellationToken.None));
     }
 
+    [Fact]
+    public async Task CreateAsync_writes_operational_log_entries()
+    {
+        var logger = new TestLogger<PersistenceBackupService>();
+        var options = CreateOptions();
+        var service = new PersistenceBackupService(options, logger);
+
+        var backup = await service.CreateAsync(CancellationToken.None);
+
+        Assert.True(File.Exists(backup.Path));
+        Assert.Contains(logger.Entries, entry =>
+            entry.Level == LogLevel.Information
+            && entry.Message.Contains("Created persistence backup", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task RestoreAsync_writes_operational_log_entries()
+    {
+        var logger = new TestLogger<PersistenceBackupService>();
+        var options = CreateOptions();
+        await File.WriteAllTextAsync(options.ProjectStorePath, """{"projects":[]}""");
+        await File.WriteAllTextAsync(options.AuditLogPath, """{"events":[]}""");
+        var service = new PersistenceBackupService(options, logger);
+        var backup = await service.CreateAsync(CancellationToken.None);
+
+        await service.RestoreAsync(backup.FileName, CancellationToken.None);
+
+        Assert.Contains(logger.Entries, entry =>
+            entry.Level == LogLevel.Warning
+            && entry.Message.Contains("Restoring local persistence", StringComparison.Ordinal));
+        Assert.Contains(logger.Entries, entry =>
+            entry.Level == LogLevel.Information
+            && entry.Message.Contains("Restored", StringComparison.Ordinal));
+    }
+
     private static PersistenceBackupOptions CreateOptions()
     {
         var root = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-backup-tests", Guid.NewGuid().ToString("N"));
@@ -105,5 +141,44 @@ public sealed class PersistenceBackupServiceTests
             Path.Combine(root, "projects.json"),
             Path.Combine(root, "audit-log.json"),
             Path.Combine(root, "backups"));
+    }
+
+    private sealed class TestLogger<T> : ILogger<T>
+    {
+        private readonly List<LogEntry> _entries = [];
+
+        public IReadOnlyCollection<LogEntry> Entries => _entries;
+
+        public IDisposable BeginScope<TState>(TState state)
+            where TState : notnull
+        {
+            return NullScope.Instance;
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            _entries.Add(new LogEntry(logLevel, formatter(state, exception)));
+        }
+    }
+
+    private sealed record LogEntry(LogLevel Level, string Message);
+
+    private sealed class NullScope : IDisposable
+    {
+        public static NullScope Instance { get; } = new();
+
+        public void Dispose()
+        {
+        }
     }
 }

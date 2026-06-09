@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Text.Json;
 using AiKnowledgeTransfer.Contracts.Operations;
+using Microsoft.Extensions.Logging;
 
 namespace AiKnowledgeTransfer.Application.Operations;
 
@@ -12,10 +13,14 @@ public sealed class PersistenceBackupService
     };
 
     private readonly PersistenceBackupOptions _options;
+    private readonly ILogger<PersistenceBackupService>? _logger;
 
-    public PersistenceBackupService(PersistenceBackupOptions options)
+    public PersistenceBackupService(
+        PersistenceBackupOptions options,
+        ILogger<PersistenceBackupService>? logger = null)
     {
         _options = options;
+        _logger = logger;
     }
 
     public async Task<BackupResponse> CreateAsync(CancellationToken cancellationToken)
@@ -25,6 +30,8 @@ public sealed class PersistenceBackupService
         var createdAt = DateTimeOffset.UtcNow;
         var fileName = $"ai-knowledge-transfer-{createdAt:yyyyMMdd-HHmmss}.zip";
         var path = Path.Combine(_options.BackupPath, fileName);
+
+        _logger?.LogInformation("Creating persistence backup {BackupFileName} in {BackupPath}.", fileName, _options.BackupPath);
 
         await using (var fileStream = File.Create(path))
         using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Create))
@@ -36,6 +43,8 @@ public sealed class PersistenceBackupService
         }
 
         var fileInfo = new FileInfo(path);
+        _logger?.LogInformation("Created persistence backup {BackupFileName} with {BackupSizeBytes} bytes.", fileName, fileInfo.Length);
+
         return new BackupResponse(fileName, path, createdAt, fileInfo.Length);
     }
 
@@ -60,12 +69,14 @@ public sealed class PersistenceBackupService
     {
         if (!IsSafeBackupFileName(fileName))
         {
+            _logger?.LogWarning("Rejected backup preview for unsafe file name {BackupFileName}.", fileName);
             throw new InvalidOperationException("Backup file name is invalid.");
         }
 
         var backupPath = Path.Combine(_options.BackupPath, fileName);
         if (!File.Exists(backupPath))
         {
+            _logger?.LogWarning("Backup preview requested for missing backup {BackupFileName}.", fileName);
             return Task.FromResult<BackupPreviewResponse?>(null);
         }
 
@@ -80,6 +91,15 @@ public sealed class PersistenceBackupService
         var manifest = ReadManifest(archive);
         var warnings = BuildPreviewWarnings(entries, manifest.Format);
         cancellationToken.ThrowIfCancellationRequested();
+
+        if (warnings.Count > 0)
+        {
+            _logger?.LogWarning("Backup preview for {BackupFileName} reported {WarningCount} warnings.", fileName, warnings.Count);
+        }
+        else
+        {
+            _logger?.LogInformation("Backup preview for {BackupFileName} completed with {EntryCount} entries.", fileName, entries.Length);
+        }
 
         return Task.FromResult<BackupPreviewResponse?>(new BackupPreviewResponse(
             fileName,
@@ -98,14 +118,18 @@ public sealed class PersistenceBackupService
     {
         if (!IsSafeBackupFileName(fileName))
         {
+            _logger?.LogWarning("Rejected restore for unsafe backup file name {BackupFileName}.", fileName);
             throw new InvalidOperationException("Backup file name is invalid.");
         }
 
         var backupPath = Path.Combine(_options.BackupPath, fileName);
         if (!File.Exists(backupPath))
         {
+            _logger?.LogWarning("Restore requested for missing backup {BackupFileName}.", fileName);
             return null;
         }
+
+        _logger?.LogWarning("Restoring local persistence from backup {BackupFileName}.", fileName);
 
         Directory.CreateDirectory(_options.AppDataPath);
         Directory.CreateDirectory(_options.UploadStoragePath);
@@ -138,6 +162,8 @@ public sealed class PersistenceBackupService
                 restoredEntries.Add(entry.FullName);
             }
         }
+
+        _logger?.LogInformation("Restored {RestoredEntryCount} entries from backup {BackupFileName}.", restoredEntries.Count, fileName);
 
         return new RestoreResponse(fileName, DateTimeOffset.UtcNow, restoredEntries);
     }

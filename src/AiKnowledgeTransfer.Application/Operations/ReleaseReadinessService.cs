@@ -4,11 +4,13 @@ using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Contracts.Diagnostics;
 using AiKnowledgeTransfer.Contracts.Operations;
+using Microsoft.Extensions.Logging;
 
 public sealed class ReleaseReadinessService(
     OperationalHealthService health,
     PersistenceBackupService backups,
-    AuthenticationOptions authentication)
+    AuthenticationOptions authentication,
+    ILogger<ReleaseReadinessService>? logger = null)
 {
     public ReleaseReadinessResponse GetStatus(string serviceName)
     {
@@ -40,6 +42,12 @@ public sealed class ReleaseReadinessService(
             : checks.Any(check => check.Status is "Warning" or "Manual")
                 ? "NeedsReview"
                 : "Ready";
+
+        logger?.LogInformation(
+            "Release readiness checked for {ServiceName}: {Status} with {CheckCount} checks.",
+            serviceName,
+            status,
+            checks.Count);
 
         return new ReleaseReadinessResponse(status, serviceName, DateTimeOffset.UtcNow, checks);
     }

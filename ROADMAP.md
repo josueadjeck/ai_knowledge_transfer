@@ -158,6 +158,7 @@ Aktueller Implementierungsstand:
 - Betriebs-Grundlage ist gestartet: Health-Endpoint meldet lokalen Storage, Persistenzdateien und AI-Provider-Konfiguration inklusive Fallback-Betrieb.
 - Betriebs-Grundlage ist erweitert: Die Blazor-UI zeigt Health-Komponenten fuer Storage, Persistenz, Datenbankstatus und AI-Provider direkt im Betriebsbereich.
 - Betriebs-Grundlage ist erweitert: Runtime-Metriken fuer Uptime, Prozess, Speicher, Threads und Runtime sind per API und Blazor-Operationsbereich sichtbar.
+- Betriebs-Grundlage ist erweitert: Backup, Restore, Backup-Vorschau und Release-Readiness schreiben strukturierte Betriebslogs.
 - Backup-/Restore-Grundlage ist gestartet: lokale JSON-Persistenz, Audit Log und Upload-Dateien koennen als ZIP gesichert, aufgelistet und kontrolliert wiederhergestellt werden.
 - Backup-/Restore-Grundlage ist erweitert: Backups koennen vor Restore geprueft werden; UI zeigt Inhalt, Warnungen und aktiviert Restore erst nach Vorschau.
 - Persistenzentscheidung ist dokumentiert: JSON bleibt MVP-/Demo-Speicher fuer schnelle Iteration; produktionsnaher Betrieb wechselt auf PostgreSQL oder SQL Server via EF Core und bestehende Repository-Abstraktionen.
