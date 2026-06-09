@@ -36,6 +36,7 @@
 @inject OnboardingReadinessService OnboardingReadiness
 @inject OnboardingStartPackageService OnboardingStartPackages
 @inject MarkdownExportService MarkdownExports
+@inject WordExportService WordExports
 @inject ExportApprovalService ExportApprovals
 @inject ExportHistoryService ExportHistory
 @inject TraceabilityService Traceability
@@ -571,6 +572,7 @@
             <button @onclick="LoadTraceabilityAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Traceability laden</button>
             <button @onclick="LoadComplianceAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Compliance Matrix</button>
             <button @onclick="ExportMarkdownAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Markdown Export</button>
+            <button @onclick="ExportWordAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Word Export</button>
             <button @onclick="LoadExportHistoryAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Export-Historie</button>
             <button @onclick="LoadExportApprovalsAsync" disabled="@(_selectedProject is null || !Can(Permission.ExportProject))">Freigaben laden</button>
             <button @onclick="LoadAuditAsync" disabled="@(_selectedProject is null || !Can(Permission.ViewTraceability))">Audit Log</button>
@@ -762,6 +764,27 @@
                     <textarea @bind="_exportApprovalComment"></textarea>
                 </label>
                 <button class="primary-action" @onclick="ApproveCurrentExportAsync" disabled="@(!Can(Permission.ExportProject))">Export freigeben</button>
+            </div>
+        }
+        @if (_wordExport is not null)
+        {
+            <div class="export-summary">
+                <div>
+                    <span>Word-Datei</span>
+                    <strong>@_wordExport.FileName</strong>
+                </div>
+                <div>
+                    <span>Format</span>
+                    <strong>@_wordExport.ContentType</strong>
+                </div>
+                <div>
+                    <span>Erzeugt</span>
+                    <strong>@_wordExport.GeneratedAt.LocalDateTime.ToString("g")</strong>
+                </div>
+                <div>
+                    <span>Umfang</span>
+                    <strong>@FormatFileSize(_wordExport.Document.Length)</strong>
+                </div>
             </div>
         }
         @if (_exportHistory.Count > 0)
@@ -1147,6 +1170,7 @@
     private TraceabilityMatrixResponse? _traceability;
     private ComplianceMatrixResponse? _compliance;
     private ExportProjectMarkdownResponse? _export;
+    private ExportProjectWordResponse? _wordExport;
     private IReadOnlyCollection<ExportHistoryResponse> _exportHistory = [];
     private IReadOnlyCollection<ExportApprovalResponse> _exportApprovals = [];
     private string _exportApprovalReviewer = "Senior Engineer";
@@ -1578,6 +1602,22 @@
         });
     }
 
+    private async Task ExportWordAsync()
+    {
+        if (_selectedProject is null || !Can(Permission.ExportProject))
+        {
+            return;
+        }
+
+        await RunSafelyAsync("Word exportieren", async () =>
+        {
+            _wordExport = await WordExports.ExportProjectAsync(_selectedProject.Id, CancellationToken.None);
+            _exportHistory = await ExportHistory.ListAsync(_selectedProject.Id, CancellationToken.None);
+            _exportApprovals = await ExportApprovals.ListAsync(_selectedProject.Id, CancellationToken.None);
+            SetStatus("Word Export erzeugt", _wordExport?.FileName ?? "Export");
+        });
+    }
+
     private async Task LoadExportHistoryAsync()
     {
         if (_selectedProject is null || !Can(Permission.ExportProject))
@@ -1810,6 +1850,7 @@
         _traceability = null;
         _compliance = null;
         _export = null;
+        _wordExport = null;
         _exportHistory = [];
         _exportApprovals = [];
         _lastAnalysis = null;

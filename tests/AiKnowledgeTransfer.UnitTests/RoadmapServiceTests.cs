@@ -15,6 +15,7 @@ using AiKnowledgeTransfer.Infrastructure.Parsing;
 using AiKnowledgeTransfer.Infrastructure.Storage;
 using AiKnowledgeTransfer.Infrastructure.Persistence;
 using AiKnowledgeTransfer.Infrastructure.Audit;
+using DocumentFormat.OpenXml.Packaging;
 
 public sealed class RoadmapServiceTests
 {
@@ -668,6 +669,81 @@ public sealed class RoadmapServiceTests
         var listedApproval = Assert.Single(approvals);
         Assert.Equal(approval.Id, listedApproval.Id);
         Assert.Contains("Ready for supervised onboarding", listedApproval.Summary, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ExportProjectAsync_creates_word_document_with_sources_knowledge_and_roadmap()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var auditLog = new JsonAuditLog(Path.Combine(storageRoot, "audit-log.json"));
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var extractionService = new KnowledgeExtractionService(repository, new HeuristicKnowledgeExtractor());
+        var reviewService = new KnowledgeReviewService(repository);
+        var roadmapService = new RoadmapService(repository);
+        var exportService = new WordExportService(repository, auditLog);
+        var exportHistoryService = new ExportHistoryService(auditLog);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Word Export Project", "Word export test", "Engineering"),
+            CancellationToken.None);
+
+        await using var content = new MemoryStream("""
+            CTU communication is unknown.
+
+            Deployment workflow must be reviewed by senior engineers.
+            """u8.ToArray());
+
+        var upload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("word-export.md", "text/markdown", "Manual upload", content),
+            CancellationToken.None);
+
+        Assert.NotNull(upload);
+        await analysisService.AnalyzeAsync(project.Id, upload.Document.Id, CancellationToken.None);
+        var extraction = await extractionService.ExtractAsync(project.Id, upload.Document.Id, CancellationToken.None);
+
+        Assert.NotNull(extraction);
+        var item = extraction.KnowledgeItems.First();
+        await reviewService.ApproveAsync(
+            project.Id,
+            item.Id,
+            new ReviewKnowledgeItemRequest("Senior Engineer", "Confirmed for Word export."),
+            CancellationToken.None);
+
+        await roadmapService.GenerateAsync(project.Id, new GenerateRoadmapRequest("Support Engineer", 3), CancellationToken.None);
+
+        var export = await exportService.ExportProjectAsync(project.Id, CancellationToken.None);
+
+        Assert.NotNull(export);
+        Assert.EndsWith(".docx", export.FileName, StringComparison.Ordinal);
+        Assert.Equal("application/vnd.openxmlformats-officedocument.wordprocessingml.document", export.ContentType);
+        Assert.True(export.Document.Length > 0);
+
+        using var stream = new MemoryStream(export.Document);
+        using var wordDocument = WordprocessingDocument.Open(stream, false);
+        var mainPart = wordDocument.MainDocumentPart;
+
+        Assert.NotNull(mainPart);
+        Assert.NotNull(mainPart.Document);
+        Assert.NotNull(mainPart.Document.Body);
+        var text = mainPart.Document.Body.InnerText;
+
+        Assert.Contains("Word Export Project Knowledge Transfer", text, StringComparison.Ordinal);
+        Assert.Contains("Sources", text, StringComparison.Ordinal);
+        Assert.Contains("Knowledge Items", text, StringComparison.Ordinal);
+        Assert.Contains("Roadmaps", text, StringComparison.Ordinal);
+        Assert.Contains("Traceability Matrix", text, StringComparison.Ordinal);
+        Assert.Contains("Support Engineer", text, StringComparison.Ordinal);
+
+        var history = await exportHistoryService.ListAsync(project.Id, CancellationToken.None);
+        var exportRun = Assert.Single(history);
+        Assert.Equal(export.FileName, exportRun.FileName);
+        Assert.Equal(export.ContentType, exportRun.ContentType);
+        Assert.Contains("Word export", exportRun.Summary, StringComparison.Ordinal);
     }
 
     [Fact]

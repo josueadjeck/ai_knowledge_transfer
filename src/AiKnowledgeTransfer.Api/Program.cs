@@ -361,6 +361,16 @@ projects.MapGet("/{projectId:guid}/exports/markdown", async Task<IResult> (
 })
 .RequirePermission(Permission.ExportProject);
 
+projects.MapGet("/{projectId:guid}/exports/word", async Task<IResult> (
+    Guid projectId,
+    WordExportService service,
+    CancellationToken cancellationToken) =>
+{
+    var result = await service.ExportProjectAsync(projectId, cancellationToken);
+    return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
+})
+.RequirePermission(Permission.ExportProject);
+
 projects.MapGet("/{projectId:guid}/exports/history", async Task<IResult> (
     Guid projectId,
     ExportHistoryService service,

@@ -15,9 +15,16 @@ public sealed class ExportHistoryService(IAuditLog auditLog)
                 auditEvent.Id,
                 projectId,
                 string.IsNullOrWhiteSpace(auditEvent.TargetType) ? "knowledge-transfer.md" : auditEvent.TargetType,
-                "text/markdown",
+                GetContentType(auditEvent.TargetType),
                 auditEvent.Summary,
                 auditEvent.OccurredAt))
             .ToArray();
+    }
+
+    private static string GetContentType(string fileName)
+    {
+        return fileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase)
+            ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : "text/markdown";
     }
 }

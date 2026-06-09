@@ -103,17 +103,16 @@ public sealed class RoadmapReadinessService
                 [
                     "Comparing versions is not yet implemented as a dedicated workflow."
                 ]),
-            NeedsWork(
+            Ready(
                 7,
                 "Export",
-                3,
+                4,
                 4,
                 [
-                    "Markdown export, export history, export approval and traceability details are implemented."
+                    "Markdown export, Word export, export history, export approval and traceability details are implemented.",
+                    "Word export creates a DOCX handover document with sources, verified knowledge, review notes, review history, traceability and roadmap sections."
                 ],
-                [
-                    "Word or PDF export is still open."
-                ]),
+                []),
             Ready(
                 8,
                 "Compliance und Traceability",
