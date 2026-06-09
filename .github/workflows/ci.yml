@@ -169,6 +169,10 @@ jobs:
         shell: pwsh
         run: ./scripts/security/static-source-scan.ps1 -OutputPath artifacts/security/static-source-scan.json
 
+      - name: Generate release attestation manifest
+        shell: pwsh
+        run: ./scripts/security/generate-release-attestation-manifest.ps1 -SecurityArtifactPath artifacts/security -OutputPath artifacts/security/release-attestation-manifest.json -RetentionDays 90
+
       - name: Basic secret pattern scan
         shell: bash
         run: |
@@ -198,3 +202,4 @@ jobs:
         with:
           name: security-inventory
           path: artifacts/security
+          retention-days: 90
