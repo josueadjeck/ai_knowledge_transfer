@@ -84,7 +84,7 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 
 Before deploying:
 
-1. Confirm CI restore, build, publish, dependency inventory, SPDX SBOM generation, container policy scan, container image vulnerability scan, container image inventory, container build, tests, vulnerability scan, static source security scan and secret scan passed.
+1. Confirm CI restore, build, publish, dependency inventory, SPDX SBOM generation, container policy scan, container image vulnerability scan, container image inventory, container image provenance, container build, tests, vulnerability scan, static source security scan and secret scan passed.
 2. Confirm `GET /health` is `ok`.
 3. Confirm `GET /api/operations/monitoring-summary` is `ok` or contains only accepted manual release-review signals.
 4. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
@@ -96,4 +96,4 @@ Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the manage
 
 ## Current Limits
 
-The MVP deployment baseline does not yet provide image signing, full CycloneDX/SPDX SBOM export, direct secret-manager integration, blue/green deployment or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.
+The MVP deployment baseline generates container provenance but does not yet provide registry-backed image signing enforcement, full CycloneDX/SPDX SBOM export, direct secret-manager integration, blue/green deployment or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.

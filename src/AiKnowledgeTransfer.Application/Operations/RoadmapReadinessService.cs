@@ -126,11 +126,11 @@ public sealed class RoadmapReadinessService
                 6,
                 7,
                 [
-                    "Monitoring, backups, release readiness, DB providers, security gates, SBOM, container checks, role review and tenant isolation review are implemented.",
+                    "Monitoring, backups, release readiness, DB providers, security gates, SBOM, container checks, container provenance, role review and tenant isolation review are implemented.",
                     "SQL Server and PostgreSQL are configurable production-capable database providers."
                 ],
                 [
-                    "Enterprise-hardening follow-ups remain: image signing, full file-level SBOM, direct secret-manager integration, blue/green deployment and complete tenant isolation."
+                    "Enterprise-hardening follow-ups remain: registry-backed image signing enforcement, full file-level SBOM, direct secret-manager integration, blue/green deployment and complete tenant isolation."
                 ])
         ];
     }

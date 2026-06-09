@@ -115,6 +115,10 @@ jobs:
         run: |
           docker image inspect ai-knowledge-transfer-api:ci ai-knowledge-transfer-web:ci > artifacts/security/container-images.json
 
+      - name: Generate container image provenance
+        shell: pwsh
+        run: ./scripts/security/generate-container-provenance.ps1 -ImageInventoryPath artifacts/security/container-images.json -OutputPath artifacts/security/container-provenance.json
+
       - name: Test
         run: dotnet test AiKnowledgeTransfer.slnx --configuration Release --no-build --logger trx --results-directory TestResults
 

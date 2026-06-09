@@ -85,7 +85,8 @@ public sealed class ReleaseReadinessServiceTests
             && check.Evidence.Contains("container-policy-scan.json", StringComparison.Ordinal)
             && check.Evidence.Contains("container-vulnerability-scan-api.json", StringComparison.Ordinal)
             && check.Evidence.Contains("container-vulnerability-scan-web.json", StringComparison.Ordinal)
-            && check.Evidence.Contains("container-images.json", StringComparison.Ordinal));
+            && check.Evidence.Contains("container-images.json", StringComparison.Ordinal)
+            && check.Evidence.Contains("container-provenance.json", StringComparison.Ordinal));
     }
 
     [Fact]
