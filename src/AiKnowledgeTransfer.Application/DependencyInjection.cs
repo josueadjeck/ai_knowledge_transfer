@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ProjectService>();
         services.AddScoped<DocumentAnalysisService>();
         services.AddScoped<DocumentAnalysisPreflightService>();
+        services.AddScoped<DocumentVersionComparisonService>();
         services.AddScoped<DocumentParserCapabilityService>();
         services.AddScoped<MarkdownExportService>();
         services.AddScoped<WordExportService>();

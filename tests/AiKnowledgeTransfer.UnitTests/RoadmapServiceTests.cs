@@ -125,6 +125,66 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task CompareAsync_reports_changed_and_added_chunks_between_document_versions()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests", Guid.NewGuid().ToString("N"));
+        var storage = new LocalFileStorage(storageRoot);
+        var parser = new PlainTextDocumentParser();
+        var projectService = new ProjectService(repository, storage);
+        var analysisService = new DocumentAnalysisService(repository, storage, [parser]);
+        var comparisonService = new DocumentVersionComparisonService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Version Project", "Document version comparison test", "Engineering"),
+            CancellationToken.None);
+
+        await using var firstContent = new MemoryStream("""
+            System overview.
+
+            Deployment workflow.
+            """u8.ToArray());
+        var firstUpload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("manual.md", "text/markdown", "Manual upload", firstContent),
+            CancellationToken.None);
+
+        await using var secondContent = new MemoryStream("""
+            System overview.
+
+            Deployment workflow changed.
+
+            Recovery workflow added.
+            """u8.ToArray());
+        var secondUpload = await projectService.UploadDocumentAsync(
+            project.Id,
+            new UploadDocumentCommand("manual.md", "text/markdown", "Manual upload", secondContent),
+            CancellationToken.None);
+
+        Assert.NotNull(firstUpload);
+        Assert.NotNull(secondUpload);
+        await analysisService.AnalyzeAsync(project.Id, firstUpload.Document.Id, CancellationToken.None);
+        await analysisService.AnalyzeAsync(project.Id, secondUpload.Document.Id, CancellationToken.None);
+
+        var comparison = await comparisonService.CompareAsync(
+            project.Id,
+            firstUpload.Document.Id,
+            secondUpload.Document.Id,
+            CancellationToken.None);
+
+        Assert.NotNull(comparison);
+        Assert.Equal("manual.md", comparison.FileName);
+        Assert.Equal(1, comparison.BaseVersionNumber);
+        Assert.Equal(2, comparison.TargetVersionNumber);
+        Assert.Equal(1, comparison.UnchangedCount);
+        Assert.Equal(1, comparison.ChangedCount);
+        Assert.Equal(1, comparison.AddedCount);
+        Assert.Equal(0, comparison.RemovedCount);
+        Assert.Contains(comparison.Rows, row => row.ChangeType == "Changed" && row.TargetText.Contains("changed", StringComparison.Ordinal));
+        Assert.Contains(comparison.Rows, row => row.ChangeType == "Added" && row.TargetText.Contains("Recovery", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task OnboardingReadiness_reports_not_ready_without_verified_knowledge_or_roadmap()
     {
         var repository = new InMemoryProjectRepository();

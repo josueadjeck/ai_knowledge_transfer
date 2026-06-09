@@ -162,6 +162,25 @@ projects.MapGet("/{projectId:guid}/documents/{documentId:guid}/analysis-prefligh
 })
 .RequirePermission(Permission.AnalyzeDocument);
 
+projects.MapGet("/{projectId:guid}/documents/{baseDocumentId:guid}/compare/{targetDocumentId:guid}", async Task<IResult> (
+    Guid projectId,
+    Guid baseDocumentId,
+    Guid targetDocumentId,
+    DocumentVersionComparisonService service,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        var result = await service.CompareAsync(projectId, baseDocumentId, targetDocumentId, cancellationToken);
+        return result is null ? ApiResponses.NotFound("Project or document version was not found.") : Results.Ok(result);
+    }
+    catch (InvalidOperationException exception)
+    {
+        return ApiResponses.BadRequest(exception.Message);
+    }
+})
+.RequirePermission(Permission.ViewProject);
+
 projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/extract-knowledge", async Task<IResult> (
     Guid projectId,
     Guid documentId,

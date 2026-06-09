@@ -20,6 +20,10 @@ public sealed class RoadmapReadinessServiceTests
             && phase.Status == "Ready"
             && phase.Evidence.Any(evidence => evidence.Contains("Editable roadmap", StringComparison.Ordinal)));
         Assert.Contains(readiness.Phases, phase =>
+            phase.Phase == 6
+            && phase.Status == "Ready"
+            && phase.Evidence.Any(evidence => evidence.Contains("version comparison", StringComparison.OrdinalIgnoreCase)));
+        Assert.Contains(readiness.Phases, phase =>
             phase.Phase == 9
             && phase.Gaps.Any(gap => gap.Contains("tenant isolation", StringComparison.OrdinalIgnoreCase)));
     }

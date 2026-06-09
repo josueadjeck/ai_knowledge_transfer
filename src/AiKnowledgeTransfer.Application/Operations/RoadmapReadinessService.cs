@@ -90,18 +90,17 @@ public sealed class RoadmapReadinessService
                     "Editable roadmap structure is implemented through API and Blazor UI for generated roadmap weeks."
                 ],
                 []),
-            NeedsWork(
+            Ready(
                 6,
                 "Review und Freigabe",
-                4,
+                5,
                 5,
                 [
                     "Knowledge items support review, approval, rejection, comments, quality status and review history.",
-                    "Bulk review actions are available in API and UI."
+                    "Bulk review actions are available in API and UI.",
+                    "Document version comparison is available as a dedicated API and Blazor workflow."
                 ],
-                [
-                    "Comparing versions is not yet implemented as a dedicated workflow."
-                ]),
+                []),
             Ready(
                 7,
                 "Export",

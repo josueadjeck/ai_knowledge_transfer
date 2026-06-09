@@ -29,6 +29,7 @@
 @inject ProjectService Projects
 @inject DocumentAnalysisService Analysis
 @inject DocumentAnalysisPreflightService AnalysisPreflight
+@inject DocumentVersionComparisonService VersionComparison
 @inject KnowledgeExtractionService Extraction
 @inject KnowledgeReviewService Review
 @inject KnowledgeReviewSummaryService ReviewSummary
@@ -247,6 +248,62 @@
 
         @if (_selectedProject?.Documents.Count > 0)
         {
+            <div class="version-compare">
+                <div class="form-grid">
+                    <label>
+                        Basisversion
+                        <select @bind="_baseCompareDocumentId">
+                            <option value="">Auswaehlen</option>
+                            @foreach (var document in ComparableDocuments)
+                            {
+                                <option value="@document.Id">@document.FileName v@document.VersionNumber</option>
+                            }
+                        </select>
+                    </label>
+                    <label>
+                        Zielversion
+                        <select @bind="_targetCompareDocumentId">
+                            <option value="">Auswaehlen</option>
+                            @foreach (var document in ComparableDocuments)
+                            {
+                                <option value="@document.Id">@document.FileName v@document.VersionNumber</option>
+                            }
+                        </select>
+                    </label>
+                </div>
+                <button @onclick="CompareDocumentVersionsAsync" disabled="@(!CanCompareDocumentVersions)">Versionen vergleichen</button>
+            </div>
+            @if (_documentVersionComparison is not null)
+            {
+                <div class="analysis-summary">
+                    <div>
+                        <span>Datei</span>
+                        <strong>@_documentVersionComparison.FileName</strong>
+                    </div>
+                    <div>
+                        <span>Versionen</span>
+                        <strong>v@_documentVersionComparison.BaseVersionNumber zu v@_documentVersionComparison.TargetVersionNumber</strong>
+                    </div>
+                    <div>
+                        <span>Geaendert</span>
+                        <strong>@_documentVersionComparison.ChangedCount</strong>
+                    </div>
+                    <div>
+                        <span>Neu/Entfernt</span>
+                        <strong>@_documentVersionComparison.AddedCount / @_documentVersionComparison.RemovedCount</strong>
+                    </div>
+                </div>
+                <details class="chunk-preview">
+                    <summary>Vergleichszeilen anzeigen</summary>
+                    @foreach (var row in _documentVersionComparison.Rows.Where(row => row.ChangeType != "Unchanged").Take(8))
+                    {
+                        <article>
+                            <span>@row.ChangeType | Basis @(row.BaseChunkNumber?.ToString() ?? "-") | Ziel @(row.TargetChunkNumber?.ToString() ?? "-")</span>
+                            <p>@PreviewText(string.IsNullOrWhiteSpace(row.TargetText) ? row.BaseText : row.TargetText)</p>
+                        </article>
+                    }
+                </details>
+            }
             <div class="compact-list">
                 @foreach (var document in _selectedProject.Documents)
                 {
@@ -1194,6 +1251,8 @@
     private ProjectDetailsResponse? _selectedProject;
     private Guid _selectedProjectId;
     private string _uploadSource = "Manual upload";
+    private Guid? _baseCompareDocumentId;
+    private Guid? _targetCompareDocumentId;
     private string _roadmapRole = "Support Engineer";
     private int _roadmapWeeks = 4;
     private string _knowledgeTypeFilter = string.Empty;
@@ -1218,6 +1277,7 @@
     private string _exportApprovalComment = "Export reviewed for pilot onboarding.";
     private AnalyzeDocumentResponse? _lastAnalysis;
     private DocumentAnalysisPreflightResponse? _analysisPreflight;
+    private DocumentVersionComparisonResponse? _documentVersionComparison;
     private ExtractKnowledgeResponse? _lastExtraction;
     private KnowledgeReviewSummaryResponse? _reviewSummary;
     private OnboardingReadinessResponse? _onboardingReadiness;
@@ -1242,6 +1302,12 @@
 
     private bool CanExtract => Can(Permission.ExtractKnowledge)
         && _selectedProject?.Documents.Any(document => document.Status == "Analyzed") == true;
+
+    private bool CanCompareDocumentVersions => Can(Permission.ViewProject)
+        && _selectedProject is not null
+        && _baseCompareDocumentId is not null
+        && _targetCompareDocumentId is not null
+        && _baseCompareDocumentId != _targetCompareDocumentId;
 
     private bool CanOperateBackups => Can(Permission.ManageUsers);
 
@@ -1305,6 +1371,12 @@
         .Select(auditEvent => auditEvent.TargetType)
         .Distinct(StringComparer.Ordinal)
         .Order(StringComparer.Ordinal);
+
+    private IEnumerable<DocumentResponse> ComparableDocuments => _selectedProject?.Documents
+        .Where(document => document.ChunkCount > 0)
+        .OrderBy(document => document.FileName, StringComparer.OrdinalIgnoreCase)
+        .ThenBy(document => document.VersionNumber)
+        ?? Enumerable.Empty<DocumentResponse>();
 
     private IEnumerable<AuditEventResponse> FilteredAuditEvents => _auditEvents
         .Where(auditEvent => string.IsNullOrWhiteSpace(_auditActionFilter) || auditEvent.Action == _auditActionFilter)
@@ -1419,6 +1491,28 @@
         {
             _analysisPreflight = await AnalysisPreflight.GetAsync(_selectedProject.Id, document.Id, CancellationToken.None);
             SetStatus("Preflight abgeschlossen", PreflightStatusDetail(_analysisPreflight));
+        });
+    }
+
+    private async Task CompareDocumentVersionsAsync()
+    {
+        if (_selectedProject is null || !CanCompareDocumentVersions)
+        {
+            return;
+        }
+
+        await RunSafelyAsync("Versionen vergleichen", async () =>
+        {
+            _documentVersionComparison = await VersionComparison.CompareAsync(
+                _selectedProject.Id,
+                _baseCompareDocumentId!.Value,
+                _targetCompareDocumentId!.Value,
+                CancellationToken.None);
+            SetStatus(
+                "Versionsvergleich geladen",
+                _documentVersionComparison is null
+                    ? "Keine Daten"
+                    : $"{_documentVersionComparison.ChangedCount} geaendert, {_documentVersionComparison.AddedCount} neu");
         });
     }
 
@@ -1932,11 +2026,39 @@
         _exportHistory = [];
         _exportApprovals = [];
         _roadmapEdits = [];
+        _documentVersionComparison = null;
         _lastAnalysis = null;
         _lastExtraction = null;
         _auditEvents = [];
+        ResetCompareSelectionIfNeeded();
         ResetKnowledgeFiltersIfNeeded();
         ResetAuditFiltersIfNeeded();
+    }
+
+    private void ResetCompareSelectionIfNeeded()
+    {
+        var comparableDocuments = ComparableDocuments.ToArray();
+        var comparableIds = comparableDocuments.Select(document => document.Id).ToHashSet();
+        if (_baseCompareDocumentId is not null && !comparableIds.Contains(_baseCompareDocumentId.Value))
+        {
+            _baseCompareDocumentId = null;
+        }
+
+        if (_targetCompareDocumentId is not null && !comparableIds.Contains(_targetCompareDocumentId.Value))
+        {
+            _targetCompareDocumentId = null;
+        }
+
+        var sameFileGroup = comparableDocuments
+            .GroupBy(document => document.FileName, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(group => group.Count() >= 2);
+
+        if ((_baseCompareDocumentId is null || _targetCompareDocumentId is null) && sameFileGroup is not null)
+        {
+            var versions = sameFileGroup.OrderBy(document => document.VersionNumber).Take(2).ToArray();
+            _baseCompareDocumentId ??= versions[0].Id;
+            _targetCompareDocumentId ??= versions[1].Id;
+        }
     }
 
     private void ResetKnowledgeFiltersIfNeeded()

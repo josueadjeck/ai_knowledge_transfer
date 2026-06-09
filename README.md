@@ -13,6 +13,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Multipart document upload with local file storage.
 - Central upload validation for supported file types and 10 MB maximum file size.
 - Document cards show source, content type, file size, version, upload time and storage status.
+- Document version comparison shows changed, added, removed and unchanged analyzed chunks between versions of the same file.
 - Text and Markdown parsing into document chunks.
 - PDF text extraction into document chunks for text-based PDF files.
 - Word `.docx` text extraction into document chunks.
@@ -112,6 +113,7 @@ The web UI can run the MVP workflow directly:
 - Upload a text, Markdown, text-based PDF or Word `.docx` document.
 - Inspect supported parser formats before analysis.
 - Analyze the document into chunks.
+- Compare analyzed versions of the same file.
 - Inspect parser diagnostics after analysis.
 - Inspect extracted chunks, quality labels and parser-specific source references per analyzed document.
 - Extract knowledge items.
@@ -290,6 +292,12 @@ Analyze an uploaded text or Markdown document:
 
 ```http
 POST http://localhost:5256/api/projects/{projectId}/documents/{documentId}/analyze
+```
+
+Compare two analyzed versions of the same document:
+
+```http
+GET http://localhost:5256/api/projects/{projectId}/documents/{baseDocumentId}/compare/{targetDocumentId}
 ```
 
 Extract first knowledge items from an analyzed document:
