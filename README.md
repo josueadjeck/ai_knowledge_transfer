@@ -54,6 +54,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - SQLite-backed audit log foundation for local relational persistence tests.
 - Database initialization for SQLite-backed local relational runs.
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
+- Role permission review summary for critical permissions and non-admin assignments.
 - Identity resolution foundation for claim-based roles with the MVP role selector as a demo fallback.
 - API permission gates for project, document, review, roadmap, export, audit and operations endpoints.
 - Tenancy mode is explicit in health and release readiness; MVP defaults to single-tenant operation.
@@ -399,6 +400,12 @@ Get the MVP role permission matrix:
 
 ```http
 GET http://localhost:5256/api/security/roles
+```
+
+Get the role permission review summary:
+
+```http
+GET http://localhost:5256/api/security/role-review
 ```
 
 Get the current resolved user:

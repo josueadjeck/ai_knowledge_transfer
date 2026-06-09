@@ -4,14 +4,18 @@ using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Contracts.Diagnostics;
 using AiKnowledgeTransfer.Contracts.Operations;
+using AiKnowledgeTransfer.Contracts.Security;
 using Microsoft.Extensions.Logging;
 
 public sealed class ReleaseReadinessService(
     OperationalHealthService health,
     PersistenceBackupService backups,
     AuthenticationOptions authentication,
+    RolePermissionService? rolePermissions = null,
     ILogger<ReleaseReadinessService>? logger = null)
 {
+    private readonly RolePermissionService _rolePermissions = rolePermissions ?? new RolePermissionService();
+
     public ReleaseReadinessResponse GetStatus(string serviceName)
     {
         var healthStatus = health.GetStatus(serviceName);
@@ -23,6 +27,7 @@ public sealed class ReleaseReadinessService(
             BuildDatabaseSchemaCheck(healthStatus),
             BuildDatabaseProviderCheck(healthStatus),
             BuildAuthenticationCheck(authentication),
+            BuildRolePermissionReviewCheck(_rolePermissions.GetReview()),
             BuildTenancyCheck(healthStatus),
             BuildBackupCheck(backupList),
             BuildAiProviderCheck(healthStatus),
@@ -255,6 +260,16 @@ public sealed class ReleaseReadinessService(
             Required: true,
             "OIDC authentication settings are configured.",
             $"Mode: {authentication.Mode}, role claim: {authentication.RoleClaimType}");
+    }
+
+    private static ReleaseReadinessCheckResponse BuildRolePermissionReviewCheck(RolePermissionReviewResponse review)
+    {
+        return new ReleaseReadinessCheckResponse(
+            "Role permission review",
+            "Manual",
+            Required: true,
+            "Confirm critical permissions and identity-provider role mappings are reviewed before release.",
+            $"Status: {review.Status}, non-admin critical assignments: {review.NonAdminCriticalAssignmentCount}, endpoint: /api/security/role-review");
     }
 
     private static ReleaseReadinessCheckResponse BuildTenancyCheck(HealthResponse healthStatus)

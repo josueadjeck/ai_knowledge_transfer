@@ -59,6 +59,20 @@ public sealed class ReleaseReadinessServiceTests
     }
 
     [Fact]
+    public void GetStatus_requires_role_permission_review()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(root, aiApiKeyConfigured: true).GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Role permission review"
+            && check.Required
+            && check.Status == "Manual"
+            && check.Evidence.Contains("/api/security/role-review", StringComparison.Ordinal)
+            && check.Evidence.Contains("non-admin critical assignments", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void GetStatus_requires_container_image_inventory_review()
     {
         var root = CreateRoot();

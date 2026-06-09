@@ -446,6 +446,12 @@ app.MapGet("/api/security/roles", (RolePermissionService service) =>
 })
 .RequirePermission(Permission.ManageUsers);
 
+app.MapGet("/api/security/role-review", (RolePermissionService service) =>
+{
+    return Results.Ok(service.GetReview());
+})
+.RequirePermission(Permission.ManageUsers);
+
 app.MapGet("/api/security/current-user", (HttpContext httpContext, UserIdentityService service) =>
 {
     return Results.Ok(service.Resolve(httpContext.User));

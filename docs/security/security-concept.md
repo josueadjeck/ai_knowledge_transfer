@@ -27,6 +27,7 @@ The MVP roles are:
 | Viewer | Reads approved or visible project information without mutating state. |
 
 API permission gates protect project, document, review, roadmap, export, audit and operations endpoints. The Blazor UI uses the same authorization service for action availability.
+Before release, administrators should review `GET /api/security/role-review` and confirm non-admin roles with critical permissions are intentional. The review also checks that identity-provider role claims map to the intended application roles.
 
 ## Data and Storage Controls
 

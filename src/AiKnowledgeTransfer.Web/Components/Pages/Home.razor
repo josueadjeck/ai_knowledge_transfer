@@ -41,6 +41,7 @@
 @inject TraceabilityService Traceability
 @inject ComplianceMatrixService Compliance
 @inject UserIdentityService Identity
+@inject RolePermissionService RolePermissions
 @inject AuditLogService Audit
 @inject PersistenceBackupService Backups
 @inject ReleaseReadinessService ReleaseReadiness
@@ -795,6 +796,7 @@
             <button @onclick="LoadMonitoringSummaryAsync" disabled="@(!CanOperateBackups)">Monitoring laden</button>
             <button @onclick="LoadHealthAsync" disabled="@(!CanOperateBackups)">Status laden</button>
             <button @onclick="LoadRuntimeMetricsAsync" disabled="@(!CanOperateBackups)">Metriken laden</button>
+            <button @onclick="LoadRolePermissionReviewAsync" disabled="@(!CanOperateBackups)">Rollenreview</button>
             <button @onclick="CreateBackupAsync" disabled="@(!CanOperateBackups)">Backup erstellen</button>
             <button @onclick="LoadBackupsAsync" disabled="@(!CanOperateBackups)">Backups laden</button>
             <button @onclick="PreviewBackupAsync" disabled="@(!CanPreviewBackup)">Backup pruefen</button>
@@ -950,6 +952,38 @@
             </div>
         }
 
+        @if (_rolePermissionReview is not null)
+        {
+            <div class="health-overview">
+                <div>
+                    <span>Rollenreview</span>
+                    <strong class="@ReadinessStatusClass(_rolePermissionReview.Status)">@_rolePermissionReview.Status</strong>
+                </div>
+                <div>
+                    <span>Rollen</span>
+                    <strong>@_rolePermissionReview.RoleCount</strong>
+                </div>
+                <div>
+                    <span>Kritisch</span>
+                    <strong>@_rolePermissionReview.CriticalAssignmentCount</strong>
+                </div>
+                <div>
+                    <span>Nicht-Admin</span>
+                    <strong>@_rolePermissionReview.NonAdminCriticalAssignmentCount</strong>
+                </div>
+            </div>
+            <div class="readiness-list">
+                @foreach (var assignment in _rolePermissionReview.CriticalAssignments.Take(8))
+                {
+                    <div>
+                        <strong>@assignment.Role</strong>
+                        <span>@assignment.Permission</span>
+                        <p>@assignment.Reason</p>
+                    </div>
+                }
+            </div>
+        }
+
         @if (_backups.Count > 0)
         {
             <label class="select-label">
@@ -1059,6 +1093,7 @@
     private ReleaseReadinessResponse? _releaseReadiness;
     private RuntimeMetricsResponse? _runtimeMetrics;
     private MonitoringSummaryResponse? _monitoringSummary;
+    private RolePermissionReviewResponse? _rolePermissionReview;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
     private IReadOnlyCollection<DocumentParserCapabilityResponse> _parserCapabilities = [];
@@ -1585,6 +1620,13 @@
     {
         _releaseReadiness = ReleaseReadiness.GetStatus("AiKnowledgeTransfer.Web");
         SetStatus("Release geprueft", $"{_releaseReadiness.Status}, {_releaseReadiness.Checks.Count} Checks");
+        return Task.CompletedTask;
+    }
+
+    private Task LoadRolePermissionReviewAsync()
+    {
+        _rolePermissionReview = RolePermissions.GetReview();
+        SetStatus("Rollenreview geladen", $"{_rolePermissionReview.Status}, {_rolePermissionReview.NonAdminCriticalAssignmentCount} kritische Nicht-Admin-Zuordnungen");
         return Task.CompletedTask;
     }
 

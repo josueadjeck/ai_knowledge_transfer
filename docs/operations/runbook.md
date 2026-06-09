@@ -62,9 +62,10 @@ Status meanings:
 - `NeedsReview`: automated release blockers are clear, but warning or manual checks still need a human decision.
 - `Blocked`: at least one required check failed.
 
-Current required checks cover runtime health, persistence configuration, authentication, tenancy, backups, CI security gates, security and data protection review, secret management review and release approval.
+Current required checks cover runtime health, persistence configuration, authentication, role permission review, tenancy, backups, CI security gates, security and data protection review, secret management review and release approval.
 Database mode with `AKT_DB_SCHEMA_MODE=Migrations` applies managed EF migrations. `EnsureCreated` remains available for local MVP runs but appears as a warning for release review.
 
+The `Role permission review` check is manual. Review `GET /api/security/role-review` and confirm critical permissions, non-admin assignments and identity-provider role-claim mapping are accepted for the release.
 The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `dotnet-package-inventory.json`, `sbom.spdx.json`, `vulnerable-packages.json`, `static-source-scan.json`, `container-policy-scan.json`, `container-vulnerability-scan-api.json`, `container-vulnerability-scan-web.json` and `container-images.json` are present for the release candidate.
 The `Security and data protection review` check is manual. Review the concepts under `docs/security` and document accepted residual risks for the target deployment.
 The `Secret management review` check is manual. Confirm runtime secrets are stored outside source control and images, injected at runtime and have documented rotation ownership.
