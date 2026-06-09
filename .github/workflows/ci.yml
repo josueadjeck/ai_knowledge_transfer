@@ -123,6 +123,10 @@ jobs:
         shell: pwsh
         run: ./scripts/security/generate-container-provenance.ps1 -ImageInventoryPath artifacts/security/container-images.json -OutputPath artifacts/security/container-provenance.json
 
+      - name: Container signing policy scan
+        shell: pwsh
+        run: ./scripts/security/container-signing-policy-scan.ps1 -ProvenancePath artifacts/security/container-provenance.json -OutputPath artifacts/security/container-signing-policy.json -Registry ghcr.io/${{ github.repository }} -SignerIdentity github-actions-oidc -VerificationPolicy registry-signature-required
+
       - name: Test
         run: dotnet test AiKnowledgeTransfer.slnx --configuration Release --no-build --logger trx --results-directory TestResults
 

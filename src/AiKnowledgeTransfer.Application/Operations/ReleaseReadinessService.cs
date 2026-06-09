@@ -54,8 +54,8 @@ public sealed class ReleaseReadinessService(
                 "Container image inventory",
                 "Manual",
                 Required: true,
-                "Confirm the CI security-inventory artifact includes metadata and provenance for the API and Web container images.",
-                "Expected artifact entries: container-policy-scan.json, container-vulnerability-scan-api.json, container-vulnerability-scan-web.json, container-images.json and container-provenance.json for ai-knowledge-transfer-api:ci and ai-knowledge-transfer-web:ci."),
+                "Confirm the CI security-inventory artifact includes metadata, provenance and signing policy for the API and Web container images.",
+                "Expected artifact entries: container-policy-scan.json, container-vulnerability-scan-api.json, container-vulnerability-scan-web.json, container-images.json, container-provenance.json and container-signing-policy.json for ai-knowledge-transfer-api:ci and ai-knowledge-transfer-web:ci."),
             new(
                 "Security and data protection review",
                 "Manual",

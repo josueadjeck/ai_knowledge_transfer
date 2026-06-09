@@ -204,6 +204,7 @@ Aktueller Implementierungsstand:
 - SBOM-/Artefakt-Grundlage ist erweitert: CI erzeugt ein `build-artifact-inventory.json` mit Dateipfaden, Groessen und SHA256-Hashes der API- und Web-Publish-Artefakte.
 - Container-Security-Grundlage ist erweitert: CI prueft Dockerfiles per Policy-Scan auf nicht-root Runtime-User, versionierte .NET-Basisimages, Production-Umgebung und stabile COPY-/Port-Regeln.
 - Container-Supply-Chain-Grundlage ist erweitert: CI erzeugt ein `container-provenance.json` aus Image-Inventar, erwarteten Tags und GitHub-Run-Kontext als Vorstufe fuer registry-backed Image Signing.
+- Container-Supply-Chain-Grundlage ist erweitert: CI erzwingt ein `container-signing-policy.json` mit Registry, Signer Identity, Verification Policy und Provenance-Subjects als registry-backed Signing-Promotion-Gate.
 - Container-Security-Grundlage ist erweitert: CI scannt gebaute API- und Web-Images mit Trivy auf High-/Critical-Vulnerabilities und archiviert JSON-Scanartefakte.
 - Secret-Management-Grundlage ist dokumentiert: Runtime-Secrets wie AI-Provider-Key, Datenbank-Credentials und OIDC-/Provider-Konfiguration muessen fuer Pilot-/Enterprise-Betrieb ueber einen freigegebenen Secret Store injiziert und in Release-Readiness geprueft werden.
 - Secret-Management-Grundlage ist erweitert: `AKT_SECRET_STORE_MODE`, `AKT_SECRET_STORE_PROVIDER` und `AKT_SECRET_ROTATION_OWNER` machen Secret-Store-Nutzung in Health und Release-Readiness pruefbar.
