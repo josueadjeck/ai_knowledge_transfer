@@ -23,4 +23,7 @@ public sealed record OperationalHealthOptions(
     string AuthRoleClaimType,
     string TenancyMode,
     string TenantClaimType,
-    string DefaultTenantId);
+    string DefaultTenantId,
+    string SecretStoreMode = "Environment",
+    string? SecretStoreProvider = null,
+    string? SecretRotationOwner = null);

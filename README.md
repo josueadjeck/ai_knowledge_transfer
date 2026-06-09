@@ -74,7 +74,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - JSON persistence backup and restore endpoints for local MVP operation.
 - Backup preview before restore, including manifest, entries, warnings and upload counts.
 - Security and data protection concepts for pilot/release review.
-- Secret management baseline for AI provider keys, database credentials and runtime configuration.
+- Secret management baseline and release gate for AI provider keys, database credentials and runtime configuration.
 - Release readiness endpoint and dashboard check for runtime health, backups, persistence, authentication mode, security inventory, security/data protection review, secret management review and manual release gates.
 - GitHub Actions CI for restore, build, publish, build artifact file inventory, dependency inventory, SPDX SBOM generation, container policy scanning, built image vulnerability scanning, container image inventory, container image provenance, container builds, tests, vulnerability checks, static source security scanning and basic secret scanning.
 - Unit and architecture tests.
@@ -183,6 +183,16 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 
 `OPENAI_MODEL` and `OPENAI_BASE_URL` are optional. `OPENAI_BASE_URL` is intentionally configurable so future providers such as Azure OpenAI, customer-hosted AI gateways, or local model gateways can be added without changing the application layer.
 For pilot and enterprise deployments, inject `OPENAI_API_KEY` and other sensitive values through an approved secret manager or hosting platform. See `docs/security/secret-management.md`.
+
+Secret-store release configuration:
+
+```powershell
+$env:AKT_SECRET_STORE_MODE="SecretStore" # or Environment for local runs
+$env:AKT_SECRET_STORE_PROVIDER="AzureKeyVault" # example provider name
+$env:AKT_SECRET_ROTATION_OWNER="Operations"
+```
+
+`SecretStore` mode requires a provider name and rotation owner before release readiness can pass the secret-management check.
 
 ## Document analysis limits
 

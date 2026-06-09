@@ -28,6 +28,19 @@ For non-local deployments, secrets should be injected by the hosting platform or
 
 Secrets must not be baked into container images. Dockerfiles should remain credential-free and images should receive secrets only at runtime.
 
+## Runtime Configuration
+
+Secret management mode is configured without exposing secret values:
+
+```powershell
+$env:AKT_SECRET_STORE_MODE="Environment" # local default
+$env:AKT_SECRET_STORE_MODE="SecretStore" # pilot/enterprise target
+$env:AKT_SECRET_STORE_PROVIDER="AzureKeyVault"
+$env:AKT_SECRET_ROTATION_OWNER="Operations"
+```
+
+`SecretStore` mode requires both `AKT_SECRET_STORE_PROVIDER` and `AKT_SECRET_ROTATION_OWNER`. Health reports only whether provider and rotation-owner metadata are configured, not any secret value.
+
 ## Rotation and Incident Response
 
 Before release, the release owner must confirm:
@@ -46,7 +59,7 @@ Runtime health and release-readiness checks should report only whether required 
 
 Confirm before deployment:
 
-- Required secrets are stored in an approved secret manager or platform secret store.
+- Required secrets are stored in an approved secret manager or platform secret store, and `AKT_SECRET_STORE_MODE=SecretStore` is configured with provider and rotation owner metadata.
 - No production secret is present in repository files, Dockerfiles, images or CI logs.
 - The CI secret pattern scan passed.
 - Runtime configuration shows required secrets as configured without exposing values.
@@ -55,6 +68,6 @@ Confirm before deployment:
 
 ## Current Gaps
 
-- No direct integration with a specific enterprise secret manager is implemented yet.
+- Provider-specific secret retrieval remains owned by the hosting platform or customer-approved secret manager integration; the application validates the selected secret-store mode and release metadata.
 - CI secret scanning is deterministic and lightweight, not a full DLP or historical secret scan.
 - Secret rotation is an operational procedure, not an automated in-app workflow.

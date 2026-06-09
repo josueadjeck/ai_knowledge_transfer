@@ -21,6 +21,7 @@ public sealed class OperationalHealthService
             GetAuditLogComponent(),
             GetAuthComponent(),
             GetTenancyComponent(),
+            GetSecretManagementComponent(),
             GetAiProviderComponent(),
             GetAnalysisLimitsComponent(),
             GetExtractionLimitsComponent()
@@ -216,6 +217,30 @@ public sealed class OperationalHealthService
                 ["tenantClaimType"] = _options.TenantClaimType,
                 ["defaultTenantId"] = _options.DefaultTenantId,
                 ["multiTenantEnabled"] = isMultiTenant.ToString()
+            });
+    }
+
+    private HealthComponentResponse GetSecretManagementComponent()
+    {
+        var isSecretStore = _options.SecretStoreMode.Equals("SecretStore", StringComparison.OrdinalIgnoreCase);
+        var isEnvironment = _options.SecretStoreMode.Equals("Environment", StringComparison.OrdinalIgnoreCase);
+        var providerConfigured = !string.IsNullOrWhiteSpace(_options.SecretStoreProvider);
+        var rotationOwnerConfigured = !string.IsNullOrWhiteSpace(_options.SecretRotationOwner);
+        var isConfigured = isEnvironment || (isSecretStore && providerConfigured && rotationOwnerConfigured);
+
+        return new HealthComponentResponse(
+            "secretManagement",
+            isConfigured ? "ok" : "error",
+            isSecretStore
+                ? "Secret-store mode is selected for runtime sensitive configuration."
+                : isEnvironment
+                    ? "Environment-based secret injection is active."
+                    : "Secret management mode is invalid.",
+            new Dictionary<string, string>
+            {
+                ["mode"] = _options.SecretStoreMode,
+                ["providerConfigured"] = providerConfigured.ToString(),
+                ["rotationOwnerConfigured"] = rotationOwnerConfigured.ToString()
             });
     }
 

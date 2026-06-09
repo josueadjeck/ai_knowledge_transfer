@@ -120,6 +120,41 @@ public sealed class ReleaseReadinessServiceTests
     }
 
     [Fact]
+    public void GetStatus_blocks_release_when_secret_store_configuration_is_incomplete()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            secretManagement: new SecretManagementOptions("SecretStore", null, "Operations"))
+            .GetStatus("TestService");
+
+        Assert.Equal("Blocked", readiness.Status);
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Secret management review"
+            && check.Required
+            && check.Status == "Fail"
+            && check.Evidence.Contains("provider configured: False", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_passes_secret_management_when_secret_store_is_configured()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            secretManagement: new SecretManagementOptions("SecretStore", "AzureKeyVault", "Operations"))
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Secret management review"
+            && check.Required
+            && check.Status == "Pass"
+            && check.Evidence.Contains("provider configured: True", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void GetStatus_blocks_release_when_oidc_configuration_is_incomplete()
     {
         var root = CreateRoot();
@@ -358,6 +393,7 @@ public sealed class ReleaseReadinessServiceTests
         bool aiApiKeyConfigured,
         AuthenticationOptions? authentication = null,
         TenantOptions? tenancy = null,
+        SecretManagementOptions? secretManagement = null,
         string persistenceProvider = "Json",
         string? databaseProvider = null,
         string? databaseConnectionString = null,
@@ -365,6 +401,7 @@ public sealed class ReleaseReadinessServiceTests
     {
         authentication ??= new AuthenticationOptions("Demo", null, null, "role");
         tenancy ??= TenantOptions.Default;
+        secretManagement ??= SecretManagementOptions.Default;
         var health = new OperationalHealthService(new OperationalHealthOptions(
             root,
             Path.Combine(root, "uploads"),
@@ -388,13 +425,17 @@ public sealed class ReleaseReadinessServiceTests
             authentication.RoleClaimType,
             tenancy.Mode,
             tenancy.TenantClaimType,
-            tenancy.DefaultTenantId));
+            tenancy.DefaultTenantId,
+            secretManagement.Mode,
+            secretManagement.Provider,
+            secretManagement.RotationOwner));
         var backups = new PersistenceBackupService(CreateBackupOptions(root));
 
         return new ReleaseReadinessService(
             health,
             backups,
             authentication,
+            secretManagement,
             tenantIsolationReview: new TenantIsolationReviewService(tenancy));
     }
 

@@ -30,6 +30,7 @@ public static class DependencyInjection
         var databaseSchemaMode = GetDatabaseSchemaMode();
         var authentication = AuthenticationOptions.FromEnvironment();
         var tenancy = TenantOptions.FromEnvironment();
+        var secretManagement = SecretManagementOptions.FromEnvironment();
         var documentAnalysisOptions = DocumentAnalysisOptions.FromEnvironment();
         var knowledgeExtractionOptions = KnowledgeExtractionOptions.FromEnvironment();
 
@@ -69,9 +70,13 @@ public static class DependencyInjection
             authentication.RoleClaimType,
             tenancy.Mode,
             tenancy.TenantClaimType,
-            tenancy.DefaultTenantId));
+            tenancy.DefaultTenantId,
+            secretManagement.Mode,
+            secretManagement.Provider,
+            secretManagement.RotationOwner));
         services.AddSingleton(authentication);
         services.AddSingleton(tenancy);
+        services.AddSingleton(secretManagement);
         services.AddSingleton(documentAnalysisOptions);
         services.AddSingleton(knowledgeExtractionOptions);
         services.AddSingleton(new PersistenceBackupOptions(

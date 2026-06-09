@@ -11,12 +11,14 @@ public sealed class ReleaseReadinessService(
     OperationalHealthService health,
     PersistenceBackupService backups,
     AuthenticationOptions authentication,
+    SecretManagementOptions? secretManagement = null,
     RolePermissionService? rolePermissions = null,
     TenantIsolationReviewService? tenantIsolationReview = null,
     ILogger<ReleaseReadinessService>? logger = null)
 {
     private readonly RolePermissionService _rolePermissions = rolePermissions ?? new RolePermissionService();
     private readonly TenantIsolationReviewService? _tenantIsolationReview = tenantIsolationReview;
+    private readonly SecretManagementOptions _secretManagement = secretManagement ?? SecretManagementOptions.Default;
 
     public ReleaseReadinessResponse GetStatus(string serviceName)
     {
@@ -58,12 +60,7 @@ public sealed class ReleaseReadinessService(
                 Required: true,
                 "Confirm the security concept and data protection concept were reviewed for this release.",
                 "Review docs/security/security-concept.md and docs/security/data-protection-concept.md."),
-            new(
-                "Secret management review",
-                "Manual",
-                Required: true,
-                "Confirm runtime secrets are injected through an approved secret store and rotation is documented.",
-                "Review docs/security/secret-management.md; required sensitive settings include OPENAI_API_KEY and AKT_DB_CONNECTION_STRING when used."),
+            BuildSecretManagementCheck(_secretManagement),
             new(
                 "Release approval",
                 "Manual",
@@ -362,5 +359,35 @@ public sealed class ReleaseReadinessService(
                 ? "Configured AI provider is available for extraction."
                 : "AI provider is not configured; release can continue only if heuristic fallback is acceptable.",
             aiProvider?.Detail ?? "AI provider health component missing.");
+    }
+
+    private static ReleaseReadinessCheckResponse BuildSecretManagementCheck(SecretManagementOptions options)
+    {
+        if (options.IsSecretStore && options.IsConfigured)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Secret management review",
+                "Pass",
+                Required: true,
+                "Runtime secrets are configured for secret-store injection.",
+                $"Mode: {options.Mode}, provider configured: True, rotation owner configured: True, docs: docs/security/secret-management.md");
+        }
+
+        if (options.IsSecretStore)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Secret management review",
+                "Fail",
+                Required: true,
+                "Secret-store mode is selected but provider or rotation owner configuration is incomplete.",
+                $"Mode: {options.Mode}, provider configured: {(!string.IsNullOrWhiteSpace(options.Provider)).ToString()}, rotation owner configured: {(!string.IsNullOrWhiteSpace(options.RotationOwner)).ToString()}");
+        }
+
+        return new ReleaseReadinessCheckResponse(
+            "Secret management review",
+            "Manual",
+            Required: true,
+            "Confirm runtime secrets are injected through an approved environment or secret store and rotation is documented.",
+            "Review docs/security/secret-management.md; required sensitive settings include OPENAI_API_KEY and AKT_DB_CONNECTION_STRING when used.");
     }
 }

@@ -52,6 +52,9 @@ $env:AKT_AUTH_MODE="Oidc"
 $env:AKT_AUTH_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
 $env:AKT_AUTH_CLIENT_ID="<application-client-id>"
 $env:AKT_AUTH_ROLE_CLAIM="roles"
+$env:AKT_SECRET_STORE_MODE="SecretStore"
+$env:AKT_SECRET_STORE_PROVIDER="AzureKeyVault"
+$env:AKT_SECRET_ROTATION_OWNER="Operations"
 ```
 
 For a SQL Server backed pilot or production-like deployment, use `AKT_DB_PROVIDER=SqlServer` and provide a SQL Server connection string through the approved secret manager or hosting platform:
@@ -89,11 +92,11 @@ Before deploying:
 3. Confirm `GET /api/operations/monitoring-summary` is `ok` or contains only accepted manual release-review signals.
 4. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
 5. Create and preview a backup.
-6. Confirm `OPENAI_API_KEY`, database credentials and OIDC/client credentials are injected by an approved secret manager or platform secret store.
+6. Confirm `OPENAI_API_KEY`, database credentials and OIDC/client credentials are injected by an approved secret manager or platform secret store and `AKT_SECRET_STORE_MODE=SecretStore` has provider and rotation-owner metadata.
 7. Confirm warning and manual checks are accepted by a release owner.
 
 Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the managed EF initial migration. `EnsureCreated` remains available for local MVP runs but is reported as a release-readiness warning in database mode. Release readiness warns for SQLite and passes SQL Server or PostgreSQL as production-capable relational providers.
 
 ## Current Limits
 
-The MVP deployment baseline generates build artifact file hashes and container provenance but does not yet provide registry-backed image signing enforcement, standards-complete CycloneDX/SPDX SBOM attestation, direct secret-manager integration, blue/green deployment or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.
+The MVP deployment baseline generates build artifact file hashes and container provenance and validates secret-store release metadata, but does not yet provide registry-backed image signing enforcement, standards-complete CycloneDX/SPDX SBOM attestation, automated provider-specific secret retrieval, blue/green deployment or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.

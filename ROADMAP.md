@@ -205,6 +205,7 @@ Aktueller Implementierungsstand:
 - Container-Supply-Chain-Grundlage ist erweitert: CI erzeugt ein `container-provenance.json` aus Image-Inventar, erwarteten Tags und GitHub-Run-Kontext als Vorstufe fuer registry-backed Image Signing.
 - Container-Security-Grundlage ist erweitert: CI scannt gebaute API- und Web-Images mit Trivy auf High-/Critical-Vulnerabilities und archiviert JSON-Scanartefakte.
 - Secret-Management-Grundlage ist dokumentiert: Runtime-Secrets wie AI-Provider-Key, Datenbank-Credentials und OIDC-/Provider-Konfiguration muessen fuer Pilot-/Enterprise-Betrieb ueber einen freigegebenen Secret Store injiziert und in Release-Readiness geprueft werden.
+- Secret-Management-Grundlage ist erweitert: `AKT_SECRET_STORE_MODE`, `AKT_SECRET_STORE_PROVIDER` und `AKT_SECRET_ROTATION_OWNER` machen Secret-Store-Nutzung in Health und Release-Readiness pruefbar.
 - Produktionsnahe Datenbank-Grundlage ist erweitert: SQL Server und PostgreSQL sind als EF-Core-Provider konfigurierbar; Release-Readiness warnt fuer SQLite-Pilotbetrieb und bewertet SQL Server/PostgreSQL als produktionsfaehige relationale Provider.
 - Roadmap-Abschlusspruefung ist gestartet: Ein Roadmap-Readiness-Audit zeigt per API und Blazor-Operationsbereich, welche Phasen bereit sind und welche Restluecken vor einem vollstaendigen Abschluss bleiben.
 
