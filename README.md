@@ -19,6 +19,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Document chunks retain parser-specific source references for review and traceability.
 - Document chunks include deterministic quality labels such as `UsableText` and `ReviewShortText`.
 - Document analysis responses and the Blazor workflow summarize chunk quality counts.
+- Document analysis has configurable guardrails for maximum chunks and extracted characters per document.
 - Supported parser capabilities are available through API and visible in the Blazor document workflow.
 - Document analysis responses and the Blazor workflow show parser name, chunk count and parser detail.
 - PDF analysis reports that scanned PDFs need OCR when no extractable text is available.
@@ -160,6 +161,19 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 ```
 
 `OPENAI_MODEL` and `OPENAI_BASE_URL` are optional. `OPENAI_BASE_URL` is intentionally configurable so future providers such as Azure OpenAI, customer-hosted AI gateways, or local model gateways can be added without changing the application layer.
+
+## Document analysis limits
+
+Uploads are capped at 10 MB. Parsed analysis output is additionally limited so unexpectedly large or noisy documents cannot create oversized analysis jobs.
+
+Optional environment variables:
+
+```powershell
+$env:AKT_ANALYSIS_MAX_CHUNKS="250"
+$env:AKT_ANALYSIS_MAX_CHARACTERS="500000"
+```
+
+Invalid or missing values fall back to the defaults above.
 
 ## Authentication configuration
 

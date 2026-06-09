@@ -2,6 +2,7 @@ namespace AiKnowledgeTransfer.Infrastructure;
 
 using AiKnowledgeTransfer.Application.Abstractions;
 using AiKnowledgeTransfer.Application.Diagnostics;
+using AiKnowledgeTransfer.Application.Documents;
 using AiKnowledgeTransfer.Application.Operations;
 using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Infrastructure.Audit;
@@ -57,6 +58,7 @@ public static class DependencyInjection
             authentication.ClientId,
             authentication.RoleClaimType));
         services.AddSingleton(authentication);
+        services.AddSingleton(DocumentAnalysisOptions.FromEnvironment());
         services.AddSingleton(new PersistenceBackupOptions(
             appDataPath,
             uploadStoragePath,

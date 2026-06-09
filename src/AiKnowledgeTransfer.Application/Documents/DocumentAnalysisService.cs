@@ -10,9 +10,11 @@ public sealed class DocumentAnalysisService(
     IProjectRepository projects,
     IFileStorage fileStorage,
     IEnumerable<IDocumentParser> parsers,
-    IAuditLog? auditLog = null)
+    IAuditLog? auditLog = null,
+    DocumentAnalysisOptions? options = null)
 {
     private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+    private readonly DocumentAnalysisOptions _options = options ?? DocumentAnalysisOptions.Default;
 
     public async Task<AnalyzeDocumentResponse?> AnalyzeAsync(Guid projectId, Guid documentId, CancellationToken cancellationToken)
     {
@@ -41,6 +43,7 @@ public sealed class DocumentAnalysisService(
             content,
             cancellationToken);
 
+        ValidateParsedDocument(parsedDocument, document.FileName);
         document.ReplaceChunks(parsedDocument.Chunks.Select(ToDomainChunk));
 
         await projects.SaveChangesAsync(cancellationToken);
@@ -71,5 +74,21 @@ public sealed class DocumentAnalysisService(
             chunk.EndCharacter,
             chunk.SourceReference,
             chunk.QualityStatus);
+    }
+
+    private void ValidateParsedDocument(ParsedDocument parsedDocument, string fileName)
+    {
+        if (parsedDocument.Chunks.Count > _options.MaxChunksPerDocument)
+        {
+            throw new InvalidOperationException(
+                $"Document '{fileName}' produced {parsedDocument.Chunks.Count} chunks. The configured analysis limit is {_options.MaxChunksPerDocument} chunks.");
+        }
+
+        var totalExtractedCharacters = parsedDocument.Chunks.Sum(chunk => chunk.Text.Length);
+        if (totalExtractedCharacters > _options.MaxTotalExtractedCharacters)
+        {
+            throw new InvalidOperationException(
+                $"Document '{fileName}' produced {totalExtractedCharacters} extracted characters. The configured analysis limit is {_options.MaxTotalExtractedCharacters} characters.");
+        }
     }
 }

@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<RolePermissionService>();
         services.AddScoped<UserIdentityService>();
         services.AddScoped<TraceabilityService>();
+        services.AddSingleton(DocumentAnalysisOptions.Default);
 
         return services;
     }
