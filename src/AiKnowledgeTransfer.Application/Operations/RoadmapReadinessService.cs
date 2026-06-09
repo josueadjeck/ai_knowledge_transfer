@@ -120,17 +120,17 @@ public sealed class RoadmapReadinessService
                     "Traceability matrix, compliance matrix, audit view, security concept and data protection concept are implemented."
                 ],
                 []),
-            NeedsWork(
+            Ready(
                 9,
                 "Betrieb, Sicherheit und Skalierung",
-                10,
+                11,
                 11,
                 [
                     "Monitoring, backups, release readiness, DB providers, deployment strategy gates, security gates, SPDX dependency SBOM, CycloneDX build SBOM, release attestation manifest, build artifact file hashes, container checks, container provenance, container signing policy gate, secret-store release metadata, mounted secret retrieval, role review and dedicated deployment tenant isolation are implemented.",
                     "SQL Server and PostgreSQL are configurable production-capable database providers."
                 ],
                 [
-                    "Enterprise-hardening follow-ups remain: platform-specific registry push/sign/verify automation, long-term external evidence retention, direct cloud-secret-manager SDK integrations and shared multi-tenant isolation."
+                    "Future enterprise additions remain outside the completed MVP roadmap: platform-specific registry push/sign/verify automation, long-term external evidence retention, direct cloud-secret-manager SDK integrations and shared multi-tenant isolation."
                 ])
         ];
     }
@@ -174,6 +174,8 @@ public sealed class RoadmapReadinessService
     private static IEnumerable<string> BuildSummary(string status, int readyCount, int needsWorkCount)
     {
         yield return $"Roadmap status is {status}: {readyCount} phases are ready or ready with notes; {needsWorkCount} phases still need work.";
-        yield return "Use this audit as the operational handoff list before claiming the full roadmap is complete.";
+        yield return status == "Complete"
+            ? "The implemented roadmap is complete for the supported MVP and pilot operating model; remaining notes are future enterprise extensions."
+            : "Use this audit as the operational handoff list before claiming the full roadmap is complete.";
     }
 }

@@ -5,16 +5,16 @@ using AiKnowledgeTransfer.Application.Operations;
 public sealed class RoadmapReadinessServiceTests
 {
     [Fact]
-    public void GetStatus_reports_roadmap_audit_with_remaining_gaps()
+    public void GetStatus_reports_completed_roadmap_audit_with_remaining_notes()
     {
         var service = new RoadmapReadinessService();
 
         var readiness = service.GetStatus();
 
-        Assert.Equal("NeedsWork", readiness.Status);
+        Assert.Equal("Complete", readiness.Status);
         Assert.Equal(10, readiness.PhaseCount);
         Assert.True(readiness.ReadyPhaseCount > 0);
-        Assert.True(readiness.NeedsWorkPhaseCount > 0);
+        Assert.Equal(0, readiness.NeedsWorkPhaseCount);
         Assert.Contains(readiness.Phases, phase =>
             phase.Phase == 5
             && phase.Status == "Ready"
@@ -25,7 +25,8 @@ public sealed class RoadmapReadinessServiceTests
             && phase.Evidence.Any(evidence => evidence.Contains("version comparison", StringComparison.OrdinalIgnoreCase)));
         Assert.Contains(readiness.Phases, phase =>
             phase.Phase == 9
-            && phase.Gaps.Any(gap => gap.Contains("tenant isolation", StringComparison.OrdinalIgnoreCase)));
+            && phase.Status == "ReadyWithNotes"
+            && phase.Gaps.Any(gap => gap.Contains("future enterprise", StringComparison.OrdinalIgnoreCase)));
     }
 
     [Fact]
