@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<KnowledgeReviewSummaryService>();
         services.AddScoped<PersistenceBackupService>();
         services.AddScoped<ReleaseReadinessService>();
+        services.AddScoped<RuntimeMetricsService>();
         services.AddScoped<RoadmapService>();
         services.AddScoped<OnboardingReadinessService>();
         services.AddScoped<OnboardingStartPackageService>();

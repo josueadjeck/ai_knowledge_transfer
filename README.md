@@ -55,6 +55,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Health endpoint with local storage, persistence and AI provider configuration status.
 - Health output reports active persistence mode and database provider configuration.
 - Blazor operations panel shows health components for storage, persistence and AI provider status.
+- Runtime metrics endpoint and Blazor operations panel show uptime, process and memory indicators.
 - JSON persistence backup and restore endpoints for local MVP operation.
 - Backup preview before restore, including manifest, entries, warnings and upload counts.
 - Release readiness endpoint and dashboard check for runtime health, backups, persistence and manual release gates.
@@ -367,6 +368,12 @@ Get release readiness:
 
 ```http
 GET http://localhost:5256/api/operations/release-readiness
+```
+
+Get runtime metrics:
+
+```http
+GET http://localhost:5256/api/operations/runtime-metrics
 ```
 
 Create, list and restore local JSON persistence backups:
