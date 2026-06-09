@@ -158,6 +158,43 @@ public sealed class ReleaseReadinessServiceTests
     }
 
     [Fact]
+    public void GetStatus_blocks_release_when_mounted_file_secret_store_has_no_mount_path()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            secretManagement: new SecretManagementOptions("SecretStore", "MountedFiles", "Operations"))
+            .GetStatus("TestService");
+
+        Assert.Equal("Blocked", readiness.Status);
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Secret management review"
+            && check.Required
+            && check.Status == "Fail"
+            && check.Evidence.Contains("mount path configured: False", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_passes_secret_management_when_mounted_file_secret_store_is_configured()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            secretManagement: new SecretManagementOptions("SecretStore", "MountedFiles", "Operations", Path.Combine(root, "secrets")))
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Secret management review"
+            && check.Required
+            && check.Status == "Pass"
+            && check.Evidence.Contains("provider: MountedFiles", StringComparison.Ordinal)
+            && check.Evidence.Contains("mount path configured: True", StringComparison.Ordinal));
+    }
+
+
+    [Fact]
     public void GetStatus_blocks_release_when_blue_green_approval_owner_is_missing()
     {
         var root = CreateRoot();
@@ -494,6 +531,7 @@ public sealed class ReleaseReadinessServiceTests
             secretManagement.Mode,
             secretManagement.Provider,
             secretManagement.RotationOwner,
+            secretManagement.MountPath,
             deployment.Strategy,
             deployment.ApprovalOwner));
         var backups = new PersistenceBackupService(CreateBackupOptions(root));

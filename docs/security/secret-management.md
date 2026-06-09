@@ -35,11 +35,14 @@ Secret management mode is configured without exposing secret values:
 ```powershell
 $env:AKT_SECRET_STORE_MODE="Environment" # local default
 $env:AKT_SECRET_STORE_MODE="SecretStore" # pilot/enterprise target
-$env:AKT_SECRET_STORE_PROVIDER="AzureKeyVault"
+$env:AKT_SECRET_STORE_PROVIDER="MountedFiles"
+$env:AKT_SECRET_MOUNT_PATH="/run/secrets"
 $env:AKT_SECRET_ROTATION_OWNER="Operations"
 ```
 
-`SecretStore` mode requires both `AKT_SECRET_STORE_PROVIDER` and `AKT_SECRET_ROTATION_OWNER`. Health reports only whether provider and rotation-owner metadata are configured, not any secret value.
+`SecretStore` mode requires both `AKT_SECRET_STORE_PROVIDER` and `AKT_SECRET_ROTATION_OWNER`. The first automated retrieval provider is `MountedFiles`, which also requires `AKT_SECRET_MOUNT_PATH`. The application reads files named after the required setting, for example `/run/secrets/OPENAI_API_KEY` or `/run/secrets/AKT_DB_CONNECTION_STRING`, and trims trailing whitespace.
+
+Health reports only whether provider, mount path and rotation-owner metadata are configured, not any secret value.
 
 ## Rotation and Incident Response
 
@@ -59,7 +62,7 @@ Runtime health and release-readiness checks should report only whether required 
 
 Confirm before deployment:
 
-- Required secrets are stored in an approved secret manager or platform secret store, and `AKT_SECRET_STORE_MODE=SecretStore` is configured with provider and rotation owner metadata.
+- Required secrets are stored in an approved secret manager or platform secret store, and `AKT_SECRET_STORE_MODE=SecretStore` is configured with provider, mount path when required, and rotation owner metadata.
 - No production secret is present in repository files, Dockerfiles, images or CI logs.
 - The CI secret pattern scan passed.
 - Runtime configuration shows required secrets as configured without exposing values.
@@ -68,6 +71,6 @@ Confirm before deployment:
 
 ## Current Gaps
 
-- Provider-specific secret retrieval remains owned by the hosting platform or customer-approved secret manager integration; the application validates the selected secret-store mode and release metadata.
+- `MountedFiles` secret retrieval is implemented. Direct SDK integrations for provider-specific systems such as Azure Key Vault, AWS Secrets Manager or HashiCorp Vault can be added behind the same resolver when a target platform is selected.
 - CI secret scanning is deterministic and lightweight, not a full DLP or historical secret scan.
 - Secret rotation is an operational procedure, not an automated in-app workflow.

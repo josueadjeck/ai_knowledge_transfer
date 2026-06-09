@@ -339,7 +339,8 @@ public sealed class OperationalHealthServiceTests
         Assert.Contains(health.Components, component =>
             component.Name == "secretManagement"
             && component.Status == "error"
-            && component.Metadata["providerConfigured"] == "False");
+            && component.Metadata["providerConfigured"] == "False"
+            && component.Metadata["mountPathConfigured"] == "False");
     }
 
     [Fact]

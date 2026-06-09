@@ -188,11 +188,12 @@ Secret-store release configuration:
 
 ```powershell
 $env:AKT_SECRET_STORE_MODE="SecretStore" # or Environment for local runs
-$env:AKT_SECRET_STORE_PROVIDER="AzureKeyVault" # example provider name
+$env:AKT_SECRET_STORE_PROVIDER="MountedFiles" # first automated retrieval provider
+$env:AKT_SECRET_MOUNT_PATH="C:\run\secrets"
 $env:AKT_SECRET_ROTATION_OWNER="Operations"
 ```
 
-`SecretStore` mode requires a provider name and rotation owner before release readiness can pass the secret-management check.
+`SecretStore` mode requires a provider name and rotation owner before release readiness can pass the secret-management check. The `MountedFiles` provider also requires `AKT_SECRET_MOUNT_PATH` and reads files named like the secret keys, for example `OPENAI_API_KEY` or `AKT_DB_CONNECTION_STRING`.
 
 Deployment strategy configuration:
 

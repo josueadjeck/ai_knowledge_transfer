@@ -29,5 +29,6 @@ public sealed record OperationalHealthOptions(
     string SecretStoreMode = "Environment",
     string? SecretStoreProvider = null,
     string? SecretRotationOwner = null,
+    string? SecretMountPath = null,
     string DeploymentStrategy = "SingleSlot",
     string? DeploymentApprovalOwner = null);

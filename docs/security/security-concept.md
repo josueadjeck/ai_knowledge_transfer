@@ -43,7 +43,7 @@ Database mode supports `AKT_DB_SCHEMA_MODE=Migrations` for managed EF schema app
 
 ## Secret Management
 
-Runtime secrets such as AI provider keys, database credentials and future provider-specific credentials must be injected by an approved secret manager or hosting platform. `AKT_SECRET_STORE_MODE=SecretStore` makes provider and rotation-owner metadata visible in health and release readiness without exposing secret values. See `docs/security/secret-management.md`.
+Runtime secrets such as AI provider keys, database credentials and future provider-specific credentials must be injected by an approved secret manager or hosting platform. `AKT_SECRET_STORE_MODE=SecretStore` makes provider, mount path and rotation-owner metadata visible in health and release readiness without exposing secret values. `MountedFiles` is the first automated retrieval provider. See `docs/security/secret-management.md`.
 
 ## AI Provider Controls
 
@@ -79,7 +79,7 @@ Key project, document, knowledge, review, export, traceability and operations ac
 - Dedicated single-tenant deployment isolation is supported; shared multi-tenant isolation is planned but not implemented end to end.
 - Local file storage is suitable for controlled pilots, not for hardened multi-node production.
 - CI static source scanning and secret scanning are baselines, not replacements for enterprise security tooling.
-- Platform-specific registry push/sign/verify automation, external SBOM attestation storage and retention, automated provider-specific secret retrieval and enterprise SAST remain follow-up work.
+- Platform-specific registry push/sign/verify automation, external SBOM attestation storage and retention, direct cloud-secret-manager SDK integrations and enterprise SAST remain follow-up work.
 
 ## Release Review
 

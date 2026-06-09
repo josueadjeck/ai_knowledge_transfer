@@ -57,7 +57,8 @@ $env:AKT_AUTH_ROLE_CLAIM="roles"
 $env:AKT_TENANT_BOUNDARY_MODE="DedicatedDeployment"
 $env:AKT_TENANT_BOUNDARY_OWNER="Operations"
 $env:AKT_SECRET_STORE_MODE="SecretStore"
-$env:AKT_SECRET_STORE_PROVIDER="AzureKeyVault"
+$env:AKT_SECRET_STORE_PROVIDER="MountedFiles"
+$env:AKT_SECRET_MOUNT_PATH="/run/secrets"
 $env:AKT_SECRET_ROTATION_OWNER="Operations"
 $env:AKT_DEPLOYMENT_STRATEGY="BlueGreen"
 $env:AKT_DEPLOYMENT_APPROVAL_OWNER="Release Owner"
@@ -113,4 +114,4 @@ The concrete slot implementation remains platform-specific. Use the target hosti
 
 ## Current Limits
 
-The MVP deployment baseline generates build artifact file hashes, SPDX dependency SBOM, CycloneDX build SBOM and container provenance, validates registry-backed image signing policy metadata, validates secret-store release metadata, supports a blue/green release-readiness mode and supports dedicated single-tenant deployment isolation. It does not yet provide platform-specific registry push/sign/verify automation, external SBOM attestation storage and retention, automated provider-specific secret retrieval or shared multi-tenant production storage.
+The MVP deployment baseline generates build artifact file hashes, SPDX dependency SBOM, CycloneDX build SBOM and container provenance, validates registry-backed image signing policy metadata, validates secret-store release metadata, reads mounted runtime secrets, supports a blue/green release-readiness mode and supports dedicated single-tenant deployment isolation. It does not yet provide platform-specific registry push/sign/verify automation, external SBOM attestation storage and retention, direct cloud-secret-manager SDK integrations or shared multi-tenant production storage.

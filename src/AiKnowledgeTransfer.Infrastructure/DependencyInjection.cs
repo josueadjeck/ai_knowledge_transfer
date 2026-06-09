@@ -25,17 +25,18 @@ public static class DependencyInjection
         var auditLogPath = Path.Combine(appDataPath, "audit-log.json");
         var backupPath = Path.Combine(appDataPath, "backups");
         var persistenceProvider = GetPersistenceProvider();
-        var databaseConnectionString = Environment.GetEnvironmentVariable("AKT_DB_CONNECTION_STRING");
         var databaseProviderName = Environment.GetEnvironmentVariable("AKT_DB_PROVIDER");
         var databaseSchemaMode = GetDatabaseSchemaMode();
         var authentication = AuthenticationOptions.FromEnvironment();
         var tenancy = TenantOptions.FromEnvironment();
         var secretManagement = SecretManagementOptions.FromEnvironment();
+        var secrets = new RuntimeSecretResolver(secretManagement);
+        var databaseConnectionString = secrets.GetSecret("AKT_DB_CONNECTION_STRING");
         var deployment = DeploymentOptions.FromEnvironment();
         var documentAnalysisOptions = DocumentAnalysisOptions.FromEnvironment();
         var knowledgeExtractionOptions = KnowledgeExtractionOptions.FromEnvironment();
 
-        var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+        var apiKey = secrets.GetSecret("OPENAI_API_KEY");
         var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
         if (string.IsNullOrWhiteSpace(model))
         {
@@ -77,6 +78,7 @@ public static class DependencyInjection
             secretManagement.Mode,
             secretManagement.Provider,
             secretManagement.RotationOwner,
+            secretManagement.MountPath,
             deployment.Strategy,
             deployment.ApprovalOwner));
         services.AddSingleton(authentication);

@@ -379,7 +379,7 @@ public sealed class ReleaseReadinessService(
                 "Pass",
                 Required: true,
                 "Runtime secrets are configured for secret-store injection.",
-                $"Mode: {options.Mode}, provider configured: True, rotation owner configured: True, docs: docs/security/secret-management.md");
+                $"Mode: {options.Mode}, provider: {options.Provider}, provider configured: True, rotation owner configured: True, mount path configured: {(!string.IsNullOrWhiteSpace(options.MountPath)).ToString()}, docs: docs/security/secret-management.md");
         }
 
         if (options.IsSecretStore)
@@ -388,8 +388,8 @@ public sealed class ReleaseReadinessService(
                 "Secret management review",
                 "Fail",
                 Required: true,
-                "Secret-store mode is selected but provider or rotation owner configuration is incomplete.",
-                $"Mode: {options.Mode}, provider configured: {(!string.IsNullOrWhiteSpace(options.Provider)).ToString()}, rotation owner configured: {(!string.IsNullOrWhiteSpace(options.RotationOwner)).ToString()}");
+                "Secret-store mode is selected but provider, mount path or rotation owner configuration is incomplete.",
+                $"Mode: {options.Mode}, provider: {options.Provider}, provider configured: {(!string.IsNullOrWhiteSpace(options.Provider)).ToString()}, rotation owner configured: {(!string.IsNullOrWhiteSpace(options.RotationOwner)).ToString()}, mount path configured: {(!string.IsNullOrWhiteSpace(options.MountPath)).ToString()}");
         }
 
         return new ReleaseReadinessCheckResponse(

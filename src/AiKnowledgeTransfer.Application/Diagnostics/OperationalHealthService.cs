@@ -232,7 +232,13 @@ public sealed class OperationalHealthService
         var isEnvironment = _options.SecretStoreMode.Equals("Environment", StringComparison.OrdinalIgnoreCase);
         var providerConfigured = !string.IsNullOrWhiteSpace(_options.SecretStoreProvider);
         var rotationOwnerConfigured = !string.IsNullOrWhiteSpace(_options.SecretRotationOwner);
-        var isConfigured = isEnvironment || (isSecretStore && providerConfigured && rotationOwnerConfigured);
+        var isMountedFilesProvider = _options.SecretStoreProvider?.Equals("MountedFiles", StringComparison.OrdinalIgnoreCase) == true;
+        var mountPathConfigured = !string.IsNullOrWhiteSpace(_options.SecretMountPath);
+        var isConfigured = isEnvironment
+            || (isSecretStore
+                && providerConfigured
+                && rotationOwnerConfigured
+                && (!isMountedFilesProvider || mountPathConfigured));
 
         return new HealthComponentResponse(
             "secretManagement",
@@ -246,7 +252,9 @@ public sealed class OperationalHealthService
             {
                 ["mode"] = _options.SecretStoreMode,
                 ["providerConfigured"] = providerConfigured.ToString(),
-                ["rotationOwnerConfigured"] = rotationOwnerConfigured.ToString()
+                ["rotationOwnerConfigured"] = rotationOwnerConfigured.ToString(),
+                ["mountedFilesProvider"] = isMountedFilesProvider.ToString(),
+                ["mountPathConfigured"] = mountPathConfigured.ToString()
             });
     }
 
