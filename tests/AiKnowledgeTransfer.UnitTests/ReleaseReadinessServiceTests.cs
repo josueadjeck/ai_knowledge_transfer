@@ -177,6 +177,25 @@ public sealed class ReleaseReadinessServiceTests
             && check.Status == "Fail");
     }
 
+    [Fact]
+    public void GetStatus_passes_when_database_uses_migrations_schema_mode()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            persistenceProvider: "Database",
+            databaseProvider: "Sqlite",
+            databaseConnectionString: "Data Source=knowledge-transfer.db",
+            databaseSchemaMode: "Migrations")
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Database schema management"
+            && check.Status == "Pass"
+            && check.Detail.Contains("managed EF migrations", StringComparison.Ordinal));
+    }
+
     private static ReleaseReadinessService CreateService(
         string root,
         bool aiApiKeyConfigured,

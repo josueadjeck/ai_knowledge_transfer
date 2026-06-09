@@ -112,6 +112,16 @@ public sealed class ReleaseReadinessService(
                 $"Schema mode: {schemaMode}");
         }
 
+        if (schemaMode.Equals("Migrations", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Database schema management",
+                "Pass",
+                Required: true,
+                "Database mode uses managed EF migrations.",
+                $"Schema mode: {schemaMode}");
+        }
+
         return new ReleaseReadinessCheckResponse(
             "Database schema management",
             "Fail",

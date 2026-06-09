@@ -57,7 +57,7 @@ Status meanings:
 - `Blocked`: at least one required check failed.
 
 Current required checks cover runtime health, persistence configuration, authentication, tenancy, backups, CI security gates and release approval.
-Database mode currently reports `EnsureCreated` schema management as a warning until managed EF migrations are implemented.
+Database mode with `AKT_DB_SCHEMA_MODE=Migrations` applies managed EF migrations. `EnsureCreated` remains available for local MVP runs but appears as a warning for release review.
 
 ## Deployment baseline
 

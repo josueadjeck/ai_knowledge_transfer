@@ -18,7 +18,19 @@ public static class DatabaseInitializationExtensions
         EnsureSqliteDirectory(options);
 
         var dbContext = scope.ServiceProvider.GetRequiredService<KnowledgeTransferDbContext>();
-        await dbContext.Database.EnsureCreatedAsync(cancellationToken);
+        if (options.SchemaMode.Equals("Migrations", StringComparison.OrdinalIgnoreCase))
+        {
+            await dbContext.Database.MigrateAsync(cancellationToken);
+            return;
+        }
+
+        if (options.SchemaMode.Equals("EnsureCreated", StringComparison.OrdinalIgnoreCase))
+        {
+            await dbContext.Database.EnsureCreatedAsync(cancellationToken);
+            return;
+        }
+
+        throw new InvalidOperationException("Unsupported AKT_DB_SCHEMA_MODE. Currently supported: EnsureCreated, Migrations.");
     }
 
     private static void EnsureSqliteDirectory(DatabasePersistenceOptions options)
