@@ -21,16 +21,19 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 var storageRootPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "uploads");
+var authentication = AuthenticationOptions.FromEnvironment();
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure(storageRootPath);
+    .AddInfrastructure(storageRootPath)
+    .AddConfiguredApiAuthentication(authentication);
 
 var app = builder.Build();
 
 await app.Services.InitializeInfrastructureDatabaseAsync();
 
 app.UseHttpsRedirection();
+app.UseConfiguredApiAuthentication(authentication);
 
 var projects = app.MapGroup("/api/projects");
 

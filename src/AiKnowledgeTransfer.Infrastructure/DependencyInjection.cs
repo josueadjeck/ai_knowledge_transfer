@@ -25,19 +25,7 @@ public static class DependencyInjection
         var persistenceProvider = GetPersistenceProvider();
         var databaseConnectionString = Environment.GetEnvironmentVariable("AKT_DB_CONNECTION_STRING");
         var databaseProviderName = Environment.GetEnvironmentVariable("AKT_DB_PROVIDER");
-        var authMode = Environment.GetEnvironmentVariable("AKT_AUTH_MODE");
-        if (string.IsNullOrWhiteSpace(authMode))
-        {
-            authMode = "Demo";
-        }
-
-        var authAuthority = Environment.GetEnvironmentVariable("AKT_AUTH_AUTHORITY");
-        var authClientId = Environment.GetEnvironmentVariable("AKT_AUTH_CLIENT_ID");
-        var authRoleClaimType = Environment.GetEnvironmentVariable("AKT_AUTH_ROLE_CLAIM");
-        if (string.IsNullOrWhiteSpace(authRoleClaimType))
-        {
-            authRoleClaimType = "role";
-        }
+        var authentication = AuthenticationOptions.FromEnvironment();
 
         var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
@@ -64,15 +52,11 @@ public static class DependencyInjection
             model,
             baseUrl,
             !string.IsNullOrWhiteSpace(apiKey),
-            authMode,
-            authAuthority,
-            authClientId,
-            authRoleClaimType));
-        services.AddSingleton(new AuthenticationOptions(
-            authMode,
-            authAuthority,
-            authClientId,
-            authRoleClaimType));
+            authentication.Mode,
+            authentication.Authority,
+            authentication.ClientId,
+            authentication.RoleClaimType));
+        services.AddSingleton(authentication);
         services.AddSingleton(new PersistenceBackupOptions(
             appDataPath,
             uploadStoragePath,

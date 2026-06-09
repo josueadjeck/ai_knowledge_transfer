@@ -25,9 +25,40 @@ public sealed class PermissionAuthorizationServiceTests
         Assert.True(service.HasPermission(new ClaimsPrincipal(new ClaimsIdentity()), Permission.ViewProject));
     }
 
-    private static PermissionAuthorizationService CreateService()
+    [Fact]
+    public void HasPermission_denies_anonymous_access_in_oidc_mode()
     {
-        return new PermissionAuthorizationService(new UserIdentityService(new RolePermissionService()));
+        var service = CreateService(new AuthenticationOptions(
+            "Oidc",
+            "https://login.example.test",
+            "client-id",
+            "roles"));
+
+        Assert.False(service.HasPermission(new ClaimsPrincipal(new ClaimsIdentity()), Permission.ViewProject));
+    }
+
+    [Fact]
+    public void HasPermission_allows_authenticated_oidc_role_permissions()
+    {
+        var options = new AuthenticationOptions(
+            "Oidc",
+            "https://login.example.test",
+            "client-id",
+            "roles");
+        var service = CreateService(options);
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(
+            [new Claim("roles", "Admin")],
+            authenticationType: "Bearer"));
+
+        Assert.True(service.HasPermission(principal, Permission.ManageUsers));
+    }
+
+    private static PermissionAuthorizationService CreateService(AuthenticationOptions? options = null)
+    {
+        var permissions = new RolePermissionService();
+        return new PermissionAuthorizationService(
+            new UserIdentityService(permissions, options),
+            options);
     }
 
     private static ClaimsPrincipal CreatePrincipal(string role)

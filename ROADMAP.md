@@ -172,6 +172,7 @@ Aktueller Implementierungsstand:
 - Auth-/Rollenhaertung ist gestartet: Rollen koennen aus Claims aufgeloest werden; der MVP-Rollenselektor bleibt als Demo-Fallback fuer die Web-UI erhalten.
 - Auth-/Rollenhaertung ist erweitert: API-Endpunkte pruefen Berechtigungen serverseitig ueber den Identity-/Claims-Kontext.
 - Auth-/Rollenhaertung ist erweitert: OIDC-/Entra-Konfiguration ist ueber Umgebungsvariablen vorbereitet und wird in Health sowie Release-Readiness bewertet.
+- Auth-/Rollenhaertung ist erweitert: Die API aktiviert im OIDC-Modus JWT-Bearer-Validierung und blockiert anonyme Zugriffe an Permission-Gates.
 
 ### Phase 0: Produktklaerung
 

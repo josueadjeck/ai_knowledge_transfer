@@ -172,7 +172,7 @@ $env:AKT_AUTH_CLIENT_ID="<application-client-id>"
 $env:AKT_AUTH_ROLE_CLAIM="roles"
 ```
 
-When `AKT_AUTH_MODE=Oidc`, health and release-readiness checks require authority and client id to be configured. Middleware wiring for production sign-in/token validation is the next hardening step.
+When `AKT_AUTH_MODE=Oidc`, health and release-readiness checks require authority and client id to be configured. The API enables JWT bearer authentication in OIDC mode and validates issuer, audience and the configured role claim. Anonymous requests are denied by permission gates in OIDC mode; demo mode keeps the local Viewer fallback for workflow testing.
 
 ## API examples
 
@@ -347,7 +347,7 @@ Get the current resolved user:
 GET http://localhost:5256/api/security/current-user
 ```
 
-API endpoints enforce the same permission model as the Web UI. Anonymous requests resolve to the Viewer role; mutating endpoints require a role claim with the necessary permission.
+API endpoints enforce the same permission model as the Web UI. In demo mode, anonymous requests resolve to the Viewer role; mutating endpoints require a role claim with the necessary permission. In OIDC mode, protected API endpoints require a valid bearer token before permissions are evaluated.
 
 Get audit events:
 
