@@ -66,7 +66,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Structured operational logs for backup, restore, backup preview and release-readiness checks.
 - JSON persistence backup and restore endpoints for local MVP operation.
 - Backup preview before restore, including manifest, entries, warnings and upload counts.
-- Release readiness endpoint and dashboard check for runtime health, backups, persistence, authentication mode and manual release gates.
+- Release readiness endpoint and dashboard check for runtime health, backups, persistence, authentication mode, security inventory and manual release gates.
 - GitHub Actions CI for restore, build, publish, dependency inventory, container builds, tests, vulnerability checks and basic secret scanning.
 - Unit and architecture tests.
 

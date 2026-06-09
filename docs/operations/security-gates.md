@@ -20,6 +20,7 @@ Required checks:
 ## Current limits
 
 The dependency inventory is a first SBOM-style baseline, not a complete CycloneDX or SPDX SBOM. The secret scan is intentionally simple and deterministic. It is not a replacement for a dedicated enterprise secret scanner.
+Release readiness includes a manual `Security inventory` check so release owners confirm the uploaded artifact exists and was reviewed.
 
 Recommended production additions:
 

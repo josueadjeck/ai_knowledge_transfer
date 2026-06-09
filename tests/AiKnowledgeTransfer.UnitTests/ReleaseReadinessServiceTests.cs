@@ -38,6 +38,20 @@ public sealed class ReleaseReadinessServiceTests
         Assert.Contains(readiness.Checks, check => check.Name == "Backup available" && check.Status == "Pass");
         Assert.Contains(readiness.Checks, check => check.Name == "AI provider" && check.Status == "Warning");
         Assert.Contains(readiness.Checks, check => check.Name == "CI security gates" && check.Status == "Manual");
+        Assert.Contains(readiness.Checks, check => check.Name == "Security inventory" && check.Status == "Manual");
+    }
+
+    [Fact]
+    public void GetStatus_requires_security_inventory_review()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(root, aiApiKeyConfigured: true).GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Security inventory"
+            && check.Required
+            && check.Status == "Manual"
+            && check.Evidence.Contains("security-inventory", StringComparison.Ordinal));
     }
 
     [Fact]

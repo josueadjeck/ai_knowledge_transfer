@@ -30,7 +30,13 @@ public sealed class ReleaseReadinessService(
                 "Manual",
                 Required: true,
                 "Confirm the latest GitHub Actions CI run passed before deployment.",
-                ".github/workflows/ci.yml runs restore, build, tests, vulnerability check and basic secret scan."),
+                ".github/workflows/ci.yml runs restore, build, publish, container build, tests, vulnerability check and basic secret scan."),
+            new(
+                "Security inventory",
+                "Manual",
+                Required: true,
+                "Confirm the CI security-inventory artifact was generated and reviewed for the release.",
+                "Expected artifact: security-inventory with dotnet-package-inventory.json and vulnerable-packages.json."),
             new(
                 "Release approval",
                 "Manual",
