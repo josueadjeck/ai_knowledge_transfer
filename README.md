@@ -67,7 +67,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - JSON persistence backup and restore endpoints for local MVP operation.
 - Backup preview before restore, including manifest, entries, warnings and upload counts.
 - Release readiness endpoint and dashboard check for runtime health, backups, persistence, authentication mode, security inventory and manual release gates.
-- GitHub Actions CI for restore, build, publish, dependency inventory, container builds, tests, vulnerability checks and basic secret scanning.
+- GitHub Actions CI for restore, build, publish, dependency inventory, container image inventory, container builds, tests, vulnerability checks and basic secret scanning.
 - Unit and architecture tests.
 
 ## Run locally
@@ -152,7 +152,7 @@ dotnet build AiKnowledgeTransfer.slnx
 dotnet test AiKnowledgeTransfer.slnx
 ```
 
-The GitHub Actions workflow runs restore, Release build, API/Web publish, transitive package inventory, API/Web container builds, tests, NuGet package vulnerability checks and common secret pattern checks on `main` and pull requests. See `docs/operations/security-gates.md`.
+The GitHub Actions workflow runs restore, Release build, API/Web publish, transitive package inventory, API/Web container builds, container image metadata inventory, tests, NuGet package vulnerability checks and common secret pattern checks on `main` and pull requests. See `docs/operations/security-gates.md`.
 For operational release steps, see `docs/operations/runbook.md` and `docs/operations/deployment.md`.
 
 ## AI provider configuration

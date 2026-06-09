@@ -48,6 +48,10 @@ jobs:
       - name: Build Web container image
         run: docker build --file Dockerfile.web --tag ai-knowledge-transfer-web:ci .
 
+      - name: Generate container image inventory
+        run: |
+          docker image inspect ai-knowledge-transfer-api:ci ai-knowledge-transfer-web:ci > artifacts/security/container-images.json
+
       - name: Test
         run: dotnet test AiKnowledgeTransfer.slnx --configuration Release --no-build --logger trx --results-directory TestResults
 

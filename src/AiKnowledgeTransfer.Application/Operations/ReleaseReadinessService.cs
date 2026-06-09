@@ -38,6 +38,12 @@ public sealed class ReleaseReadinessService(
                 "Confirm the CI security-inventory artifact was generated and reviewed for the release.",
                 "Expected artifact: security-inventory with dotnet-package-inventory.json and vulnerable-packages.json."),
             new(
+                "Container image inventory",
+                "Manual",
+                Required: true,
+                "Confirm the CI security-inventory artifact includes metadata for the API and Web container images.",
+                "Expected artifact entry: container-images.json for ai-knowledge-transfer-api:ci and ai-knowledge-transfer-web:ci."),
+            new(
                 "Release approval",
                 "Manual",
                 Required: true,

@@ -13,6 +13,7 @@ Required checks:
 - Publish API and Web Release artifacts.
 - Generate a transitive .NET package inventory artifact.
 - Build API and Web container images without pushing them.
+- Generate container image metadata inventory for the built images.
 - Run all unit and architecture tests.
 - Check direct and transitive NuGet packages for known vulnerabilities.
 - Scan source files for common secret patterns such as OpenAI keys, database connection strings and passwords.
@@ -20,7 +21,7 @@ Required checks:
 ## Current limits
 
 The dependency inventory is a first SBOM-style baseline, not a complete CycloneDX or SPDX SBOM. The secret scan is intentionally simple and deterministic. It is not a replacement for a dedicated enterprise secret scanner.
-Release readiness includes a manual `Security inventory` check so release owners confirm the uploaded artifact exists and was reviewed.
+Release readiness includes manual `Security inventory` and `Container image inventory` checks so release owners confirm the uploaded artifact exists and was reviewed.
 
 Recommended production additions:
 

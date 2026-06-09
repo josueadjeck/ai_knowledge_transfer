@@ -189,6 +189,7 @@ Aktueller Implementierungsstand:
 - EF-Migrations-Grundlage ist gestartet: Eine initiale SQLite/EF-Migration ist vorhanden und `AKT_DB_SCHEMA_MODE=Migrations` wendet sie beim Start kontrolliert an.
 - Security-Gates sind erweitert: CI erzeugt ein transitive .NET Dependency Inventory und archiviert Security-Inventar-Artefakte fuer Release-Nachvollziehbarkeit.
 - Release-/Security-Haertung ist erweitert: Release-Readiness verlangt eine manuelle Pruefung des CI-Artefakts `security-inventory`.
+- Container-Security-Grundlage ist erweitert: CI archiviert Container-Image-Metadaten und Release-Readiness verlangt deren manuelle Pruefung.
 
 ### Phase 0: Produktklaerung
 

@@ -4,7 +4,7 @@ This runbook describes the MVP operating flow for local or pilot deployments.
 
 ## Pre-release checklist
 
-1. Run the CI workflow on `main` and confirm restore, build, publish, dependency inventory, container build, tests, vulnerability check and secret scan passed.
+1. Run the CI workflow on `main` and confirm restore, build, publish, dependency inventory, container image inventory, container build, tests, vulnerability check and secret scan passed.
 2. Confirm API, Web and `security-inventory` artifacts were produced by CI.
 3. Start the application in the target persistence mode.
 4. Open the operations panel or call `GET /api/operations/release-readiness`.
@@ -59,7 +59,7 @@ Status meanings:
 Current required checks cover runtime health, persistence configuration, authentication, tenancy, backups, CI security gates and release approval.
 Database mode with `AKT_DB_SCHEMA_MODE=Migrations` applies managed EF migrations. `EnsureCreated` remains available for local MVP runs but appears as a warning for release review.
 
-The `Security inventory` release check is manual. Review the uploaded `security-inventory` artifact and confirm both `dotnet-package-inventory.json` and `vulnerable-packages.json` are present for the release candidate.
+The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `dotnet-package-inventory.json`, `vulnerable-packages.json` and `container-images.json` are present for the release candidate.
 
 ## Deployment baseline
 
