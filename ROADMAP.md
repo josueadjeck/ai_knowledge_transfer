@@ -183,6 +183,7 @@ Aktueller Implementierungsstand:
 - UX-/API-Haertung ist erweitert: Analyseabbrueche durch Schutzgrenzen liefern einen stabilen Fehlercode und klare Handlungshinweise in API und Blazor-UI.
 - Performance-Grundlage ist erweitert: Knowledge Extraction hat konfigurierbare Schutzgrenzen vor AI-Provider-Aufrufen und meldet Limitverletzungen mit stabilem API-Fehlercode.
 - Mandantenfaehigkeit ist geplant: Tenancy-Modus, Tenant-Claim und Default-Tenant sind als Betriebsoptionen sichtbar; Health und Release-Readiness bewerten Single-/Multi-Tenant-Konfiguration.
+- Deployment-Grundlage ist gestartet: CI veroeffentlicht API- und Web-Release-Artefakte und die Deployment-Dokumentation beschreibt Runtime-Konfiguration, Checks und aktuelle Grenzen.
 
 ### Phase 0: Produktklaerung
 

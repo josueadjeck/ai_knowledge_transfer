@@ -4,13 +4,14 @@ This runbook describes the MVP operating flow for local or pilot deployments.
 
 ## Pre-release checklist
 
-1. Run the CI workflow on `main` and confirm restore, build, tests, vulnerability check and secret scan passed.
-2. Start the application in the target persistence mode.
-3. Open the operations panel or call `GET /api/operations/release-readiness`.
-4. Create and preview a backup before deploying or restoring data.
-5. Resolve every `Fail` readiness check.
-6. Review every `Manual` or `Warning` readiness check with the release owner.
-7. Approve the deployment only after runtime health, persistence and backup checks are acceptable.
+1. Run the CI workflow on `main` and confirm restore, build, publish, tests, vulnerability check and secret scan passed.
+2. Confirm API and Web publish artifacts were produced by CI.
+3. Start the application in the target persistence mode.
+4. Open the operations panel or call `GET /api/operations/release-readiness`.
+5. Create and preview a backup before deploying or restoring data.
+6. Resolve every `Fail` readiness check.
+7. Review every `Manual` or `Warning` readiness check with the release owner.
+8. Approve the deployment only after runtime health, persistence and backup checks are acceptable.
 
 ## Runtime health
 
@@ -54,4 +55,8 @@ Status meanings:
 - `NeedsReview`: automated release blockers are clear, but warning or manual checks still need a human decision.
 - `Blocked`: at least one required check failed.
 
-Current required checks cover runtime health, persistence configuration, backups, CI security gates and release approval.
+Current required checks cover runtime health, persistence configuration, authentication, tenancy, backups, CI security gates and release approval.
+
+## Deployment baseline
+
+See `docs/operations/deployment.md` for local publish commands, required runtime configuration and current deployment limits.

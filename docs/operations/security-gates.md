@@ -10,6 +10,7 @@ Required checks:
 
 - Restore all .NET projects.
 - Build the full solution in Release configuration.
+- Publish API and Web Release artifacts.
 - Run all unit and architecture tests.
 - Check direct and transitive NuGet packages for known vulnerabilities.
 - Scan source files for common secret patterns such as OpenAI keys, database connection strings and passwords.

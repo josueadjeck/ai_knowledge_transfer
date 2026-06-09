@@ -31,6 +31,12 @@ jobs:
       - name: Build
         run: dotnet build AiKnowledgeTransfer.slnx --configuration Release --no-restore
 
+      - name: Publish API artifact
+        run: dotnet publish src/AiKnowledgeTransfer.Api/AiKnowledgeTransfer.Api.csproj --configuration Release --no-build --output artifacts/api
+
+      - name: Publish Web artifact
+        run: dotnet publish src/AiKnowledgeTransfer.Web/AiKnowledgeTransfer.Web.csproj --configuration Release --no-build --output artifacts/web
+
       - name: Test
         run: dotnet test AiKnowledgeTransfer.slnx --configuration Release --no-build --logger trx --results-directory TestResults
 
