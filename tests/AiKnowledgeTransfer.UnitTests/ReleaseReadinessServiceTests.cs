@@ -41,6 +41,7 @@ public sealed class ReleaseReadinessServiceTests
         Assert.Contains(readiness.Checks, check => check.Name == "Security inventory" && check.Status == "Manual");
         Assert.Contains(readiness.Checks, check => check.Name == "Container image inventory" && check.Status == "Manual");
         Assert.Contains(readiness.Checks, check => check.Name == "Security and data protection review" && check.Status == "Manual");
+        Assert.Contains(readiness.Checks, check => check.Name == "Secret management review" && check.Status == "Manual");
     }
 
     [Fact]
@@ -83,6 +84,21 @@ public sealed class ReleaseReadinessServiceTests
             && check.Status == "Manual"
             && check.Evidence.Contains("docs/security/security-concept.md", StringComparison.Ordinal)
             && check.Evidence.Contains("docs/security/data-protection-concept.md", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_requires_secret_management_review()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(root, aiApiKeyConfigured: true).GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Secret management review"
+            && check.Required
+            && check.Status == "Manual"
+            && check.Evidence.Contains("docs/security/secret-management.md", StringComparison.Ordinal)
+            && check.Evidence.Contains("OPENAI_API_KEY", StringComparison.Ordinal)
+            && check.Evidence.Contains("AKT_DB_CONNECTION_STRING", StringComparison.Ordinal));
     }
 
     [Fact]

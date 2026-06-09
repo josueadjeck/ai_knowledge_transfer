@@ -50,6 +50,12 @@ public sealed class ReleaseReadinessService(
                 "Confirm the security concept and data protection concept were reviewed for this release.",
                 "Review docs/security/security-concept.md and docs/security/data-protection-concept.md."),
             new(
+                "Secret management review",
+                "Manual",
+                Required: true,
+                "Confirm runtime secrets are injected through an approved secret store and rotation is documented.",
+                "Review docs/security/secret-management.md; required sensitive settings include OPENAI_API_KEY and AKT_DB_CONNECTION_STRING when used."),
+            new(
                 "Release approval",
                 "Manual",
                 Required: true,

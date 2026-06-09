@@ -70,10 +70,11 @@ Before deploying:
 2. Confirm `GET /health` is `ok`.
 3. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
 4. Create and preview a backup.
-5. Confirm warning and manual checks are accepted by a release owner.
+5. Confirm `OPENAI_API_KEY`, database credentials and OIDC/client credentials are injected by an approved secret manager or platform secret store.
+6. Confirm warning and manual checks are accepted by a release owner.
 
 Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the managed EF initial migration. `EnsureCreated` remains available for local MVP runs but is reported as a release-readiness warning in database mode.
 
 ## Current Limits
 
-The MVP deployment baseline does not yet provide image signing, full CycloneDX/SPDX SBOM export, external secret management, blue/green deployment or tenant-isolated production storage. Those remain Phase 9 follow-up work.
+The MVP deployment baseline does not yet provide image signing, full CycloneDX/SPDX SBOM export, direct secret-manager integration, blue/green deployment or tenant-isolated production storage. Those remain Phase 9 follow-up work.

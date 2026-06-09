@@ -69,6 +69,7 @@ Before a supervised pilot starts, confirm:
 - Data classification of the uploaded documents is known.
 - OIDC is configured or Demo mode is accepted only for local testing.
 - The AI provider is approved for the document classification.
+- Required secrets are managed according to `docs/security/secret-management.md`.
 - Backup storage and retention are defined.
 - Export handling and external sharing rules are defined.
 - Tenant boundary assumptions are documented.

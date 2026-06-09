@@ -38,6 +38,10 @@ Current storage options:
 
 Database mode supports `AKT_DB_SCHEMA_MODE=Migrations` for managed EF schema application. JSON mode remains the default for quick local setup but is not the target for enterprise production.
 
+## Secret Management
+
+Runtime secrets such as AI provider keys, database credentials and future provider-specific credentials must be injected by an approved secret manager or hosting platform. See `docs/security/secret-management.md`.
+
 ## AI Provider Controls
 
 Knowledge extraction is provider-independent. OpenAI is the first provider, with heuristic fallback when the provider is unavailable or returns no usable result. The provider API key is read from environment configuration and must not be committed.
@@ -58,6 +62,7 @@ Release readiness requires manual review of:
 - Dependency and vulnerability inventory.
 - Container image inventory.
 - Security and data protection concepts.
+- Secret management review.
 - Human release approval.
 
 ## Auditability

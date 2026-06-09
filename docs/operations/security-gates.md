@@ -33,6 +33,7 @@ Recommended production additions:
 - Full CycloneDX or SPDX SBOM generation with file/package hashes and retention policy.
 - Dependency review for pull requests.
 - Built image vulnerability scanning and signing before publishing deployment images.
+- Direct integration with the customer's approved secret manager.
 - Branch protection that requires the CI workflow before merge.
 
 ## Handling findings
@@ -40,4 +41,5 @@ Recommended production additions:
 - Do not commit real provider keys, database credentials or customer secrets.
 - Rotate any secret that was committed, even if it was later removed.
 - Keep local values in environment variables or user secrets.
+- Inject pilot and enterprise secrets through an approved secret manager or hosting platform.
 - Prefer provider-independent configuration keys so OpenAI, Azure OpenAI, customer AI gateways and local models can use the same application contracts.
