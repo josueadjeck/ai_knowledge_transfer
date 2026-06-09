@@ -67,6 +67,7 @@ public sealed class ReleaseReadinessServiceTests
             check.Name == "Container image inventory"
             && check.Required
             && check.Status == "Manual"
+            && check.Evidence.Contains("container-policy-scan.json", StringComparison.Ordinal)
             && check.Evidence.Contains("container-images.json", StringComparison.Ordinal));
     }
 

@@ -50,7 +50,7 @@ Before release, teams must confirm:
 
 ## CI and Release Gates
 
-The CI pipeline runs restore, build, publish, tests, vulnerability checks, a deterministic static source security scan, a deterministic secret scan, dependency inventory generation, SPDX SBOM generation, container builds and container image metadata inventory.
+The CI pipeline runs restore, build, publish, tests, vulnerability checks, a deterministic static source security scan, a deterministic secret scan, dependency inventory generation, SPDX SBOM generation, Dockerfile container policy scanning, container builds and container image metadata inventory.
 
 Release readiness requires manual review of:
 
@@ -70,7 +70,7 @@ Key project, document, knowledge, review, export, traceability and operations ac
 - Full tenant isolation is planned but not implemented end to end.
 - Local file storage is suitable for controlled pilots, not for hardened multi-node production.
 - CI static source scanning and secret scanning are baselines, not replacements for enterprise security tooling.
-- Full SBOM with file hashes, image signing and enterprise SAST remain follow-up work.
+- Built image vulnerability scanning, image signing, full SBOM with file hashes and enterprise SAST remain follow-up work.
 
 ## Release Review
 

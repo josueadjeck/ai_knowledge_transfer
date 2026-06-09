@@ -66,7 +66,7 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 
 Before deploying:
 
-1. Confirm CI restore, build, publish, dependency inventory, SPDX SBOM generation, container image inventory, container build, tests, vulnerability scan, static source security scan and secret scan passed.
+1. Confirm CI restore, build, publish, dependency inventory, SPDX SBOM generation, container policy scan, container image inventory, container build, tests, vulnerability scan, static source security scan and secret scan passed.
 2. Confirm `GET /health` is `ok`.
 3. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
 4. Create and preview a backup.
