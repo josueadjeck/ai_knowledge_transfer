@@ -74,6 +74,8 @@ public sealed class ReleaseReadinessServiceTests
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
             aiApiKeyConfigured,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
             authentication.Mode,
             authentication.Authority,
             authentication.ClientId,

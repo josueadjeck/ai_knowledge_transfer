@@ -55,6 +55,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.
 - Health output reports active persistence mode and database provider configuration.
+- Health output reports the active document analysis guardrails.
 - Blazor operations panel shows health components for storage, persistence and AI provider status.
 - Runtime metrics endpoint and Blazor operations panel show uptime, process and memory indicators.
 - Structured operational logs for backup, restore, backup preview and release-readiness checks.

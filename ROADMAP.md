@@ -178,6 +178,7 @@ Aktueller Implementierungsstand:
 - Auth-/Rollenhaertung ist erweitert: Die Blazor-UI zeigt den aktiven Auth-Modus, nutzt Demo-Rollen nur im Demo-Modus und prueft Aktionen ueber denselben Authorization-Service wie die API.
 - Auth-/Rollenhaertung ist erweitert: Die Web-App aktiviert im OIDC-Modus Cookie- und OpenID-Connect-Redirect-Login mit Login-/Logout-Endpunkten.
 - Performance-Grundlage ist gestartet: Dokumentanalysen haben konfigurierbare Schutzgrenzen fuer maximale Chunk-Anzahl und extrahierte Gesamtzeichen pro Dokument.
+- Betriebs-Grundlage ist erweitert: Health und Blazor-Operationsbereich zeigen die aktiven Analyse-Schutzgrenzen fuer grosse Dokumente.
 
 ### Phase 0: Produktklaerung
 

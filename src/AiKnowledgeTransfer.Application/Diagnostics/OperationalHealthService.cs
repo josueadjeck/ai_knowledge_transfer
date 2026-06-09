@@ -20,7 +20,8 @@ public sealed class OperationalHealthService
             GetProjectStoreComponent(),
             GetAuditLogComponent(),
             GetAuthComponent(),
-            GetAiProviderComponent()
+            GetAiProviderComponent(),
+            GetAnalysisLimitsComponent()
         };
 
         var status = components.Any(component => component.Status == "error")
@@ -174,6 +175,19 @@ public sealed class OperationalHealthService
                 ["authorityConfigured"] = (!string.IsNullOrWhiteSpace(_options.AuthAuthority)).ToString(),
                 ["clientIdConfigured"] = (!string.IsNullOrWhiteSpace(_options.AuthClientId)).ToString(),
                 ["roleClaimType"] = _options.AuthRoleClaimType
+            });
+    }
+
+    private HealthComponentResponse GetAnalysisLimitsComponent()
+    {
+        return new HealthComponentResponse(
+            "analysisLimits",
+            "ok",
+            "Document analysis guardrails are configured.",
+            new Dictionary<string, string>
+            {
+                ["maxChunksPerDocument"] = _options.MaxAnalysisChunksPerDocument.ToString(),
+                ["maxExtractedCharacters"] = _options.MaxAnalysisExtractedCharacters.ToString()
             });
     }
 }

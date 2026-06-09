@@ -27,6 +27,7 @@ public static class DependencyInjection
         var databaseConnectionString = Environment.GetEnvironmentVariable("AKT_DB_CONNECTION_STRING");
         var databaseProviderName = Environment.GetEnvironmentVariable("AKT_DB_PROVIDER");
         var authentication = AuthenticationOptions.FromEnvironment();
+        var documentAnalysisOptions = DocumentAnalysisOptions.FromEnvironment();
 
         var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
@@ -53,12 +54,14 @@ public static class DependencyInjection
             model,
             baseUrl,
             !string.IsNullOrWhiteSpace(apiKey),
+            documentAnalysisOptions.MaxChunksPerDocument,
+            documentAnalysisOptions.MaxTotalExtractedCharacters,
             authentication.Mode,
             authentication.Authority,
             authentication.ClientId,
             authentication.RoleClaimType));
         services.AddSingleton(authentication);
-        services.AddSingleton(DocumentAnalysisOptions.FromEnvironment());
+        services.AddSingleton(documentAnalysisOptions);
         services.AddSingleton(new PersistenceBackupOptions(
             appDataPath,
             uploadStoragePath,

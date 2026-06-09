@@ -20,6 +20,8 @@ public sealed class OperationalHealthServiceTests
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
             AiApiKeyConfigured: false,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
             "Demo",
             null,
             null,
@@ -33,6 +35,10 @@ public sealed class OperationalHealthServiceTests
         Assert.Contains(health.Components, component => component.Name == "storage" && component.Status == "ok");
         Assert.Contains(health.Components, component => component.Name == "persistence" && component.Metadata["provider"] == "Json");
         Assert.Contains(health.Components, component => component.Name == "aiProvider" && component.Status == "fallback");
+        Assert.Contains(health.Components, component =>
+            component.Name == "analysisLimits"
+            && component.Metadata["maxChunksPerDocument"] == "250"
+            && component.Metadata["maxExtractedCharacters"] == "500000");
     }
 
     [Fact]
@@ -51,6 +57,8 @@ public sealed class OperationalHealthServiceTests
             "custom-model",
             "https://example.test/v1/",
             AiApiKeyConfigured: true,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
             "Demo",
             null,
             null,
@@ -81,6 +89,8 @@ public sealed class OperationalHealthServiceTests
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
             AiApiKeyConfigured: false,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
             "Demo",
             null,
             null,
@@ -114,6 +124,8 @@ public sealed class OperationalHealthServiceTests
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
             AiApiKeyConfigured: false,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
             "Oidc",
             null,
             null,
