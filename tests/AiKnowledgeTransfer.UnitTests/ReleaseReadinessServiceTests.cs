@@ -128,11 +128,64 @@ public sealed class ReleaseReadinessServiceTests
             && check.Status == "Fail");
     }
 
+    [Fact]
+    public void GetStatus_marks_database_schema_management_manual_for_json_persistence()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(root, aiApiKeyConfigured: true).GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Database schema management"
+            && check.Status == "Manual"
+            && check.Detail.Contains("JSON persistence", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_warns_when_database_uses_ensure_created_schema_mode()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            persistenceProvider: "Database",
+            databaseProvider: "Sqlite",
+            databaseConnectionString: "Data Source=knowledge-transfer.db")
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Database schema management"
+            && check.Status == "Warning"
+            && check.Detail.Contains("EnsureCreated", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_blocks_release_when_database_schema_mode_is_unsupported()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            persistenceProvider: "Database",
+            databaseProvider: "Sqlite",
+            databaseConnectionString: "Data Source=knowledge-transfer.db",
+            databaseSchemaMode: "ManualSql")
+            .GetStatus("TestService");
+
+        Assert.Equal("Blocked", readiness.Status);
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Database schema management"
+            && check.Status == "Fail");
+    }
+
     private static ReleaseReadinessService CreateService(
         string root,
         bool aiApiKeyConfigured,
         AuthenticationOptions? authentication = null,
-        TenantOptions? tenancy = null)
+        TenantOptions? tenancy = null,
+        string persistenceProvider = "Json",
+        string? databaseProvider = null,
+        string? databaseConnectionString = null,
+        string databaseSchemaMode = "EnsureCreated")
     {
         authentication ??= new AuthenticationOptions("Demo", null, null, "role");
         tenancy ??= TenantOptions.Default;
@@ -141,9 +194,10 @@ public sealed class ReleaseReadinessServiceTests
             Path.Combine(root, "uploads"),
             Path.Combine(root, "projects.json"),
             Path.Combine(root, "audit-log.json"),
-            "Json",
-            null,
-            null,
+            persistenceProvider,
+            databaseProvider,
+            databaseConnectionString,
+            databaseSchemaMode,
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",

@@ -20,6 +20,7 @@ public sealed class ReleaseReadinessService(
         {
             BuildHealthCheck(healthStatus),
             BuildPersistenceCheck(healthStatus),
+            BuildDatabaseSchemaCheck(healthStatus),
             BuildAuthenticationCheck(authentication),
             BuildTenancyCheck(healthStatus),
             BuildBackupCheck(backupList),
@@ -79,6 +80,44 @@ public sealed class ReleaseReadinessService(
                 ? "Persistence configuration is usable."
                 : "Persistence configuration is incomplete.",
             $"Provider: {provider}");
+    }
+
+    private static ReleaseReadinessCheckResponse BuildDatabaseSchemaCheck(HealthResponse healthStatus)
+    {
+        var persistence = healthStatus.Components.FirstOrDefault(component => component.Name == "persistence");
+        var provider = persistence?.Metadata.TryGetValue("provider", out var providerValue) == true
+            ? providerValue
+            : "unknown";
+        var schemaMode = persistence?.Metadata.TryGetValue("databaseSchemaMode", out var schemaModeValue) == true
+            ? schemaModeValue
+            : "unknown";
+
+        if (!provider.Equals("Database", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Database schema management",
+                "Manual",
+                Required: false,
+                "JSON persistence is active; database schema management does not apply to this deployment.",
+                $"Persistence: {provider}");
+        }
+
+        if (schemaMode.Equals("EnsureCreated", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Database schema management",
+                "Warning",
+                Required: false,
+                "Database mode uses EF EnsureCreated; add managed EF migrations before production database rollout.",
+                $"Schema mode: {schemaMode}");
+        }
+
+        return new ReleaseReadinessCheckResponse(
+            "Database schema management",
+            "Fail",
+            Required: true,
+            "Unsupported database schema mode.",
+            $"Schema mode: {schemaMode}");
     }
 
     private static ReleaseReadinessCheckResponse BuildBackupCheck(IReadOnlyCollection<BackupResponse> backupList)

@@ -26,6 +26,7 @@ Expected result:
 - Overall status is `ok`.
 - Storage is reachable.
 - Persistence is configured.
+- Database schema mode is visible when database persistence is active.
 - AI provider is either configured or the fallback decision is accepted.
 
 ## Backup and restore
@@ -56,6 +57,7 @@ Status meanings:
 - `Blocked`: at least one required check failed.
 
 Current required checks cover runtime health, persistence configuration, authentication, tenancy, backups, CI security gates and release approval.
+Database mode currently reports `EnsureCreated` schema management as a warning until managed EF migrations are implemented.
 
 ## Deployment baseline
 

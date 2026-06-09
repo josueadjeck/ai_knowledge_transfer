@@ -8,6 +8,7 @@ public sealed record OperationalHealthOptions(
     string PersistenceProvider,
     string? DatabaseProvider,
     string? DatabaseConnectionString,
+    string DatabaseSchemaMode,
     string AiProvider,
     string AiModel,
     string AiBaseUrl,

@@ -47,6 +47,7 @@ For enterprise-style pilot operation:
 $env:AKT_PERSISTENCE_PROVIDER="Database"
 $env:AKT_DB_PROVIDER="Sqlite"
 $env:AKT_DB_CONNECTION_STRING="Data Source=App_Data/knowledge-transfer.db"
+$env:AKT_DB_SCHEMA_MODE="EnsureCreated"
 $env:AKT_AUTH_MODE="Oidc"
 $env:AKT_AUTH_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
 $env:AKT_AUTH_CLIENT_ID="<application-client-id>"
@@ -70,6 +71,8 @@ Before deploying:
 3. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
 4. Create and preview a backup.
 5. Confirm warning and manual checks are accepted by a release owner.
+
+Database deployments currently use EF `EnsureCreated` as the MVP schema mode. Treat the database schema warning as a release-owner decision until managed EF migrations are added.
 
 ## Current Limits
 

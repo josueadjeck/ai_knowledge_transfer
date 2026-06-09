@@ -185,6 +185,7 @@ Aktueller Implementierungsstand:
 - Mandantenfaehigkeit ist geplant: Tenancy-Modus, Tenant-Claim und Default-Tenant sind als Betriebsoptionen sichtbar; Health und Release-Readiness bewerten Single-/Multi-Tenant-Konfiguration.
 - Deployment-Grundlage ist gestartet: CI veroeffentlicht API- und Web-Release-Artefakte und die Deployment-Dokumentation beschreibt Runtime-Konfiguration, Checks und aktuelle Grenzen.
 - Container-Grundlage ist gestartet: API und Web haben eigene Dockerfiles; CI baut beide Images ohne Push als Runtime-Haertungscheck.
+- Datenbank-Betrieb ist erweitert: Health und Release-Readiness zeigen den aktuellen Schema-Modus `EnsureCreated` und warnen, dass produktionsnahe EF-Migrations noch fehlen.
 
 ### Phase 0: Produktklaerung
 

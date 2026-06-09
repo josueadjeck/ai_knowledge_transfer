@@ -116,6 +116,7 @@ public sealed class OperationalHealthService
                 ["provider"] = _options.PersistenceProvider,
                 ["databaseProvider"] = _options.DatabaseProvider ?? string.Empty,
                 ["connectionStringConfigured"] = hasConnectionString.ToString(),
+                ["databaseSchemaMode"] = _options.DatabaseSchemaMode,
                 ["projectStorePath"] = _options.ProjectStorePath,
                 ["auditLogPath"] = _options.AuditLogPath
             });

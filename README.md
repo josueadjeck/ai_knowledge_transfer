@@ -138,10 +138,12 @@ Database migration preparation:
 $env:AKT_PERSISTENCE_PROVIDER="Json" # default
 $env:AKT_DB_PROVIDER="Sqlite"
 $env:AKT_DB_CONNECTION_STRING="Data Source=App_Data/knowledge-transfer.db"
+$env:AKT_DB_SCHEMA_MODE="EnsureCreated"
 ```
 
 `Json` remains the active default. SQLite is prepared as the first local relational provider for model and repository tests. Set `AKT_PERSISTENCE_PROVIDER=Database` with `AKT_DB_PROVIDER=Sqlite` to activate the database registration path; PostgreSQL or SQL Server can be added later for production-like deployments without changing Domain or Application.
 When database mode is active, API and Web initialize the SQLite schema on startup.
+`AKT_DB_SCHEMA_MODE=EnsureCreated` documents the current MVP schema strategy. Release readiness warns in database mode until managed EF migrations are introduced.
 
 ## Verify
 

@@ -16,6 +16,7 @@ public sealed class OperationalHealthServiceTests
             "Json",
             null,
             null,
+            "EnsureCreated",
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
@@ -66,6 +67,7 @@ public sealed class OperationalHealthServiceTests
             "Json",
             null,
             null,
+            "EnsureCreated",
             "OpenAI",
             "custom-model",
             "https://example.test/v1/",
@@ -103,6 +105,7 @@ public sealed class OperationalHealthServiceTests
             "Database",
             "Sqlite",
             "Data Source=knowledge-transfer.db",
+            "EnsureCreated",
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
@@ -126,7 +129,8 @@ public sealed class OperationalHealthServiceTests
             component.Name == "persistence"
             && component.Status == "ok"
             && component.Metadata["databaseProvider"] == "Sqlite"
-            && component.Metadata["connectionStringConfigured"] == "True");
+            && component.Metadata["connectionStringConfigured"] == "True"
+            && component.Metadata["databaseSchemaMode"] == "EnsureCreated");
         Assert.Contains(health.Components, component => component.Name == "projectStore" && component.Status == "database");
         Assert.Contains(health.Components, component => component.Name == "auditLog" && component.Status == "database");
     }
@@ -143,6 +147,7 @@ public sealed class OperationalHealthServiceTests
             "Json",
             null,
             null,
+            "EnsureCreated",
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
@@ -181,6 +186,7 @@ public sealed class OperationalHealthServiceTests
             "Json",
             null,
             null,
+            "EnsureCreated",
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",
@@ -218,6 +224,7 @@ public sealed class OperationalHealthServiceTests
             "Json",
             null,
             null,
+            "EnsureCreated",
             "OpenAI",
             "gpt-5.4-mini",
             "https://api.openai.com/v1/",

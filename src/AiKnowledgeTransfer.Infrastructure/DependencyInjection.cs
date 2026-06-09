@@ -27,6 +27,7 @@ public static class DependencyInjection
         var persistenceProvider = GetPersistenceProvider();
         var databaseConnectionString = Environment.GetEnvironmentVariable("AKT_DB_CONNECTION_STRING");
         var databaseProviderName = Environment.GetEnvironmentVariable("AKT_DB_PROVIDER");
+        var databaseSchemaMode = GetDatabaseSchemaMode();
         var authentication = AuthenticationOptions.FromEnvironment();
         var tenancy = TenantOptions.FromEnvironment();
         var documentAnalysisOptions = DocumentAnalysisOptions.FromEnvironment();
@@ -53,6 +54,7 @@ public static class DependencyInjection
             persistenceProvider.ToString(),
             databaseProviderName,
             databaseConnectionString,
+            databaseSchemaMode,
             "OpenAI",
             model,
             baseUrl,
@@ -81,7 +83,8 @@ public static class DependencyInjection
         var databaseOptions = new DatabasePersistenceOptions(
             persistenceProvider,
             databaseConnectionString,
-            databaseProviderName);
+            databaseProviderName,
+            databaseSchemaMode);
         services.AddSingleton(databaseOptions);
         services.AddConfiguredDatabasePersistence(databaseOptions);
 
@@ -128,5 +131,13 @@ public static class DependencyInjection
         return Enum.TryParse<PersistenceProvider>(configuredProvider, ignoreCase: true, out var provider)
             ? provider
             : PersistenceProvider.Json;
+    }
+
+    private static string GetDatabaseSchemaMode()
+    {
+        var schemaMode = Environment.GetEnvironmentVariable("AKT_DB_SCHEMA_MODE");
+        return string.IsNullOrWhiteSpace(schemaMode)
+            ? "EnsureCreated"
+            : schemaMode;
     }
 }
