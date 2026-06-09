@@ -12,6 +12,7 @@ Required checks:
 - Build the full solution in Release configuration.
 - Publish API and Web Release artifacts.
 - Generate a transitive .NET package inventory artifact.
+- Generate an SPDX 2.3 JSON SBOM baseline from the .NET package inventory.
 - Build API and Web container images without pushing them.
 - Generate container image metadata inventory for the built images.
 - Run all unit and architecture tests.
@@ -21,14 +22,14 @@ Required checks:
 
 ## Current limits
 
-The dependency inventory is a first SBOM-style baseline, not a complete CycloneDX or SPDX SBOM. The static source security scan is a deterministic baseline for obvious dangerous release-code patterns, not a full SAST engine. The secret scan is intentionally simple and deterministic. It is not a replacement for a dedicated enterprise secret scanner.
+The SPDX JSON SBOM is a dependency-only baseline generated from `dotnet list package --include-transitive`; it is not yet a full build artifact SBOM with file hashes. The static source security scan is a deterministic baseline for obvious dangerous release-code patterns, not a full SAST engine. The secret scan is intentionally simple and deterministic. It is not a replacement for a dedicated enterprise secret scanner.
 Release readiness includes manual `Security inventory` and `Container image inventory` checks so release owners confirm the uploaded artifact exists and was reviewed.
 
 Recommended production additions:
 
 - GitHub Advanced Security or an equivalent secret scanning tool.
 - CodeQL or another enterprise SAST engine.
-- CycloneDX or SPDX SBOM generation with artifact retention policy.
+- Full CycloneDX or SPDX SBOM generation with file/package hashes and retention policy.
 - Dependency review for pull requests.
 - Container image scanning and signing before publishing deployment images.
 - Branch protection that requires the CI workflow before merge.

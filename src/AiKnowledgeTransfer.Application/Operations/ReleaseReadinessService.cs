@@ -36,7 +36,7 @@ public sealed class ReleaseReadinessService(
                 "Manual",
                 Required: true,
                 "Confirm the CI security-inventory artifact was generated and reviewed for the release.",
-                "Expected artifact: security-inventory with dotnet-package-inventory.json and vulnerable-packages.json."),
+                "Expected artifact: security-inventory with dotnet-package-inventory.json, sbom.spdx.json, vulnerable-packages.json and static-source-scan.json."),
             new(
                 "Container image inventory",
                 "Manual",

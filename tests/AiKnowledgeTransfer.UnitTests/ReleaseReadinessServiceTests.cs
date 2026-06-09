@@ -53,7 +53,8 @@ public sealed class ReleaseReadinessServiceTests
             check.Name == "Security inventory"
             && check.Required
             && check.Status == "Manual"
-            && check.Evidence.Contains("security-inventory", StringComparison.Ordinal));
+            && check.Evidence.Contains("security-inventory", StringComparison.Ordinal)
+            && check.Evidence.Contains("sbom.spdx.json", StringComparison.Ordinal));
     }
 
     [Fact]

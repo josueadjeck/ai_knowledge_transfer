@@ -42,6 +42,10 @@ jobs:
           mkdir -p artifacts/security
           dotnet list AiKnowledgeTransfer.slnx package --include-transitive --format json > artifacts/security/dotnet-package-inventory.json
 
+      - name: Generate SPDX SBOM
+        shell: pwsh
+        run: ./scripts/security/generate-spdx-sbom.ps1 -InventoryPath artifacts/security/dotnet-package-inventory.json -OutputPath artifacts/security/sbom.spdx.json
+
       - name: Build API container image
         run: docker build --file Dockerfile.api --tag ai-knowledge-transfer-api:ci .
 

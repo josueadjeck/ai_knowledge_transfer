@@ -4,7 +4,7 @@ This runbook describes the MVP operating flow for local or pilot deployments.
 
 ## Pre-release checklist
 
-1. Run the CI workflow on `main` and confirm restore, build, publish, dependency inventory, container image inventory, container build, tests, vulnerability check, static source security scan and secret scan passed.
+1. Run the CI workflow on `main` and confirm restore, build, publish, dependency inventory, SPDX SBOM generation, container image inventory, container build, tests, vulnerability check, static source security scan and secret scan passed.
 2. Confirm API, Web and `security-inventory` artifacts were produced by CI.
 3. Review `docs/security/security-concept.md` and `docs/security/data-protection-concept.md` for the target deployment.
 4. Start the application in the target persistence mode.
@@ -60,7 +60,7 @@ Status meanings:
 Current required checks cover runtime health, persistence configuration, authentication, tenancy, backups, CI security gates, security and data protection review and release approval.
 Database mode with `AKT_DB_SCHEMA_MODE=Migrations` applies managed EF migrations. `EnsureCreated` remains available for local MVP runs but appears as a warning for release review.
 
-The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `dotnet-package-inventory.json`, `vulnerable-packages.json`, `static-source-scan.json` and `container-images.json` are present for the release candidate.
+The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `dotnet-package-inventory.json`, `sbom.spdx.json`, `vulnerable-packages.json`, `static-source-scan.json` and `container-images.json` are present for the release candidate.
 The `Security and data protection review` check is manual. Review the concepts under `docs/security` and document accepted residual risks for the target deployment.
 
 ## Deployment baseline
