@@ -170,6 +170,7 @@ Aktueller Implementierungsstand:
 - Security-Gates sind gestartet: GitHub Actions prueft Restore, Release-Build, Tests, NuGet-Vulnerabilities und einfache Secret-Muster auf `main` und Pull Requests.
 - Release-/Betriebsprozess ist gestartet: Betriebshandbuch und Release-Readiness-Check pruefen Health, Persistenz, Backup, CI-Gates und manuelle Release-Freigabe.
 - Auth-/Rollenhaertung ist gestartet: Rollen koennen aus Claims aufgeloest werden; der MVP-Rollenselektor bleibt als Demo-Fallback fuer die Web-UI erhalten.
+- Auth-/Rollenhaertung ist erweitert: API-Endpunkte pruefen Berechtigungen serverseitig ueber den Identity-/Claims-Kontext.
 
 ### Phase 0: Produktklaerung
 

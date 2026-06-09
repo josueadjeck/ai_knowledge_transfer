@@ -50,6 +50,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Database initialization for SQLite-backed local relational runs.
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
 - Identity resolution foundation for claim-based roles with the MVP role selector as a demo fallback.
+- API permission gates for project, document, review, roadmap, export, audit and operations endpoints.
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.
 - Health output reports active persistence mode and database provider configuration.
@@ -330,6 +331,8 @@ Get the current resolved user:
 ```http
 GET http://localhost:5256/api/security/current-user
 ```
+
+API endpoints enforce the same permission model as the Web UI. Anonymous requests resolve to the Viewer role; mutating endpoints require a role claim with the necessary permission.
 
 Get audit events:
 

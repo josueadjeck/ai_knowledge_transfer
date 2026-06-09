@@ -14,6 +14,7 @@ using AiKnowledgeTransfer.Application.Traceability;
 using AiKnowledgeTransfer.Contracts.Projects;
 using AiKnowledgeTransfer.Contracts.Exports;
 using AiKnowledgeTransfer.Contracts.Roadmaps;
+using AiKnowledgeTransfer.Contracts.Security;
 using AiKnowledgeTransfer.Contracts.Validation;
 using AiKnowledgeTransfer.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,8 @@ projects.MapGet("/", async Task<IResult> (ProjectService service, CancellationTo
 {
     var result = await service.ListAsync(cancellationToken);
     return Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewProject);
 
 projects.MapGet("/{projectId:guid}", async Task<IResult> (
     Guid projectId,
@@ -46,7 +48,8 @@ projects.MapGet("/{projectId:guid}", async Task<IResult> (
 {
     var result = await service.GetAsync(projectId, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewProject);
 
 projects.MapPost("/", async Task<IResult> (
     CreateProjectRequest request,
@@ -61,7 +64,8 @@ projects.MapPost("/", async Task<IResult> (
 
     var result = await service.CreateAsync(request, cancellationToken);
     return Results.Created($"/api/projects/{result.Id}", result);
-});
+})
+.RequirePermission(Permission.CreateProject);
 
 projects.MapPost("/{projectId:guid}/documents", async Task<IResult> (
     Guid projectId,
@@ -77,7 +81,8 @@ projects.MapPost("/{projectId:guid}/documents", async Task<IResult> (
 
     var result = await service.RegisterDocumentAsync(projectId, request, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Created($"/api/projects/{projectId}/documents/{result.Id}", result);
-});
+})
+.RequirePermission(Permission.UploadDocument);
 
 projects.MapPost("/{projectId:guid}/documents/upload", async Task<IResult> (
     Guid projectId,
@@ -114,6 +119,7 @@ projects.MapPost("/{projectId:guid}/documents/upload", async Task<IResult> (
 
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Created($"/api/projects/{projectId}/documents/{result.Document.Id}", result);
 })
+.RequirePermission(Permission.UploadDocument)
 .DisableAntiforgery();
 
 projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/analyze", async Task<IResult> (
@@ -135,7 +141,8 @@ projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/analyze", async 
     {
         return ApiResponses.BadRequest(exception.Message);
     }
-});
+})
+.RequirePermission(Permission.AnalyzeDocument);
 
 projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/extract-knowledge", async Task<IResult> (
     Guid projectId,
@@ -152,7 +159,8 @@ projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/extract-knowledg
     {
         return ApiResponses.BadRequest(exception.Message);
     }
-});
+})
+.RequirePermission(Permission.ExtractKnowledge);
 
 projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/submit-review", async Task<IResult> (
     Guid projectId,
@@ -169,7 +177,8 @@ projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/submi
 
     var result = await service.SubmitForReviewAsync(projectId, knowledgeItemId, request, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project or knowledge item was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.SubmitKnowledgeReview);
 
 projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/approve", async Task<IResult> (
     Guid projectId,
@@ -186,7 +195,8 @@ projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/appro
 
     var result = await service.ApproveAsync(projectId, knowledgeItemId, request, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project or knowledge item was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ApproveKnowledge);
 
 projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/reject", async Task<IResult> (
     Guid projectId,
@@ -203,7 +213,8 @@ projects.MapPost("/{projectId:guid}/knowledge-items/{knowledgeItemId:guid}/rejec
 
     var result = await service.RejectAsync(projectId, knowledgeItemId, request, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project or knowledge item was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.RejectKnowledge);
 
 projects.MapPost("/{projectId:guid}/knowledge-items/bulk-submit-review", async Task<IResult> (
     Guid projectId,
@@ -224,7 +235,8 @@ projects.MapPost("/{projectId:guid}/knowledge-items/bulk-submit-review", async T
         cancellationToken);
 
     return result.Count == 0 ? ApiResponses.NotFound("Project or knowledge items were not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.SubmitKnowledgeReview);
 
 projects.MapPost("/{projectId:guid}/knowledge-items/bulk-approve", async Task<IResult> (
     Guid projectId,
@@ -245,7 +257,8 @@ projects.MapPost("/{projectId:guid}/knowledge-items/bulk-approve", async Task<IR
         cancellationToken);
 
     return result.Count == 0 ? ApiResponses.NotFound("Project or knowledge items were not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ApproveKnowledge);
 
 projects.MapPost("/{projectId:guid}/knowledge-items/bulk-reject", async Task<IResult> (
     Guid projectId,
@@ -266,7 +279,8 @@ projects.MapPost("/{projectId:guid}/knowledge-items/bulk-reject", async Task<IRe
         cancellationToken);
 
     return result.Count == 0 ? ApiResponses.NotFound("Project or knowledge items were not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.RejectKnowledge);
 
 projects.MapGet("/{projectId:guid}/knowledge-items/review-summary", async Task<IResult> (
     Guid projectId,
@@ -275,7 +289,8 @@ projects.MapGet("/{projectId:guid}/knowledge-items/review-summary", async Task<I
 {
     var result = await service.GetAsync(projectId, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewProject);
 
 projects.MapPost("/{projectId:guid}/roadmaps", async Task<IResult> (
     Guid projectId,
@@ -291,7 +306,8 @@ projects.MapPost("/{projectId:guid}/roadmaps", async Task<IResult> (
 
     var result = await service.GenerateAsync(projectId, request, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Created($"/api/projects/{projectId}/roadmaps/{result.Id}", result);
-});
+})
+.RequirePermission(Permission.GenerateRoadmap);
 
 projects.MapGet("/{projectId:guid}/onboarding-readiness", async Task<IResult> (
     Guid projectId,
@@ -300,7 +316,8 @@ projects.MapGet("/{projectId:guid}/onboarding-readiness", async Task<IResult> (
 {
     var result = await service.GetAsync(projectId, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewProject);
 
 projects.MapGet("/{projectId:guid}/onboarding-start-package", async Task<IResult> (
     Guid projectId,
@@ -309,7 +326,8 @@ projects.MapGet("/{projectId:guid}/onboarding-start-package", async Task<IResult
 {
     var result = await service.GetAsync(projectId, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewProject);
 
 projects.MapGet("/{projectId:guid}/exports/markdown", async Task<IResult> (
     Guid projectId,
@@ -318,7 +336,8 @@ projects.MapGet("/{projectId:guid}/exports/markdown", async Task<IResult> (
 {
     var result = await service.ExportProjectAsync(projectId, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ExportProject);
 
 projects.MapGet("/{projectId:guid}/exports/history", async Task<IResult> (
     Guid projectId,
@@ -327,7 +346,8 @@ projects.MapGet("/{projectId:guid}/exports/history", async Task<IResult> (
 {
     var result = await service.ListAsync(projectId, cancellationToken);
     return Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ExportProject);
 
 projects.MapPost("/{projectId:guid}/exports/approvals", async Task<IResult> (
     Guid projectId,
@@ -343,7 +363,8 @@ projects.MapPost("/{projectId:guid}/exports/approvals", async Task<IResult> (
 
     var result = await service.ApproveAsync(projectId, request, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Created($"/api/projects/{projectId}/exports/approvals/{result.Id}", result);
-});
+})
+.RequirePermission(Permission.ExportProject);
 
 projects.MapGet("/{projectId:guid}/exports/approvals", async Task<IResult> (
     Guid projectId,
@@ -352,7 +373,8 @@ projects.MapGet("/{projectId:guid}/exports/approvals", async Task<IResult> (
 {
     var result = await service.ListAsync(projectId, cancellationToken);
     return Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ExportProject);
 
 projects.MapGet("/{projectId:guid}/traceability", async Task<IResult> (
     Guid projectId,
@@ -361,7 +383,8 @@ projects.MapGet("/{projectId:guid}/traceability", async Task<IResult> (
 {
     var result = await service.GetMatrixAsync(projectId, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewTraceability);
 
 projects.MapGet("/{projectId:guid}/compliance", async Task<IResult> (
     Guid projectId,
@@ -370,7 +393,8 @@ projects.MapGet("/{projectId:guid}/compliance", async Task<IResult> (
 {
     var result = await service.GetMatrixAsync(projectId, cancellationToken);
     return result is null ? ApiResponses.NotFound("Project was not found.") : Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewTraceability);
 
 projects.MapGet("/{projectId:guid}/audit", async Task<IResult> (
     Guid projectId,
@@ -379,7 +403,8 @@ projects.MapGet("/{projectId:guid}/audit", async Task<IResult> (
 {
     var result = await service.ListAsync(projectId, cancellationToken);
     return Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewTraceability);
 
 app.MapGet("/health", (OperationalHealthService service) =>
 {
@@ -390,12 +415,14 @@ app.MapGet("/health", (OperationalHealthService service) =>
 app.MapGet("/api/document-parsers", (DocumentParserCapabilityService service) =>
 {
     return Results.Ok(service.List());
-});
+})
+.RequirePermission(Permission.ViewProject);
 
 app.MapGet("/api/security/roles", (RolePermissionService service) =>
 {
     return Results.Ok(service.GetMatrix());
-});
+})
+.RequirePermission(Permission.ManageUsers);
 
 app.MapGet("/api/security/current-user", (HttpContext httpContext, UserIdentityService service) =>
 {
@@ -408,7 +435,8 @@ app.MapGet("/api/audit", async Task<IResult> (
 {
     var result = await service.ListAsync(projectId: null, cancellationToken);
     return Results.Ok(result);
-});
+})
+.RequirePermission(Permission.ViewTraceability);
 
 var operations = app.MapGroup("/api/operations");
 
@@ -418,17 +446,20 @@ operations.MapPost("/backups", async Task<IResult> (
 {
     var result = await service.CreateAsync(cancellationToken);
     return Results.Created($"/api/operations/backups/{result.FileName}", result);
-});
+})
+.RequirePermission(Permission.ManageUsers);
 
 operations.MapGet("/backups", (PersistenceBackupService service) =>
 {
     return Results.Ok(service.List());
-});
+})
+.RequirePermission(Permission.ManageUsers);
 
 operations.MapGet("/release-readiness", (ReleaseReadinessService service) =>
 {
     return Results.Ok(service.GetStatus("AiKnowledgeTransfer.Api"));
-});
+})
+.RequirePermission(Permission.ManageUsers);
 
 operations.MapGet("/backups/{fileName}/preview", async Task<IResult> (
     string fileName,
@@ -444,7 +475,8 @@ operations.MapGet("/backups/{fileName}/preview", async Task<IResult> (
     {
         return ApiResponses.BadRequest(exception.Message);
     }
-});
+})
+.RequirePermission(Permission.ManageUsers);
 
 operations.MapPost("/backups/{fileName}/restore", async Task<IResult> (
     string fileName,
@@ -460,7 +492,8 @@ operations.MapPost("/backups/{fileName}/restore", async Task<IResult> (
     {
         return ApiResponses.BadRequest(exception.Message);
     }
-});
+})
+.RequirePermission(Permission.ManageUsers);
 
 app.Run();
 
