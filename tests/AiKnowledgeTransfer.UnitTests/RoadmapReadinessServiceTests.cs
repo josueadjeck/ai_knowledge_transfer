@@ -16,9 +16,9 @@ public sealed class RoadmapReadinessServiceTests
         Assert.True(readiness.ReadyPhaseCount > 0);
         Assert.True(readiness.NeedsWorkPhaseCount > 0);
         Assert.Contains(readiness.Phases, phase =>
-            phase.Phase == 7
+            phase.Phase == 5
             && phase.Status == "Ready"
-            && phase.Evidence.Any(evidence => evidence.Contains("Word export", StringComparison.Ordinal)));
+            && phase.Evidence.Any(evidence => evidence.Contains("Editable roadmap", StringComparison.Ordinal)));
         Assert.Contains(readiness.Phases, phase =>
             phase.Phase == 9
             && phase.Gaps.Any(gap => gap.Contains("tenant isolation", StringComparison.OrdinalIgnoreCase)));

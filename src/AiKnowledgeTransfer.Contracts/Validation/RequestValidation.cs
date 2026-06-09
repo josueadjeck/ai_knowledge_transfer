@@ -108,6 +108,41 @@ public static class RequestValidation
         return errors;
     }
 
+    public static IReadOnlyDictionary<string, string[]> Validate(UpdateRoadmapRequest request)
+    {
+        var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
+        if (request.Weeks.Count == 0)
+        {
+            errors[nameof(request.Weeks)] = ["At least one roadmap week is required."];
+            return errors;
+        }
+
+        foreach (var week in request.Weeks)
+        {
+            var prefix = $"{nameof(request.Weeks)}[{week.WeekNumber}]";
+            if (week.WeekNumber <= 0)
+            {
+                errors[$"{prefix}.{nameof(week.WeekNumber)}"] = ["Week number must be greater than zero."];
+            }
+
+            AddRequired(errors, $"{prefix}.{nameof(week.Theme)}", week.Theme);
+            AddRequiredCollection(errors, $"{prefix}.{nameof(week.LearningGoals)}", week.LearningGoals);
+            AddRequiredCollection(errors, $"{prefix}.{nameof(week.Exercises)}", week.Exercises);
+            AddRequiredCollection(errors, $"{prefix}.{nameof(week.AcceptanceCriteria)}", week.AcceptanceCriteria);
+        }
+
+        var duplicateWeek = request.Weeks
+            .GroupBy(week => week.WeekNumber)
+            .FirstOrDefault(group => group.Count() > 1);
+        if (duplicateWeek is not null)
+        {
+            errors[nameof(request.Weeks)] = [$"Week {duplicateWeek.Key} is duplicated."];
+        }
+
+        return errors;
+    }
+
     private static void AddRequired(IDictionary<string, string[]> errors, string fieldName, string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -122,6 +157,14 @@ public static class RequestValidation
             && !AllowedKnowledgeQualityStatuses.Contains(value, StringComparer.Ordinal))
         {
             errors[fieldName] = [$"QualityStatus must be one of: {string.Join(", ", AllowedKnowledgeQualityStatuses)}."];
+        }
+    }
+
+    private static void AddRequiredCollection(IDictionary<string, string[]> errors, string fieldName, IReadOnlyCollection<string> values)
+    {
+        if (values.Count == 0 || values.All(string.IsNullOrWhiteSpace))
+        {
+            errors[fieldName] = ["At least one value is required."];
         }
     }
 }

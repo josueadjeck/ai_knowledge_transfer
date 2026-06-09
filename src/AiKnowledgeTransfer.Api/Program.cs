@@ -331,6 +331,31 @@ projects.MapPost("/{projectId:guid}/roadmaps", async Task<IResult> (
 })
 .RequirePermission(Permission.GenerateRoadmap);
 
+projects.MapPut("/{projectId:guid}/roadmaps/{roadmapId:guid}", async Task<IResult> (
+    Guid projectId,
+    Guid roadmapId,
+    UpdateRoadmapRequest request,
+    RoadmapService service,
+    CancellationToken cancellationToken) =>
+{
+    var errors = RequestValidation.Validate(request);
+    if (errors.Count > 0)
+    {
+        return ApiResponses.ValidationProblem(errors);
+    }
+
+    try
+    {
+        var result = await service.UpdateAsync(projectId, roadmapId, request, cancellationToken);
+        return result is null ? ApiResponses.NotFound("Project or roadmap was not found.") : Results.Ok(result);
+    }
+    catch (ArgumentException exception)
+    {
+        return ApiResponses.BadRequest(exception.Message);
+    }
+})
+.RequirePermission(Permission.GenerateRoadmap);
+
 projects.MapGet("/{projectId:guid}/onboarding-readiness", async Task<IResult> (
     Guid projectId,
     OnboardingReadinessService service,

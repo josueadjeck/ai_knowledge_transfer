@@ -37,6 +37,40 @@ public sealed class RoadmapService(
         return RoadmapMapper.ToResponse(roadmap);
     }
 
+    public async Task<RoadmapResponse?> UpdateAsync(Guid projectId, Guid roadmapId, UpdateRoadmapRequest request, CancellationToken cancellationToken)
+    {
+        var project = await projects.GetAsync(projectId, cancellationToken);
+        if (project is null)
+        {
+            return null;
+        }
+
+        var roadmap = project.Roadmaps.FirstOrDefault(roadmap => roadmap.Id == roadmapId);
+        if (roadmap is null)
+        {
+            return null;
+        }
+
+        var weeks = request.Weeks
+            .OrderBy(week => week.WeekNumber)
+            .Select(week => new RoadmapWeek(
+                week.WeekNumber,
+                week.Theme.Trim(),
+                Clean(week.LearningGoals),
+                Clean(week.Exercises),
+                Clean(week.AcceptanceCriteria),
+                Clean(week.ReviewNotes)))
+            .ToArray();
+
+        roadmap.UpdateWeeks(weeks);
+        await projects.SaveChangesAsync(cancellationToken);
+        await _auditLog.AppendAsync(
+            AuditEvent.Create(project.Id, "RoadmapUpdated", "system", "Roadmap", roadmap.Id, $"Roadmap for '{roadmap.TargetRole}' was updated."),
+            cancellationToken);
+
+        return RoadmapMapper.ToResponse(roadmap);
+    }
+
     private static RoadmapWeek CreateWeek(int weekNumber, string targetRole, int documentCount, RoadmapKnowledgeContext context)
     {
         return weekNumber switch
@@ -122,6 +156,14 @@ public sealed class RoadmapService(
     {
         return baseItems
             .Concat(approvedItems.Select(item => $"{prefix}: {item}."))
+            .ToArray();
+    }
+
+    private static IReadOnlyCollection<string> Clean(IReadOnlyCollection<string> values)
+    {
+        return values
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value.Trim())
             .ToArray();
     }
 

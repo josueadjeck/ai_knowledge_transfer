@@ -36,6 +36,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Knowledge items keep review history entries for submit, approve and reject actions.
 - Review summary endpoint and dashboard cards show counts by review status, quality status, type and final usable knowledge.
 - Roadmap generation that uses approved and verified knowledge as final content and marks other items as review notes.
+- Editable generated roadmap weeks with structured learning goals, exercises, acceptance criteria and review notes.
 - Onboarding readiness check for whether a project can start a supervised pilot onboarding.
 - Onboarding start package with first-week roadmap content, starter tasks and review warnings.
 - Markdown export for project handover documents.
@@ -123,6 +124,7 @@ The web UI can run the MVP workflow directly:
 - Set or automatically derive review quality status while submitting, approving or rejecting knowledge items.
 - Inspect the latest review history entries per knowledge item.
 - Generate a review-aware roadmap.
+- Edit generated roadmap weeks before using them for onboarding.
 - Inspect onboarding readiness before starting a new employee.
 - Inspect the onboarding start package for the first supervised onboarding steps.
 - Inspect roadmap weeks with learning goals, exercises, acceptance criteria and review notes.
@@ -348,6 +350,26 @@ Content-Type: application/json
 ```
 
 Generated roadmap weeks include `reviewNotes`. Only approved knowledge with `qualityStatus` `Verified` is added to learning goals and exercises where it fits; draft, in-review, rejected or not-yet-verified items remain visible as review notes.
+
+Edit a generated roadmap:
+
+```http
+PUT http://localhost:5256/api/projects/{projectId}/roadmaps/{roadmapId}
+Content-Type: application/json
+
+{
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "theme": "System overview and source review",
+      "learningGoals": ["Explain the system purpose."],
+      "exercises": ["Create a project brief."],
+      "acceptanceCriteria": ["Open questions are documented."],
+      "reviewNotes": ["Review with a senior engineer."]
+    }
+  ]
+}
+```
 
 Check onboarding readiness:
 

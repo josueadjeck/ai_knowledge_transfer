@@ -79,18 +79,17 @@ public sealed class RoadmapReadinessService
                     "Provider-independent extraction uses OpenAI when configured and heuristic fallback otherwise."
                 ],
                 []),
-            NeedsWork(
+            Ready(
                 5,
                 "Roadmap Generator",
-                5,
+                6,
                 6,
                 [
                     "Role and duration based roadmap generation exists and favors approved verified knowledge.",
-                    "Onboarding readiness and start package are available for pilot onboarding."
+                    "Onboarding readiness and start package are available for pilot onboarding.",
+                    "Editable roadmap structure is implemented through API and Blazor UI for generated roadmap weeks."
                 ],
-                [
-                    "Roadmaps are previewed and stored, but editing generated roadmap structure is not yet implemented."
-                ]),
+                []),
             NeedsWork(
                 6,
                 "Review und Freigabe",

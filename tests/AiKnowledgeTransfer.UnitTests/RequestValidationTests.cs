@@ -68,6 +68,20 @@ public sealed class RequestValidationTests
     }
 
     [Fact]
+    public void Validate_update_roadmap_requires_structured_week_content()
+    {
+        var errors = RequestValidation.Validate(new UpdateRoadmapRequest(
+        [
+            new UpdateRoadmapWeekRequest(1, "", [], [], [], [])
+        ]));
+
+        Assert.Contains("Weeks[1].Theme", errors.Keys);
+        Assert.Contains("Weeks[1].LearningGoals", errors.Keys);
+        Assert.Contains("Weeks[1].Exercises", errors.Keys);
+        Assert.Contains("Weeks[1].AcceptanceCriteria", errors.Keys);
+    }
+
+    [Fact]
     public void Validate_review_requires_reviewer_and_comment()
     {
         var errors = RequestValidation.Validate(new ReviewKnowledgeItemRequest("", ""));

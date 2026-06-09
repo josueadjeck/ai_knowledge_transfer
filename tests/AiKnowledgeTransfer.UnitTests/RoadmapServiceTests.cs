@@ -588,6 +588,59 @@ public sealed class RoadmapServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_persists_edited_roadmap_weeks()
+    {
+        var repository = new InMemoryProjectRepository();
+        var storage = new LocalFileStorage(Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-tests"));
+        var projectService = new ProjectService(repository, storage);
+        var roadmapService = new RoadmapService(repository);
+
+        var project = await projectService.CreateAsync(
+            new CreateProjectRequest("Editable Roadmap Project", "Roadmap editing test", "Engineering"),
+            CancellationToken.None);
+
+        var roadmap = await roadmapService.GenerateAsync(
+            project.Id,
+            new GenerateRoadmapRequest("Support Engineer", 2),
+            CancellationToken.None);
+
+        Assert.NotNull(roadmap);
+
+        var update = new UpdateRoadmapRequest(
+        [
+            new UpdateRoadmapWeekRequest(
+                1,
+                "Edited system overview",
+                ["Edited learning goal"],
+                ["Edited exercise"],
+                ["Edited acceptance criterion"],
+                ["Edited review note"]),
+            new UpdateRoadmapWeekRequest(
+                2,
+                "Edited architecture",
+                ["Architecture learning goal"],
+                ["Architecture exercise"],
+                ["Architecture acceptance criterion"],
+                [])
+        ]);
+
+        var updated = await roadmapService.UpdateAsync(project.Id, roadmap.Id, update, CancellationToken.None);
+
+        Assert.NotNull(updated);
+        var firstWeek = updated.Weeks.Single(week => week.WeekNumber == 1);
+        Assert.Equal("Edited system overview", firstWeek.Theme);
+        Assert.Equal(["Edited learning goal"], firstWeek.LearningGoals);
+        Assert.Equal(["Edited exercise"], firstWeek.Exercises);
+        Assert.Equal(["Edited acceptance criterion"], firstWeek.AcceptanceCriteria);
+        Assert.Equal(["Edited review note"], firstWeek.ReviewNotes);
+
+        var reloaded = await projectService.GetAsync(project.Id, CancellationToken.None);
+        Assert.NotNull(reloaded);
+        var reloadedWeek = reloaded.Roadmaps.Single(item => item.Id == roadmap.Id).Weeks.Single(week => week.WeekNumber == 1);
+        Assert.Equal("Edited system overview", reloadedWeek.Theme);
+    }
+
+    [Fact]
     public async Task ExportProjectAsync_creates_markdown_with_sources_knowledge_and_roadmap()
     {
         var repository = new InMemoryProjectRepository();

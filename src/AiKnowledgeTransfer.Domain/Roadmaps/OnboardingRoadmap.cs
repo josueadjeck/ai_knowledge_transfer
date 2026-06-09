@@ -57,6 +57,36 @@ public sealed class OnboardingRoadmap
 
     public IReadOnlyCollection<RoadmapWeek> Weeks => _weeks;
 
+    public void UpdateWeeks(IEnumerable<RoadmapWeek> weeks)
+    {
+        var updatedWeeks = weeks
+            .OrderBy(week => week.WeekNumber)
+            .ToList();
+
+        if (updatedWeeks.Count != DurationInWeeks)
+        {
+            throw new ArgumentException("Week count must match duration.", nameof(weeks));
+        }
+
+        if (updatedWeeks.Select(week => week.WeekNumber).Distinct().Count() != updatedWeeks.Count)
+        {
+            throw new ArgumentException("Week numbers must be unique.", nameof(weeks));
+        }
+
+        if (updatedWeeks.Any(week => week.WeekNumber <= 0))
+        {
+            throw new ArgumentException("Week numbers must be greater than zero.", nameof(weeks));
+        }
+
+        if (!updatedWeeks.Select(week => week.WeekNumber).SequenceEqual(Enumerable.Range(1, DurationInWeeks)))
+        {
+            throw new ArgumentException("Week numbers must match the roadmap duration.", nameof(weeks));
+        }
+
+        _weeks.Clear();
+        _weeks.AddRange(updatedWeeks);
+    }
+
     public static OnboardingRoadmap Rehydrate(
         Guid id,
         string targetRole,

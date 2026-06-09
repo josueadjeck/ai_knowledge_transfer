@@ -530,34 +530,75 @@
                     <div>
                         <strong>@roadmap.TargetRole</strong>
                         <span>@roadmap.DurationInWeeks Wochen, @roadmap.Status</span>
+                        <div class="button-row">
+                            <button @onclick="() => StartRoadmapEdit(roadmap)" disabled="@(!Can(Permission.GenerateRoadmap))">Bearbeiten</button>
+                            @if (_roadmapEdits.ContainsKey(roadmap.Id))
+                            {
+                                <button class="primary-action" @onclick="() => SaveRoadmapEditAsync(roadmap.Id)" disabled="@(!Can(Permission.GenerateRoadmap))">Speichern</button>
+                                <button @onclick="() => CancelRoadmapEdit(roadmap.Id)">Abbrechen</button>
+                            }
+                        </div>
                         <details class="roadmap-preview">
                             <summary>Roadmap anzeigen</summary>
-                            @foreach (var week in roadmap.Weeks.OrderBy(week => week.WeekNumber))
+                            @if (_roadmapEdits.TryGetValue(roadmap.Id, out var editModel))
                             {
-                                <article>
-                                    <header>
-                                        <span>Woche @week.WeekNumber</span>
-                                        <strong>@week.Theme</strong>
-                                    </header>
-                                    <div class="roadmap-week-grid">
-                                        <section>
-                                            <h3>Lernziele</h3>
-                                            @RenderRoadmapItems(week.LearningGoals)
-                                        </section>
-                                        <section>
-                                            <h3>Uebungen</h3>
-                                            @RenderRoadmapItems(week.Exercises)
-                                        </section>
-                                        <section>
-                                            <h3>Abschluss</h3>
-                                            @RenderRoadmapItems(week.AcceptanceCriteria)
-                                        </section>
-                                        <section>
-                                            <h3>Review-Hinweise</h3>
-                                            @RenderRoadmapItems(week.ReviewNotes)
-                                        </section>
-                                    </div>
-                                </article>
+                                @foreach (var week in editModel.Weeks.OrderBy(week => week.WeekNumber))
+                                {
+                                    <article>
+                                        <header>
+                                            <span>Woche @week.WeekNumber</span>
+                                            <input @bind="week.Theme" />
+                                        </header>
+                                        <div class="roadmap-week-grid">
+                                            <label>
+                                                Lernziele
+                                                <textarea @bind="week.LearningGoalsText"></textarea>
+                                            </label>
+                                            <label>
+                                                Uebungen
+                                                <textarea @bind="week.ExercisesText"></textarea>
+                                            </label>
+                                            <label>
+                                                Abschluss
+                                                <textarea @bind="week.AcceptanceCriteriaText"></textarea>
+                                            </label>
+                                            <label>
+                                                Review-Hinweise
+                                                <textarea @bind="week.ReviewNotesText"></textarea>
+                                            </label>
+                                        </div>
+                                    </article>
+                                }
+                            }
+                            else
+                            {
+                                @foreach (var week in roadmap.Weeks.OrderBy(week => week.WeekNumber))
+                                {
+                                    <article>
+                                        <header>
+                                            <span>Woche @week.WeekNumber</span>
+                                            <strong>@week.Theme</strong>
+                                        </header>
+                                        <div class="roadmap-week-grid">
+                                            <section>
+                                                <h3>Lernziele</h3>
+                                                @RenderRoadmapItems(week.LearningGoals)
+                                            </section>
+                                            <section>
+                                                <h3>Uebungen</h3>
+                                                @RenderRoadmapItems(week.Exercises)
+                                            </section>
+                                            <section>
+                                                <h3>Abschluss</h3>
+                                                @RenderRoadmapItems(week.AcceptanceCriteria)
+                                            </section>
+                                            <section>
+                                                <h3>Review-Hinweise</h3>
+                                                @RenderRoadmapItems(week.ReviewNotes)
+                                            </section>
+                                        </div>
+                                    </article>
+                                }
                             }
                         </details>
                     </div>
@@ -1181,6 +1222,7 @@
     private KnowledgeReviewSummaryResponse? _reviewSummary;
     private OnboardingReadinessResponse? _onboardingReadiness;
     private OnboardingStartPackageResponse? _onboardingStartPackage;
+    private Dictionary<Guid, RoadmapEditModel> _roadmapEdits = [];
     private HealthResponse? _health;
     private ReleaseReadinessResponse? _releaseReadiness;
     private RuntimeMetricsResponse? _runtimeMetrics;
@@ -1558,6 +1600,42 @@
         });
     }
 
+    private void StartRoadmapEdit(RoadmapResponse roadmap)
+    {
+        _roadmapEdits[roadmap.Id] = RoadmapEditModel.FromResponse(roadmap);
+        SetStatus("Roadmap-Bearbeitung gestartet", roadmap.TargetRole);
+    }
+
+    private void CancelRoadmapEdit(Guid roadmapId)
+    {
+        _roadmapEdits.Remove(roadmapId);
+        SetStatus("Roadmap-Bearbeitung verworfen", "Keine Aenderungen gespeichert.");
+    }
+
+    private async Task SaveRoadmapEditAsync(Guid roadmapId)
+    {
+        if (_selectedProject is null || !Can(Permission.GenerateRoadmap) || !_roadmapEdits.TryGetValue(roadmapId, out var editModel))
+        {
+            return;
+        }
+
+        var request = editModel.ToRequest();
+        var errors = RequestValidation.Validate(request);
+        if (errors.Count > 0)
+        {
+            SetStatus("Roadmap unvollstaendig", ToValidationMessage(errors), isError: true);
+            return;
+        }
+
+        await RunSafelyAsync("Roadmap speichern", async () =>
+        {
+            var updated = await Roadmaps.UpdateAsync(_selectedProject.Id, roadmapId, request, CancellationToken.None);
+            _roadmapEdits.Remove(roadmapId);
+            await LoadSelectedProjectAsync();
+            SetStatus("Roadmap gespeichert", updated?.TargetRole ?? "Roadmap");
+        });
+    }
+
     private async Task LoadTraceabilityAsync()
     {
         if (_selectedProject is null || !Can(Permission.ViewTraceability))
@@ -1853,6 +1931,7 @@
         _wordExport = null;
         _exportHistory = [];
         _exportApprovals = [];
+        _roadmapEdits = [];
         _lastAnalysis = null;
         _lastExtraction = null;
         _auditEvents = [];
@@ -2275,4 +2354,75 @@
     }
 
     private sealed record ExportPreviewSection(string Title, string Preview);
+
+    private sealed class RoadmapEditModel
+    {
+        public List<RoadmapWeekEditModel> Weeks { get; } = [];
+
+        public static RoadmapEditModel FromResponse(RoadmapResponse roadmap)
+        {
+            var model = new RoadmapEditModel();
+            model.Weeks.AddRange(roadmap.Weeks.OrderBy(week => week.WeekNumber).Select(RoadmapWeekEditModel.FromResponse));
+            return model;
+        }
+
+        public UpdateRoadmapRequest ToRequest()
+        {
+            return new UpdateRoadmapRequest(Weeks
+                .OrderBy(week => week.WeekNumber)
+                .Select(week => week.ToRequest())
+                .ToArray());
+        }
+    }
+
+    private sealed class RoadmapWeekEditModel
+    {
+        public int WeekNumber { get; init; }
+
+        public string Theme { get; set; } = string.Empty;
+
+        public string LearningGoalsText { get; set; } = string.Empty;
+
+        public string ExercisesText { get; set; } = string.Empty;
+
+        public string AcceptanceCriteriaText { get; set; } = string.Empty;
+
+        public string ReviewNotesText { get; set; } = string.Empty;
+
+        public static RoadmapWeekEditModel FromResponse(RoadmapWeekResponse week)
+        {
+            return new RoadmapWeekEditModel
+            {
+                WeekNumber = week.WeekNumber,
+                Theme = week.Theme,
+                LearningGoalsText = ToLines(week.LearningGoals),
+                ExercisesText = ToLines(week.Exercises),
+                AcceptanceCriteriaText = ToLines(week.AcceptanceCriteria),
+                ReviewNotesText = ToLines(week.ReviewNotes)
+            };
+        }
+
+        public UpdateRoadmapWeekRequest ToRequest()
+        {
+            return new UpdateRoadmapWeekRequest(
+                WeekNumber,
+                Theme,
+                FromLines(LearningGoalsText),
+                FromLines(ExercisesText),
+                FromLines(AcceptanceCriteriaText),
+                FromLines(ReviewNotesText));
+        }
+
+        private static string ToLines(IReadOnlyCollection<string> values)
+        {
+            return string.Join(Environment.NewLine, values);
+        }
+
+        private static IReadOnlyCollection<string> FromLines(string value)
+        {
+            return value
+                .Replace("\r\n", "\n", StringComparison.Ordinal)
+                .Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        }
+    }
 }
