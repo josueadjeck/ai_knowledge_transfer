@@ -278,6 +278,29 @@ public sealed class ReleaseReadinessServiceTests
     }
 
     [Fact]
+    public void GetStatus_passes_tenant_isolation_for_dedicated_deployment_boundary()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            tenancy: new TenantOptions(
+                "SingleTenant",
+                "tenant_id",
+                "customer-a",
+                "DedicatedDeployment",
+                "Operations"))
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Tenant isolation review"
+            && check.Required
+            && check.Status == "Pass"
+            && check.Detail.Contains("Dedicated deployment", StringComparison.Ordinal));
+    }
+
+
+    [Fact]
     public void GetStatus_blocks_release_when_tenancy_mode_is_invalid()
     {
         var root = CreateRoot();
@@ -466,6 +489,8 @@ public sealed class ReleaseReadinessServiceTests
             tenancy.Mode,
             tenancy.TenantClaimType,
             tenancy.DefaultTenantId,
+            tenancy.BoundaryMode,
+            tenancy.BoundaryOwner,
             secretManagement.Mode,
             secretManagement.Provider,
             secretManagement.RotationOwner,

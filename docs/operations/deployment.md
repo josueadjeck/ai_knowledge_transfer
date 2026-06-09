@@ -39,6 +39,8 @@ For local MVP or pilot operation:
 ```powershell
 $env:AKT_PERSISTENCE_PROVIDER="Json"
 $env:AKT_TENANCY_MODE="SingleTenant"
+$env:AKT_TENANT_BOUNDARY_MODE="DedicatedDeployment"
+$env:AKT_TENANT_BOUNDARY_OWNER="Operations"
 ```
 
 For enterprise-style pilot operation:
@@ -52,6 +54,8 @@ $env:AKT_AUTH_MODE="Oidc"
 $env:AKT_AUTH_AUTHORITY="https://login.microsoftonline.com/<tenant-id>/v2.0"
 $env:AKT_AUTH_CLIENT_ID="<application-client-id>"
 $env:AKT_AUTH_ROLE_CLAIM="roles"
+$env:AKT_TENANT_BOUNDARY_MODE="DedicatedDeployment"
+$env:AKT_TENANT_BOUNDARY_OWNER="Operations"
 $env:AKT_SECRET_STORE_MODE="SecretStore"
 $env:AKT_SECRET_STORE_PROVIDER="AzureKeyVault"
 $env:AKT_SECRET_ROTATION_OWNER="Operations"
@@ -109,4 +113,4 @@ The concrete slot implementation remains platform-specific. Use the target hosti
 
 ## Current Limits
 
-The MVP deployment baseline generates build artifact file hashes, SPDX dependency SBOM, CycloneDX build SBOM and container provenance, validates registry-backed image signing policy metadata, validates secret-store release metadata and supports a blue/green release-readiness mode, but does not yet provide platform-specific registry push/sign/verify automation, external SBOM attestation storage and retention, automated provider-specific secret retrieval or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.
+The MVP deployment baseline generates build artifact file hashes, SPDX dependency SBOM, CycloneDX build SBOM and container provenance, validates registry-backed image signing policy metadata, validates secret-store release metadata, supports a blue/green release-readiness mode and supports dedicated single-tenant deployment isolation. It does not yet provide platform-specific registry push/sign/verify automation, external SBOM attestation storage and retention, automated provider-specific secret retrieval or shared multi-tenant production storage.

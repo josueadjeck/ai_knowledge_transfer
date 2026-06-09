@@ -250,7 +250,7 @@ The Blazor workflow shows the active authentication mode. The demo role selector
 
 ## Tenancy configuration
 
-The MVP defaults to `SingleTenant`. Multi-tenant operation is planned, but complete tenant isolation still needs dedicated work across persistence, storage, audit, backup, API authorization and UI filtering. See `docs/decisions/0002-tenancy-strategy.md`.
+The MVP defaults to `SingleTenant`. Release-ready tenant isolation is modeled as a dedicated deployment boundary: one deployment, storage root, database, backup scope and release owner per customer or tenant boundary. Multi-tenant operation remains a future mode that requires additional implementation across persistence, storage, audit, backup, API authorization and UI filtering. See `docs/decisions/0002-tenancy-strategy.md`.
 
 Optional environment variables:
 
@@ -258,9 +258,11 @@ Optional environment variables:
 $env:AKT_TENANCY_MODE="SingleTenant"
 $env:AKT_TENANT_CLAIM="tenant_id"
 $env:AKT_DEFAULT_TENANT_ID="default"
+$env:AKT_TENANT_BOUNDARY_MODE="DedicatedDeployment"
+$env:AKT_TENANT_BOUNDARY_OWNER="Operations"
 ```
 
-Health reports the active tenancy mode. Release readiness warns on `SingleTenant`, requires tenant-isolation review for `MultiTenant` and fails on invalid tenancy configuration. Review `GET /api/operations/tenant-isolation-review` before serving more than one tenant.
+Health reports the active tenancy mode and boundary metadata. Release readiness passes tenant isolation for `SingleTenant` only when `DedicatedDeployment` boundary metadata has an owner, requires tenant-isolation review for `MultiTenant` and fails on invalid tenancy configuration. Review `GET /api/operations/tenant-isolation-review` before serving more than one tenant.
 
 ## API examples
 

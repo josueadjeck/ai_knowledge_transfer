@@ -72,6 +72,8 @@ public static class DependencyInjection
             tenancy.Mode,
             tenancy.TenantClaimType,
             tenancy.DefaultTenantId,
+            tenancy.BoundaryMode,
+            tenancy.BoundaryOwner,
             secretManagement.Mode,
             secretManagement.Provider,
             secretManagement.RotationOwner,

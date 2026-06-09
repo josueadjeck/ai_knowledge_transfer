@@ -58,9 +58,9 @@ Backups contain project data, audit logs and uploaded files. They must be stored
 
 ## Tenancy
 
-The MVP defaults to `SingleTenant`. Multi-tenant mode is visible as configuration and release-readiness metadata, but complete tenant isolation still requires dedicated implementation across persistence, storage, audit, backup, API authorization, UI filtering and exports.
+The MVP defaults to `SingleTenant`. Release-ready tenant isolation is achieved through a dedicated deployment boundary: one deployment, storage root, database, backup scope and release owner per customer or tenant boundary. Multi-tenant mode is visible as configuration and release-readiness metadata, but shared multi-tenant isolation still requires dedicated implementation across persistence, storage, audit, backup, API authorization, UI filtering and exports.
 
-Use `GET /api/operations/tenant-isolation-review` before release. Until all isolation areas are implemented and verified, one deployment should serve one customer or one agreed data boundary.
+Use `GET /api/operations/tenant-isolation-review` before release. Set `AKT_TENANT_BOUNDARY_MODE=DedicatedDeployment` and `AKT_TENANT_BOUNDARY_OWNER` before claiming release-ready tenant isolation. Until shared isolation areas are implemented and verified, one deployment should serve one customer or one agreed data boundary.
 
 ## Data Protection Review Checklist
 
@@ -72,7 +72,7 @@ Before a supervised pilot starts, confirm:
 - Required secrets are managed according to `docs/security/secret-management.md`.
 - Backup storage and retention are defined.
 - Export handling and external sharing rules are defined.
-- Tenant boundary assumptions are documented.
+- Tenant boundary assumptions are documented and the dedicated deployment owner is configured.
 - Residual risks are reviewed by the release owner.
 
 ## Current Gaps
@@ -80,5 +80,5 @@ Before a supervised pilot starts, confirm:
 - No automated retention or deletion workflow.
 - No built-in encryption key management beyond hosting platform controls.
 - No full data processing agreement workflow.
-- No complete multi-tenant isolation.
+- No complete shared multi-tenant isolation.
 - No enterprise DLP integration.

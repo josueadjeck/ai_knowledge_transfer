@@ -4,7 +4,7 @@ This document describes the current MVP security baseline and the controls that 
 
 ## Scope
 
-The platform stores technical onboarding knowledge, source references, review decisions, exports, operational audit events and uploaded documents. The MVP is suitable for controlled pilots, but production enterprise use still requires external identity, hardened hosting, tenant isolation decisions and customer-specific data protection review.
+The platform stores technical onboarding knowledge, source references, review decisions, exports, operational audit events and uploaded documents. The MVP is suitable for controlled pilots and dedicated single-tenant deployments, but shared multi-tenant production use still requires external identity, hardened hosting, tenant isolation implementation and customer-specific data protection review.
 
 ## Identity and Access
 
@@ -76,7 +76,7 @@ Key project, document, knowledge, review, export, traceability and operations ac
 ## Current Limitations
 
 - Demo authentication is not acceptable for enterprise production.
-- Full tenant isolation is planned but not implemented end to end.
+- Dedicated single-tenant deployment isolation is supported; shared multi-tenant isolation is planned but not implemented end to end.
 - Local file storage is suitable for controlled pilots, not for hardened multi-node production.
 - CI static source scanning and secret scanning are baselines, not replacements for enterprise security tooling.
 - Platform-specific registry push/sign/verify automation, external SBOM attestation storage and retention, automated provider-specific secret retrieval and enterprise SAST remain follow-up work.

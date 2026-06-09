@@ -19,12 +19,15 @@ Tenancy is introduced as an explicit operational configuration:
 - `AKT_TENANCY_MODE`: `SingleTenant` or `MultiTenant`
 - `AKT_TENANT_CLAIM`: claim used for tenant resolution in future OIDC-backed multi-tenant mode
 - `AKT_DEFAULT_TENANT_ID`: default tenant id for single-tenant MVP data
+- `AKT_TENANT_BOUNDARY_MODE`: `DedicatedDeployment` for release-ready single-tenant isolation
+- `AKT_TENANT_BOUNDARY_OWNER`: accountable owner for the dedicated deployment boundary
 
-Health reports the active tenancy mode. Release readiness warns when `SingleTenant` mode is active and fails on invalid tenancy configuration. This makes the future migration path visible without pretending that full isolation already exists.
+Health reports the active tenancy mode and boundary metadata. Release readiness passes tenant isolation for `SingleTenant` only when a dedicated deployment boundary and owner are configured. It still requires manual review for `MultiTenant` and fails on invalid tenancy configuration. This makes the future migration path visible without pretending that full shared multi-tenant isolation already exists.
 
 ## Consequences
 
 - MVP setup remains easy and local.
 - Enterprise deployments get an explicit readiness signal for tenancy.
-- Future multi-tenant work must add tenant ids to aggregates, database records, audit events, file storage paths, backup scope, API authorization and UI filtering.
-- Until that work is complete, `MultiTenant` is a planned operating mode, not a complete isolation guarantee.
+- Current release-ready isolation is one deployment per customer or tenant boundary.
+- Future shared multi-tenant work must add tenant ids to aggregates, database records, audit events, file storage paths, backup scope, API authorization and UI filtering.
+- Until that work is complete, `MultiTenant` is a planned operating mode, not a complete shared isolation guarantee.

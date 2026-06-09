@@ -200,6 +200,8 @@ public sealed class OperationalHealthService
     {
         var isSingleTenant = _options.TenancyMode.Equals("SingleTenant", StringComparison.OrdinalIgnoreCase);
         var isMultiTenant = _options.TenancyMode.Equals("MultiTenant", StringComparison.OrdinalIgnoreCase);
+        var isDedicatedDeployment = _options.TenantBoundaryMode.Equals("DedicatedDeployment", StringComparison.OrdinalIgnoreCase);
+        var boundaryOwnerConfigured = !string.IsNullOrWhiteSpace(_options.TenantBoundaryOwner);
         var isConfigured = (isSingleTenant || isMultiTenant)
             && !string.IsNullOrWhiteSpace(_options.TenantClaimType)
             && !string.IsNullOrWhiteSpace(_options.DefaultTenantId);
@@ -217,7 +219,10 @@ public sealed class OperationalHealthService
                 ["mode"] = _options.TenancyMode,
                 ["tenantClaimType"] = _options.TenantClaimType,
                 ["defaultTenantId"] = _options.DefaultTenantId,
-                ["multiTenantEnabled"] = isMultiTenant.ToString()
+                ["multiTenantEnabled"] = isMultiTenant.ToString(),
+                ["boundaryMode"] = _options.TenantBoundaryMode,
+                ["dedicatedDeploymentBoundary"] = (isSingleTenant && isDedicatedDeployment && boundaryOwnerConfigured).ToString(),
+                ["boundaryOwnerConfigured"] = boundaryOwnerConfigured.ToString()
             });
     }
 

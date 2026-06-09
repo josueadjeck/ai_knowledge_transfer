@@ -33,6 +33,24 @@ public sealed class TenantIsolationReviewServiceTests
     }
 
     [Fact]
+    public void GetReview_passes_single_tenant_dedicated_deployment_boundary()
+    {
+        var service = new TenantIsolationReviewService(new TenantOptions(
+            "SingleTenant",
+            "tenant_id",
+            "customer-a",
+            "DedicatedDeployment",
+            "Operations"));
+
+        var review = service.GetReview();
+
+        Assert.Equal("Pass", review.Status);
+        Assert.Equal(0, review.ManualAreaCount);
+        Assert.Contains(review.Areas, area => area.Area == "Persistence records" && area.Status == "Pass");
+        Assert.Contains(review.Notes, note => note.Contains("dedicated deployment boundary", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void GetReview_blocks_invalid_tenancy_configuration()
     {
         var service = new TenantIsolationReviewService(new TenantOptions("Shared", "tenant_id", "default"));

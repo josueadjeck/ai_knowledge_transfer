@@ -341,10 +341,16 @@ public sealed class ReleaseReadinessService(
 
         return new ReleaseReadinessCheckResponse(
             "Tenant isolation review",
-            review.Status == "Blocked" ? "Fail" : "Manual",
+            review.Status == "Blocked"
+                ? "Fail"
+                : review.Status == "Pass"
+                    ? "Pass"
+                    : "Manual",
             Required: true,
             review.Status == "SingleTenant"
                 ? "Single-tenant MVP mode is accepted only for one customer or one isolated deployment."
+                : review.Status == "Pass"
+                    ? "Dedicated deployment tenant boundary is configured."
                 : "Review tenant isolation areas before release.",
             $"Status: {review.Status}, manual areas: {review.ManualAreaCount}, endpoint: /api/operations/tenant-isolation-review");
     }

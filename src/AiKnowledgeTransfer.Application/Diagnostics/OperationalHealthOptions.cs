@@ -24,6 +24,8 @@ public sealed record OperationalHealthOptions(
     string TenancyMode,
     string TenantClaimType,
     string DefaultTenantId,
+    string TenantBoundaryMode = "Unspecified",
+    string? TenantBoundaryOwner = null,
     string SecretStoreMode = "Environment",
     string? SecretStoreProvider = null,
     string? SecretRotationOwner = null,

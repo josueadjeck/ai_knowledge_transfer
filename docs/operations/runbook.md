@@ -34,6 +34,7 @@ Expected result:
 - Persistence is configured.
 - Database schema mode is visible when database persistence is active.
 - Database provider is reviewed: SQLite for local pilots, SQL Server or PostgreSQL for production-like deployments.
+- Tenant boundary mode is reviewed: dedicated single-tenant deployment for release-ready customer isolation, manual review for shared multi-tenant mode.
 - AI provider is either configured or the fallback decision is accepted.
 - Monitoring summary is `ok` or contains only accepted manual release-review signals.
 - Roadmap readiness identifies no unexpected gaps for the release scope.
@@ -69,7 +70,7 @@ Current required checks cover runtime health, persistence configuration, authent
 Database mode with `AKT_DB_SCHEMA_MODE=Migrations` applies managed EF migrations. `EnsureCreated` remains available for local MVP runs but appears as a warning for release review.
 
 The `Role permission review` check is manual. Review `GET /api/security/role-review` and confirm critical permissions, non-admin assignments and identity-provider role-claim mapping are accepted for the release.
-The `Tenant isolation review` check is manual. Review `GET /api/operations/tenant-isolation-review`; `MultiTenant` mode must not serve multiple customers until persistence, storage, audit, backup, API, UI and export isolation are verified.
+The `Tenant isolation review` check passes for `SingleTenant` only when `AKT_TENANT_BOUNDARY_MODE=DedicatedDeployment` and `AKT_TENANT_BOUNDARY_OWNER` are configured. `MultiTenant` mode must not serve multiple customers until persistence, storage, audit, backup, API, UI and export isolation are verified.
 The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `build-artifact-inventory.json`, `dotnet-package-inventory.json`, `sbom.spdx.json`, `cyclonedx-build-sbom.json`, `vulnerable-packages.json`, `static-source-scan.json`, `container-policy-scan.json`, `container-vulnerability-scan-api.json`, `container-vulnerability-scan-web.json`, `container-images.json`, `container-provenance.json` and `container-signing-policy.json` are present for the release candidate.
 The `Security and data protection review` check is manual. Review the concepts under `docs/security` and document accepted residual risks for the target deployment.
 The `Secret management review` check is manual for environment-based local runs. In `SecretStore` mode it passes only when provider and rotation-owner metadata are configured, and fails if either is missing.

@@ -12,7 +12,9 @@ public sealed class TenantIsolationReviewService(TenantOptions options)
             ? "Blocked"
             : options.IsMultiTenant
                 ? "NeedsReview"
-                : "SingleTenant";
+                : options.IsDedicatedDeploymentBoundary
+                    ? "Pass"
+                    : "SingleTenant";
         var manualAreaCount = areas.Count(area => area.Status.Equals("Manual", StringComparison.OrdinalIgnoreCase));
 
         return new TenantIsolationReviewResponse(
@@ -41,7 +43,7 @@ public sealed class TenantIsolationReviewService(TenantOptions options)
         yield return new TenantIsolationAreaResponse(
             "Configuration",
             "Pass",
-            $"Mode {options.Mode}, tenant claim {options.TenantClaimType}, default tenant {options.DefaultTenantId}.");
+            $"Mode {options.Mode}, tenant claim {options.TenantClaimType}, default tenant {options.DefaultTenantId}, boundary mode {options.BoundaryMode}.");
 
         foreach (var area in new[]
         {
@@ -54,6 +56,15 @@ public sealed class TenantIsolationReviewService(TenantOptions options)
             "Exports"
         })
         {
+            if (options.IsSingleTenant && options.IsDedicatedDeploymentBoundary)
+            {
+                yield return new TenantIsolationAreaResponse(
+                    area,
+                    "Pass",
+                    $"Dedicated deployment boundary is configured and owned by {options.BoundaryOwner}; this deployment serves one tenant or customer boundary.");
+                continue;
+            }
+
             yield return new TenantIsolationAreaResponse(
                 area,
                 options.IsMultiTenant ? "Manual" : "Planned",
@@ -78,7 +89,14 @@ public sealed class TenantIsolationReviewService(TenantOptions options)
             yield break;
         }
 
+        if (options.IsDedicatedDeploymentBoundary)
+        {
+            yield return "SingleTenant mode is isolated by a dedicated deployment boundary.";
+            yield return "Use a separate deployment, storage root, database, backup scope and release approval per customer or tenant boundary.";
+            yield break;
+        }
+
         yield return "SingleTenant mode is the supported MVP operating mode.";
-        yield return "Use one deployment per customer or tenant until full multi-tenant isolation is implemented.";
+        yield return "Set AKT_TENANT_BOUNDARY_MODE=DedicatedDeployment and AKT_TENANT_BOUNDARY_OWNER before claiming release-ready tenant isolation.";
     }
 }

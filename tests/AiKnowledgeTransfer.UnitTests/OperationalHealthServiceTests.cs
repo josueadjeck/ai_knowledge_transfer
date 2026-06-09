@@ -52,7 +52,8 @@ public sealed class OperationalHealthServiceTests
         Assert.Contains(health.Components, component =>
             component.Name == "tenancy"
             && component.Status == "ok"
-            && component.Metadata["mode"] == "SingleTenant");
+            && component.Metadata["mode"] == "SingleTenant"
+            && component.Metadata["boundaryMode"] == "Unspecified");
         Assert.Contains(health.Components, component =>
             component.Name == "secretManagement"
             && component.Status == "ok"
@@ -219,6 +220,48 @@ public sealed class OperationalHealthServiceTests
             && component.Status == "ok"
             && component.Metadata["multiTenantEnabled"] == "True");
     }
+
+    [Fact]
+    public void GetStatus_reports_dedicated_deployment_tenant_boundary()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-health-tests", Guid.NewGuid().ToString("N"));
+        var options = new OperationalHealthOptions(
+            root,
+            Path.Combine(root, "uploads"),
+            Path.Combine(root, "projects.json"),
+            Path.Combine(root, "audit-log.json"),
+            "Json",
+            null,
+            null,
+            "EnsureCreated",
+            "OpenAI",
+            "gpt-5.4-mini",
+            "https://api.openai.com/v1/",
+            AiApiKeyConfigured: false,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
+            "Demo",
+            null,
+            null,
+            "role",
+            "SingleTenant",
+            "tenant_id",
+            "customer-a",
+            TenantBoundaryMode: "DedicatedDeployment",
+            TenantBoundaryOwner: "Operations");
+        var service = new OperationalHealthService(options);
+
+        var health = service.GetStatus("TestService");
+
+        Assert.Contains(health.Components, component =>
+            component.Name == "tenancy"
+            && component.Status == "ok"
+            && component.Metadata["dedicatedDeploymentBoundary"] == "True"
+            && component.Metadata["boundaryOwnerConfigured"] == "True");
+    }
+
 
     [Fact]
     public void GetStatus_reports_invalid_tenancy_mode_as_degraded()
