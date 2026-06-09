@@ -20,6 +20,7 @@ public sealed class OperationalHealthService
             GetProjectStoreComponent(),
             GetAuditLogComponent(),
             GetAuthComponent(),
+            GetTenancyComponent(),
             GetAiProviderComponent(),
             GetAnalysisLimitsComponent(),
             GetExtractionLimitsComponent()
@@ -189,6 +190,31 @@ public sealed class OperationalHealthService
             {
                 ["maxChunksPerDocument"] = _options.MaxAnalysisChunksPerDocument.ToString(),
                 ["maxExtractedCharacters"] = _options.MaxAnalysisExtractedCharacters.ToString()
+            });
+    }
+
+    private HealthComponentResponse GetTenancyComponent()
+    {
+        var isSingleTenant = _options.TenancyMode.Equals("SingleTenant", StringComparison.OrdinalIgnoreCase);
+        var isMultiTenant = _options.TenancyMode.Equals("MultiTenant", StringComparison.OrdinalIgnoreCase);
+        var isConfigured = (isSingleTenant || isMultiTenant)
+            && !string.IsNullOrWhiteSpace(_options.TenantClaimType)
+            && !string.IsNullOrWhiteSpace(_options.DefaultTenantId);
+
+        return new HealthComponentResponse(
+            "tenancy",
+            isConfigured ? "ok" : "error",
+            isMultiTenant
+                ? "Multi-tenant mode is configured."
+                : isSingleTenant
+                    ? "Single-tenant mode is active."
+                    : "Tenancy mode is invalid.",
+            new Dictionary<string, string>
+            {
+                ["mode"] = _options.TenancyMode,
+                ["tenantClaimType"] = _options.TenantClaimType,
+                ["defaultTenantId"] = _options.DefaultTenantId,
+                ["multiTenantEnabled"] = isMultiTenant.ToString()
             });
     }
 

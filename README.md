@@ -55,6 +55,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - MVP role permission matrix for Admin, Senior Engineer, Contributor and Viewer.
 - Identity resolution foundation for claim-based roles with the MVP role selector as a demo fallback.
 - API permission gates for project, document, review, roadmap, export, audit and operations endpoints.
+- Tenancy mode is explicit in health and release readiness; MVP defaults to single-tenant operation.
 - JSON-backed audit log for key project, document, knowledge, review, roadmap, traceability and export actions.
 - Health endpoint with local storage, persistence and AI provider configuration status.
 - Health output reports active persistence mode and database provider configuration.
@@ -210,6 +211,20 @@ $env:AKT_AUTH_ROLE_CLAIM="roles"
 When `AKT_AUTH_MODE=Oidc`, health and release-readiness checks require authority and client id to be configured. The API enables JWT bearer authentication in OIDC mode and validates issuer, audience and the configured role claim. Anonymous requests are denied by permission gates in OIDC mode; demo mode keeps the local Viewer fallback for workflow testing.
 Release readiness treats demo authentication as a warning: useful for local MVP work, but not sufficient for an enterprise deployment without a conscious release decision.
 The Blazor workflow shows the active authentication mode. The demo role selector is only available in demo mode; in OIDC mode, Web permissions are evaluated through the same authorization service as API permission gates. The Web app exposes `/auth/login` and `/auth/logout` for cookie-backed OIDC sign-in and sign-out.
+
+## Tenancy configuration
+
+The MVP defaults to `SingleTenant`. Multi-tenant operation is planned, but complete tenant isolation still needs dedicated work across persistence, storage, audit, backup, API authorization and UI filtering. See `docs/decisions/0002-tenancy-strategy.md`.
+
+Optional environment variables:
+
+```powershell
+$env:AKT_TENANCY_MODE="SingleTenant"
+$env:AKT_TENANT_CLAIM="tenant_id"
+$env:AKT_DEFAULT_TENANT_ID="default"
+```
+
+Health reports the active tenancy mode. Release readiness warns on `SingleTenant` and fails on invalid tenancy configuration.
 
 ## API examples
 

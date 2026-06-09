@@ -28,6 +28,7 @@ public static class DependencyInjection
         var databaseConnectionString = Environment.GetEnvironmentVariable("AKT_DB_CONNECTION_STRING");
         var databaseProviderName = Environment.GetEnvironmentVariable("AKT_DB_PROVIDER");
         var authentication = AuthenticationOptions.FromEnvironment();
+        var tenancy = TenantOptions.FromEnvironment();
         var documentAnalysisOptions = DocumentAnalysisOptions.FromEnvironment();
         var knowledgeExtractionOptions = KnowledgeExtractionOptions.FromEnvironment();
 
@@ -63,8 +64,12 @@ public static class DependencyInjection
             authentication.Mode,
             authentication.Authority,
             authentication.ClientId,
-            authentication.RoleClaimType));
+            authentication.RoleClaimType,
+            tenancy.Mode,
+            tenancy.TenantClaimType,
+            tenancy.DefaultTenantId));
         services.AddSingleton(authentication);
+        services.AddSingleton(tenancy);
         services.AddSingleton(documentAnalysisOptions);
         services.AddSingleton(knowledgeExtractionOptions);
         services.AddSingleton(new PersistenceBackupOptions(

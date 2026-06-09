@@ -84,12 +84,58 @@ public sealed class ReleaseReadinessServiceTests
             && check.Detail.Contains("OIDC authentication settings", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void GetStatus_warns_when_single_tenant_mode_is_active()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(root, aiApiKeyConfigured: true).GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Tenancy configuration"
+            && check.Status == "Warning"
+            && check.Detail.Contains("Single-tenant MVP mode", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_passes_when_multi_tenant_mode_is_configured()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            tenancy: new TenantOptions("MultiTenant", "tenant_id", "default"))
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Tenancy configuration"
+            && check.Status == "Pass"
+            && check.Detail.Contains("Multi-tenant mode", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_blocks_release_when_tenancy_mode_is_invalid()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            tenancy: new TenantOptions("Shared", "tenant_id", "default"))
+            .GetStatus("TestService");
+
+        Assert.Equal("Blocked", readiness.Status);
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Tenancy configuration"
+            && check.Status == "Fail");
+    }
+
     private static ReleaseReadinessService CreateService(
         string root,
         bool aiApiKeyConfigured,
-        AuthenticationOptions? authentication = null)
+        AuthenticationOptions? authentication = null,
+        TenantOptions? tenancy = null)
     {
         authentication ??= new AuthenticationOptions("Demo", null, null, "role");
+        tenancy ??= TenantOptions.Default;
         var health = new OperationalHealthService(new OperationalHealthOptions(
             root,
             Path.Combine(root, "uploads"),
@@ -109,7 +155,10 @@ public sealed class ReleaseReadinessServiceTests
             authentication.Mode,
             authentication.Authority,
             authentication.ClientId,
-            authentication.RoleClaimType));
+            authentication.RoleClaimType,
+            tenancy.Mode,
+            tenancy.TenantClaimType,
+            tenancy.DefaultTenantId));
         var backups = new PersistenceBackupService(CreateBackupOptions(root));
 
         return new ReleaseReadinessService(health, backups, authentication);

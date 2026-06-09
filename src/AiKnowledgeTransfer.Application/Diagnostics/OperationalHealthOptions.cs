@@ -19,4 +19,7 @@ public sealed record OperationalHealthOptions(
     string AuthMode,
     string? AuthAuthority,
     string? AuthClientId,
-    string AuthRoleClaimType);
+    string AuthRoleClaimType,
+    string TenancyMode,
+    string TenantClaimType,
+    string DefaultTenantId);

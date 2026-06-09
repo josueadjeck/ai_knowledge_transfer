@@ -182,6 +182,7 @@ Aktueller Implementierungsstand:
 - Betriebs-Grundlage ist erweitert: Health und Blazor-Operationsbereich zeigen die aktiven Analyse-Schutzgrenzen fuer grosse Dokumente.
 - UX-/API-Haertung ist erweitert: Analyseabbrueche durch Schutzgrenzen liefern einen stabilen Fehlercode und klare Handlungshinweise in API und Blazor-UI.
 - Performance-Grundlage ist erweitert: Knowledge Extraction hat konfigurierbare Schutzgrenzen vor AI-Provider-Aufrufen und meldet Limitverletzungen mit stabilem API-Fehlercode.
+- Mandantenfaehigkeit ist geplant: Tenancy-Modus, Tenant-Claim und Default-Tenant sind als Betriebsoptionen sichtbar; Health und Release-Readiness bewerten Single-/Multi-Tenant-Konfiguration.
 
 ### Phase 0: Produktklaerung
 

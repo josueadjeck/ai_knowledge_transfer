@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<TraceabilityService>();
         services.AddSingleton(DocumentAnalysisOptions.Default);
         services.AddSingleton(KnowledgeExtractionOptions.Default);
+        services.AddSingleton(TenantOptions.Default);
 
         return services;
     }

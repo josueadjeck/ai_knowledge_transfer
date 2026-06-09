@@ -21,6 +21,7 @@ public sealed class ReleaseReadinessService(
             BuildHealthCheck(healthStatus),
             BuildPersistenceCheck(healthStatus),
             BuildAuthenticationCheck(authentication),
+            BuildTenancyCheck(healthStatus),
             BuildBackupCheck(backupList),
             BuildAiProviderCheck(healthStatus),
             new(
@@ -129,6 +130,51 @@ public sealed class ReleaseReadinessService(
             Required: true,
             "OIDC authentication settings are configured.",
             $"Mode: {authentication.Mode}, role claim: {authentication.RoleClaimType}");
+    }
+
+    private static ReleaseReadinessCheckResponse BuildTenancyCheck(HealthResponse healthStatus)
+    {
+        var tenancy = healthStatus.Components.FirstOrDefault(component => component.Name == "tenancy");
+        if (tenancy is null)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Tenancy configuration",
+                "Fail",
+                Required: true,
+                "Tenancy health component is missing.",
+                "Expected health component: tenancy.");
+        }
+
+        var mode = tenancy.Metadata.TryGetValue("mode", out var configuredMode)
+            ? configuredMode
+            : "unknown";
+
+        if (tenancy.Status == "error")
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Tenancy configuration",
+                "Fail",
+                Required: true,
+                "Tenancy configuration is invalid.",
+                $"Mode: {mode}");
+        }
+
+        if (mode.Equals("MultiTenant", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Tenancy configuration",
+                "Pass",
+                Required: false,
+                "Multi-tenant mode is configured.",
+                $"Mode: {mode}");
+        }
+
+        return new ReleaseReadinessCheckResponse(
+            "Tenancy configuration",
+            "Warning",
+            Required: false,
+            "Single-tenant MVP mode is active; multi-tenant isolation must be designed before serving multiple customers.",
+            $"Mode: {mode}");
     }
 
     private static ReleaseReadinessCheckResponse BuildAiProviderCheck(HealthResponse healthStatus)

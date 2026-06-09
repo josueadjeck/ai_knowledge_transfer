@@ -27,7 +27,10 @@ public sealed class OperationalHealthServiceTests
             "Demo",
             null,
             null,
-            "role");
+            "role",
+            "SingleTenant",
+            "tenant_id",
+            "default");
         var service = new OperationalHealthService(options);
 
         var health = service.GetStatus("TestService");
@@ -45,6 +48,10 @@ public sealed class OperationalHealthServiceTests
             component.Name == "extractionLimits"
             && component.Metadata["maxChunksPerExtraction"] == "80"
             && component.Metadata["maxChunkCharacters"] == "120000");
+        Assert.Contains(health.Components, component =>
+            component.Name == "tenancy"
+            && component.Status == "ok"
+            && component.Metadata["mode"] == "SingleTenant");
     }
 
     [Fact]
@@ -70,7 +77,10 @@ public sealed class OperationalHealthServiceTests
             "Demo",
             null,
             null,
-            "role");
+            "role",
+            "SingleTenant",
+            "tenant_id",
+            "default");
         var service = new OperationalHealthService(options);
 
         var health = service.GetStatus("TestService");
@@ -104,7 +114,10 @@ public sealed class OperationalHealthServiceTests
             "Demo",
             null,
             null,
-            "role");
+            "role",
+            "SingleTenant",
+            "tenant_id",
+            "default");
         var service = new OperationalHealthService(options);
 
         var health = service.GetStatus("TestService");
@@ -141,7 +154,10 @@ public sealed class OperationalHealthServiceTests
             "Oidc",
             null,
             null,
-            "roles");
+            "roles",
+            "SingleTenant",
+            "tenant_id",
+            "default");
         var service = new OperationalHealthService(options);
 
         var health = service.GetStatus("TestService");
@@ -151,5 +167,80 @@ public sealed class OperationalHealthServiceTests
             component.Name == "authentication"
             && component.Status == "error"
             && component.Metadata["roleClaimType"] == "roles");
+    }
+
+    [Fact]
+    public void GetStatus_reports_multi_tenant_configuration()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-health-tests", Guid.NewGuid().ToString("N"));
+        var options = new OperationalHealthOptions(
+            root,
+            Path.Combine(root, "uploads"),
+            Path.Combine(root, "projects.json"),
+            Path.Combine(root, "audit-log.json"),
+            "Json",
+            null,
+            null,
+            "OpenAI",
+            "gpt-5.4-mini",
+            "https://api.openai.com/v1/",
+            AiApiKeyConfigured: false,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
+            "Demo",
+            null,
+            null,
+            "role",
+            "MultiTenant",
+            "tenant_id",
+            "default");
+        var service = new OperationalHealthService(options);
+
+        var health = service.GetStatus("TestService");
+
+        Assert.Contains(health.Components, component =>
+            component.Name == "tenancy"
+            && component.Status == "ok"
+            && component.Metadata["multiTenantEnabled"] == "True");
+    }
+
+    [Fact]
+    public void GetStatus_reports_invalid_tenancy_mode_as_degraded()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-health-tests", Guid.NewGuid().ToString("N"));
+        var options = new OperationalHealthOptions(
+            root,
+            Path.Combine(root, "uploads"),
+            Path.Combine(root, "projects.json"),
+            Path.Combine(root, "audit-log.json"),
+            "Json",
+            null,
+            null,
+            "OpenAI",
+            "gpt-5.4-mini",
+            "https://api.openai.com/v1/",
+            AiApiKeyConfigured: false,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
+            "Demo",
+            null,
+            null,
+            "role",
+            "Shared",
+            "tenant_id",
+            "default");
+        var service = new OperationalHealthService(options);
+
+        var health = service.GetStatus("TestService");
+
+        Assert.Equal("degraded", health.Status);
+        Assert.Contains(health.Components, component =>
+            component.Name == "tenancy"
+            && component.Status == "error"
+            && component.Metadata["mode"] == "Shared");
     }
 }
