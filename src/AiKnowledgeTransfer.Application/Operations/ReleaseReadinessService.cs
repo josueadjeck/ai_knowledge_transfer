@@ -175,13 +175,16 @@ public sealed class ReleaseReadinessService(
                 $"Persistence: {provider}");
         }
 
-        if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+        if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase)
+            || databaseProvider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)
+            || databaseProvider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase)
+            || databaseProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
         {
             return new ReleaseReadinessCheckResponse(
                 "Database provider",
                 "Pass",
                 Required: true,
-                "SQL Server is configured as a production-capable relational provider.",
+                "A production-capable relational database provider is configured.",
                 $"Database provider: {databaseProvider}");
         }
 

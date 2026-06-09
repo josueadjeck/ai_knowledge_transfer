@@ -243,7 +243,26 @@ public sealed class ReleaseReadinessServiceTests
         Assert.Contains(readiness.Checks, check =>
             check.Name == "Database provider"
             && check.Status == "Pass"
-            && check.Detail.Contains("SQL Server", StringComparison.Ordinal));
+            && check.Evidence.Contains("SqlServer", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_passes_when_postgres_database_provider_is_configured()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            persistenceProvider: "Database",
+            databaseProvider: "Postgres",
+            databaseConnectionString: "Host=localhost;Database=AiKnowledgeTransfer;Username=akt;Password=example",
+            databaseSchemaMode: "Migrations")
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Database provider"
+            && check.Status == "Pass"
+            && check.Evidence.Contains("Postgres", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -254,7 +273,7 @@ public sealed class ReleaseReadinessServiceTests
             root,
             aiApiKeyConfigured: true,
             persistenceProvider: "Database",
-            databaseProvider: "Postgres",
+            databaseProvider: "Oracle",
             databaseConnectionString: "Host=localhost;Database=AiKnowledgeTransfer",
             databaseSchemaMode: "Migrations")
             .GetStatus("TestService");

@@ -138,14 +138,14 @@ Database migration preparation:
 
 ```powershell
 $env:AKT_PERSISTENCE_PROVIDER="Json" # default
-$env:AKT_DB_PROVIDER="Sqlite" # or SqlServer
+$env:AKT_DB_PROVIDER="Sqlite" # or SqlServer/Postgres
 $env:AKT_DB_CONNECTION_STRING="Data Source=App_Data/knowledge-transfer.db"
 $env:AKT_DB_SCHEMA_MODE="EnsureCreated"
 ```
 
-`Json` remains the active default. SQLite is prepared for local relational pilots and model/repository tests. SQL Server is available as the first production-capable EF Core provider. Set `AKT_PERSISTENCE_PROVIDER=Database` with `AKT_DB_PROVIDER=Sqlite` or `AKT_DB_PROVIDER=SqlServer` to activate the database registration path.
+`Json` remains the active default. SQLite is prepared for local relational pilots and model/repository tests. SQL Server and PostgreSQL are available as production-capable EF Core providers. Set `AKT_PERSISTENCE_PROVIDER=Database` with `AKT_DB_PROVIDER=Sqlite`, `AKT_DB_PROVIDER=SqlServer` or `AKT_DB_PROVIDER=Postgres` to activate the database registration path.
 When database mode is active, API and Web initialize the SQLite schema on startup.
-`AKT_DB_SCHEMA_MODE=EnsureCreated` keeps the local MVP schema strategy. `AKT_DB_SCHEMA_MODE=Migrations` applies the managed EF initial migration and is the preferred path for production-like database pilots and SQL Server deployments.
+`AKT_DB_SCHEMA_MODE=EnsureCreated` keeps the local MVP schema strategy. `AKT_DB_SCHEMA_MODE=Migrations` applies the managed EF initial migration and is the preferred path for production-like database pilots, SQL Server deployments and PostgreSQL deployments.
 
 ## Verify
 

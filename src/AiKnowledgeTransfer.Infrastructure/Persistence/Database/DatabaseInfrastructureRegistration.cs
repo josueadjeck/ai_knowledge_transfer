@@ -37,6 +37,18 @@ public static class DatabaseInfrastructureRegistration
             return services.AddDatabasePersistence(builder => builder.UseSqlServer(options.ConnectionString));
         }
 
-        throw new InvalidOperationException("Unsupported AKT_DB_PROVIDER. Currently supported: Sqlite, SqlServer.");
+        if (IsPostgres(options.ProviderName))
+        {
+            return services.AddDatabasePersistence(builder => builder.UseNpgsql(options.ConnectionString));
+        }
+
+        throw new InvalidOperationException("Unsupported AKT_DB_PROVIDER. Currently supported: Sqlite, SqlServer, Postgres.");
+    }
+
+    private static bool IsPostgres(string? providerName)
+    {
+        return providerName?.Equals("Postgres", StringComparison.OrdinalIgnoreCase) == true
+            || providerName?.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase) == true
+            || providerName?.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase) == true;
     }
 }
