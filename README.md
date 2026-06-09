@@ -69,7 +69,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Security and data protection concepts for pilot/release review.
 - Secret management baseline for AI provider keys, database credentials and runtime configuration.
 - Release readiness endpoint and dashboard check for runtime health, backups, persistence, authentication mode, security inventory, security/data protection review, secret management review and manual release gates.
-- GitHub Actions CI for restore, build, publish, dependency inventory, SPDX SBOM generation, container policy scanning, container image inventory, container builds, tests, vulnerability checks, static source security scanning and basic secret scanning.
+- GitHub Actions CI for restore, build, publish, dependency inventory, SPDX SBOM generation, container policy scanning, built image vulnerability scanning, container image inventory, container builds, tests, vulnerability checks, static source security scanning and basic secret scanning.
 - Unit and architecture tests.
 
 ## Run locally
@@ -154,7 +154,7 @@ dotnet build AiKnowledgeTransfer.slnx
 dotnet test AiKnowledgeTransfer.slnx
 ```
 
-The GitHub Actions workflow runs restore, Release build, API/Web publish, transitive package inventory, SPDX SBOM generation, Dockerfile container policy scanning, API/Web container builds, container image metadata inventory, tests, NuGet package vulnerability checks, a deterministic static source security scan and common secret pattern checks on `main` and pull requests. See `docs/operations/security-gates.md`.
+The GitHub Actions workflow runs restore, Release build, API/Web publish, transitive package inventory, SPDX SBOM generation, Dockerfile container policy scanning, API/Web container builds, Trivy built image vulnerability scans, container image metadata inventory, tests, NuGet package vulnerability checks, a deterministic static source security scan and common secret pattern checks on `main` and pull requests. See `docs/operations/security-gates.md`.
 For operational release steps, see `docs/operations/runbook.md`, `docs/operations/deployment.md`, `docs/security/security-concept.md`, `docs/security/data-protection-concept.md` and `docs/security/secret-management.md`.
 
 ## AI provider configuration

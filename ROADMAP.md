@@ -195,6 +195,7 @@ Aktueller Implementierungsstand:
 - Security-Gates sind erweitert: CI fuehrt einen deterministischen Static-Source-Security-Scan fuer gefaehrliche Release-Code-Muster aus und archiviert `static-source-scan.json` im Security-Inventar.
 - SBOM-Grundlage ist gestartet: CI erzeugt aus dem transitive .NET Dependency Inventory ein SPDX-2.3-JSON-SBOM-Artefakt `sbom.spdx.json` fuer Release-Nachvollziehbarkeit.
 - Container-Security-Grundlage ist erweitert: CI prueft Dockerfiles per Policy-Scan auf nicht-root Runtime-User, versionierte .NET-Basisimages, Production-Umgebung und stabile COPY-/Port-Regeln.
+- Container-Security-Grundlage ist erweitert: CI scannt gebaute API- und Web-Images mit Trivy auf High-/Critical-Vulnerabilities und archiviert JSON-Scanartefakte.
 - Secret-Management-Grundlage ist dokumentiert: Runtime-Secrets wie AI-Provider-Key, Datenbank-Credentials und OIDC-/Provider-Konfiguration muessen fuer Pilot-/Enterprise-Betrieb ueber einen freigegebenen Secret Store injiziert und in Release-Readiness geprueft werden.
 - Produktionsnahe Datenbank-Grundlage ist erweitert: SQL Server und PostgreSQL sind als EF-Core-Provider konfigurierbar; Release-Readiness warnt fuer SQLite-Pilotbetrieb und bewertet SQL Server/PostgreSQL als produktionsfaehige relationale Provider.
 

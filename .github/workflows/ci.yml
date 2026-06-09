@@ -56,6 +56,61 @@ jobs:
       - name: Build Web container image
         run: docker build --file Dockerfile.web --tag ai-knowledge-transfer-web:ci .
 
+      - name: Scan API container image vulnerabilities
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: ai-knowledge-transfer-api:ci
+          format: json
+          output: artifacts/security/container-vulnerability-scan-api.json
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Scan Web container image vulnerabilities
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: ai-knowledge-transfer-web:ci
+          format: json
+          output: artifacts/security/container-vulnerability-scan-web.json
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Check container image vulnerabilities
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import sys
+
+          files = [
+              "artifacts/security/container-vulnerability-scan-api.json",
+              "artifacts/security/container-vulnerability-scan-web.json",
+          ]
+          findings = []
+          for path in files:
+              with open(path, encoding="utf-8") as handle:
+                  payload = json.load(handle)
+              for result in payload.get("Results", []) or []:
+                  for vulnerability in result.get("Vulnerabilities", []) or []:
+                      findings.append({
+                          "artifact": path,
+                          "target": result.get("Target"),
+                          "id": vulnerability.get("VulnerabilityID"),
+                          "package": vulnerability.get("PkgName"),
+                          "severity": vulnerability.get("Severity"),
+                          "installedVersion": vulnerability.get("InstalledVersion"),
+                          "fixedVersion": vulnerability.get("FixedVersion"),
+                      })
+
+          if findings:
+              print(json.dumps(findings, indent=2))
+              sys.exit("High or critical container image vulnerability detected.")
+          PY
+
       - name: Generate container image inventory
         run: |
           docker image inspect ai-knowledge-transfer-api:ci ai-knowledge-transfer-web:ci > artifacts/security/container-images.json
