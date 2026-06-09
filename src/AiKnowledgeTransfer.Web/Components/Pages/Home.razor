@@ -40,6 +40,7 @@
 @inject RolePermissionService Permissions
 @inject AuditLogService Audit
 @inject PersistenceBackupService Backups
+@inject ReleaseReadinessService ReleaseReadiness
 @inject OperationalHealthService Health
 @inject DocumentParserCapabilityService ParserCapabilities
 
@@ -744,6 +745,7 @@
             <button @onclick="LoadBackupsAsync" disabled="@(!CanOperateBackups)">Backups laden</button>
             <button @onclick="PreviewBackupAsync" disabled="@(!CanPreviewBackup)">Backup pruefen</button>
             <button @onclick="RestoreBackupAsync" disabled="@(!CanRestoreBackup)">Backup wiederherstellen</button>
+            <button @onclick="LoadReleaseReadinessAsync" disabled="@(!CanOperateBackups)">Release pruefen</button>
         </div>
 
         @if (_health is not null)
@@ -787,6 +789,35 @@
                                 <span><strong>@item.Key</strong>: @MaskHealthValue(item.Key, item.Value)</span>
                             }
                         </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (_releaseReadiness is not null)
+        {
+            <div class="health-overview">
+                <div>
+                    <span>Release</span>
+                    <strong class="@ReadinessStatusClass(_releaseReadiness.Status)">@_releaseReadiness.Status</strong>
+                </div>
+                <div>
+                    <span>Service</span>
+                    <strong>@_releaseReadiness.Service</strong>
+                </div>
+                <div>
+                    <span>Geprueft</span>
+                    <strong>@_releaseReadiness.CheckedAt.LocalDateTime.ToString("g")</strong>
+                </div>
+            </div>
+            <div class="readiness-list">
+                @foreach (var check in _releaseReadiness.Checks)
+                {
+                    <div>
+                        <strong>@check.Name</strong>
+                        <span class="@ReadinessStatusClass(check.Status)">@check.Status @RequiredLabel(check)</span>
+                        <p>@check.Detail</p>
+                        <span>@check.Evidence</span>
                     </div>
                 }
             </div>
@@ -897,6 +928,7 @@
     private OnboardingReadinessResponse? _onboardingReadiness;
     private OnboardingStartPackageResponse? _onboardingStartPackage;
     private HealthResponse? _health;
+    private ReleaseReadinessResponse? _releaseReadiness;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
     private IReadOnlyCollection<DocumentParserCapabilityResponse> _parserCapabilities = [];
@@ -1373,6 +1405,13 @@
         return Task.CompletedTask;
     }
 
+    private Task LoadReleaseReadinessAsync()
+    {
+        _releaseReadiness = ReleaseReadiness.GetStatus("AiKnowledgeTransfer.Web");
+        SetStatus("Release geprueft", $"{_releaseReadiness.Status}, {_releaseReadiness.Checks.Count} Checks");
+        return Task.CompletedTask;
+    }
+
     private async Task LoadBackupsAsync()
     {
         await RunSafelyAsync("Backups laden", () =>
@@ -1568,6 +1607,23 @@
                 : status.Equals("fallback", StringComparison.OrdinalIgnoreCase)
                     ? "health-warning"
                     : "health-error";
+    }
+
+    private static string ReadinessStatusClass(string status)
+    {
+        return status.Equals("Ready", StringComparison.OrdinalIgnoreCase)
+            || status.Equals("Pass", StringComparison.OrdinalIgnoreCase)
+                ? "health-ok"
+                : status.Equals("NeedsReview", StringComparison.OrdinalIgnoreCase)
+                    || status.Equals("Warning", StringComparison.OrdinalIgnoreCase)
+                    || status.Equals("Manual", StringComparison.OrdinalIgnoreCase)
+                        ? "health-warning"
+                        : "health-error";
+    }
+
+    private static string RequiredLabel(ReleaseReadinessCheckResponse check)
+    {
+        return check.Required ? "| Pflicht" : "| Optional";
     }
 
     private static string MaskHealthValue(string key, string value)

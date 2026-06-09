@@ -420,6 +420,11 @@ operations.MapGet("/backups", (PersistenceBackupService service) =>
     return Results.Ok(service.List());
 });
 
+operations.MapGet("/release-readiness", (ReleaseReadinessService service) =>
+{
+    return Results.Ok(service.GetStatus("AiKnowledgeTransfer.Api"));
+});
+
 operations.MapGet("/backups/{fileName}/preview", async Task<IResult> (
     string fileName,
     PersistenceBackupService service,

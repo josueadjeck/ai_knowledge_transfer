@@ -902,6 +902,42 @@ button:disabled {
     color: #b42318 !important;
 }
 
+.readiness-list {
+    display: grid;
+    gap: .55rem;
+}
+
+.readiness-list div {
+    background: #ffffff;
+    border: 1px solid #e1e6ed;
+    border-radius: 6px;
+    padding: .7rem;
+}
+
+.readiness-list strong,
+.readiness-list span,
+.readiness-list p {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.readiness-list strong {
+    color: #1f2933;
+    font-size: .92rem;
+}
+
+.readiness-list span {
+    color: #617080;
+    font-size: .82rem;
+    margin-top: .2rem;
+}
+
+.readiness-list p {
+    color: #394756;
+    font-size: .86rem;
+    margin: .35rem 0 0;
+}
+
 .export-sections {
     display: grid;
     gap: .55rem;
