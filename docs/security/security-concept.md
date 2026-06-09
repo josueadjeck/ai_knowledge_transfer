@@ -50,7 +50,7 @@ Before release, teams must confirm:
 
 ## CI and Release Gates
 
-The CI pipeline runs restore, build, publish, tests, vulnerability checks, a deterministic secret scan, dependency inventory generation, container builds and container image metadata inventory.
+The CI pipeline runs restore, build, publish, tests, vulnerability checks, a deterministic static source security scan, a deterministic secret scan, dependency inventory generation, container builds and container image metadata inventory.
 
 Release readiness requires manual review of:
 
@@ -69,8 +69,8 @@ Key project, document, knowledge, review, export, traceability and operations ac
 - Demo authentication is not acceptable for enterprise production.
 - Full tenant isolation is planned but not implemented end to end.
 - Local file storage is suitable for controlled pilots, not for hardened multi-node production.
-- CI secret scanning is a baseline, not a replacement for an enterprise scanner.
-- Full SBOM, image signing and SAST remain follow-up work.
+- CI static source scanning and secret scanning are baselines, not replacements for enterprise security tooling.
+- Full SBOM, image signing and enterprise SAST remain follow-up work.
 
 ## Release Review
 

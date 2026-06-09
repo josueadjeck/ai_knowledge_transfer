@@ -16,17 +16,18 @@ Required checks:
 - Generate container image metadata inventory for the built images.
 - Run all unit and architecture tests.
 - Check direct and transitive NuGet packages for known vulnerabilities.
+- Run a deterministic static source security scan for dangerous release-code patterns.
 - Scan source files for common secret patterns such as OpenAI keys, database connection strings and passwords.
 
 ## Current limits
 
-The dependency inventory is a first SBOM-style baseline, not a complete CycloneDX or SPDX SBOM. The secret scan is intentionally simple and deterministic. It is not a replacement for a dedicated enterprise secret scanner.
+The dependency inventory is a first SBOM-style baseline, not a complete CycloneDX or SPDX SBOM. The static source security scan is a deterministic baseline for obvious dangerous release-code patterns, not a full SAST engine. The secret scan is intentionally simple and deterministic. It is not a replacement for a dedicated enterprise secret scanner.
 Release readiness includes manual `Security inventory` and `Container image inventory` checks so release owners confirm the uploaded artifact exists and was reviewed.
 
 Recommended production additions:
 
 - GitHub Advanced Security or an equivalent secret scanning tool.
-- CodeQL or another SAST engine.
+- CodeQL or another enterprise SAST engine.
 - CycloneDX or SPDX SBOM generation with artifact retention policy.
 - Dependency review for pull requests.
 - Container image scanning and signing before publishing deployment images.

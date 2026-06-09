@@ -192,6 +192,7 @@ Aktueller Implementierungsstand:
 - Container-Security-Grundlage ist erweitert: CI archiviert Container-Image-Metadaten und Release-Readiness verlangt deren manuelle Pruefung.
 - Security-/Datenschutzkonzept ist dokumentiert: MVP-Sicherheitsmodell, Datenkategorien, AI-Provider-Datenfluss, Backup-/Retention-Annahmen und aktuelle Betriebsgrenzen sind als Release-Review-Grundlage festgehalten.
 - Release-/Security-Haertung ist erweitert: Release-Readiness verlangt eine manuelle Security- und Datenschutzpruefung gegen die Dokumente unter `docs/security`.
+- Security-Gates sind erweitert: CI fuehrt einen deterministischen Static-Source-Security-Scan fuer gefaehrliche Release-Code-Muster aus und archiviert `static-source-scan.json` im Security-Inventar.
 
 ### Phase 0: Produktklaerung
 

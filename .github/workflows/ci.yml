@@ -86,6 +86,10 @@ jobs:
               sys.exit("Vulnerable NuGet package detected.")
           PY
 
+      - name: Static source security scan
+        shell: pwsh
+        run: ./scripts/security/static-source-scan.ps1 -OutputPath artifacts/security/static-source-scan.json
+
       - name: Basic secret pattern scan
         shell: bash
         run: |
