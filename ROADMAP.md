@@ -184,6 +184,7 @@ Aktueller Implementierungsstand:
 - Performance-Grundlage ist erweitert: Knowledge Extraction hat konfigurierbare Schutzgrenzen vor AI-Provider-Aufrufen und meldet Limitverletzungen mit stabilem API-Fehlercode.
 - Mandantenfaehigkeit ist geplant: Tenancy-Modus, Tenant-Claim und Default-Tenant sind als Betriebsoptionen sichtbar; Health und Release-Readiness bewerten Single-/Multi-Tenant-Konfiguration.
 - Deployment-Grundlage ist gestartet: CI veroeffentlicht API- und Web-Release-Artefakte und die Deployment-Dokumentation beschreibt Runtime-Konfiguration, Checks und aktuelle Grenzen.
+- Container-Grundlage ist gestartet: API und Web haben eigene Dockerfiles; CI baut beide Images ohne Push als Runtime-Haertungscheck.
 
 ### Phase 0: Produktklaerung
 

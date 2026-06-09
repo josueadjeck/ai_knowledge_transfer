@@ -4,7 +4,7 @@ This runbook describes the MVP operating flow for local or pilot deployments.
 
 ## Pre-release checklist
 
-1. Run the CI workflow on `main` and confirm restore, build, publish, tests, vulnerability check and secret scan passed.
+1. Run the CI workflow on `main` and confirm restore, build, publish, container build, tests, vulnerability check and secret scan passed.
 2. Confirm API and Web publish artifacts were produced by CI.
 3. Start the application in the target persistence mode.
 4. Open the operations panel or call `GET /api/operations/release-readiness`.

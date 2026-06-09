@@ -11,6 +11,7 @@ Required checks:
 - Restore all .NET projects.
 - Build the full solution in Release configuration.
 - Publish API and Web Release artifacts.
+- Build API and Web container images without pushing them.
 - Run all unit and architecture tests.
 - Check direct and transitive NuGet packages for known vulnerabilities.
 - Scan source files for common secret patterns such as OpenAI keys, database connection strings and passwords.
@@ -24,7 +25,7 @@ Recommended production additions:
 - GitHub Advanced Security or an equivalent secret scanning tool.
 - CodeQL or another SAST engine.
 - Dependency review for pull requests.
-- Container image scanning once deployment images exist.
+- Container image scanning and signing before publishing deployment images.
 - Branch protection that requires the CI workflow before merge.
 
 ## Handling findings

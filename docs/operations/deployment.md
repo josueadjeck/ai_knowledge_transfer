@@ -1,6 +1,6 @@
 # Deployment Baseline
 
-The MVP deployment baseline is a release publish of the API and Web projects. Container images can be added later, but the first deployment gate is that both applications can be published as deterministic Release artifacts.
+The MVP deployment baseline is a release publish of the API and Web projects plus container image builds that are verified in CI.
 
 ## Local Publish
 
@@ -10,6 +10,27 @@ dotnet publish src\AiKnowledgeTransfer.Web\AiKnowledgeTransfer.Web.csproj --conf
 ```
 
 The `artifacts/` folder is ignored by Git.
+
+## Container Build
+
+```powershell
+docker build --file Dockerfile.api --tag ai-knowledge-transfer-api:local .
+docker build --file Dockerfile.web --tag ai-knowledge-transfer-web:local .
+```
+
+Both images listen on container port `8080`. Persist `/app/App_Data` when using local JSON, SQLite or backup files.
+
+Example API run:
+
+```powershell
+docker run --rm -p 5256:8080 -v ${PWD}\App_Data\Api:/app/App_Data -e AKT_PERSISTENCE_PROVIDER=Json ai-knowledge-transfer-api:local
+```
+
+Example Web run:
+
+```powershell
+docker run --rm -p 5280:8080 -v ${PWD}\App_Data\Web:/app/App_Data -e AKT_PERSISTENCE_PROVIDER=Json ai-knowledge-transfer-web:local
+```
 
 ## Runtime Configuration
 
@@ -44,7 +65,7 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 
 Before deploying:
 
-1. Confirm CI restore, build, publish, tests, vulnerability scan and secret scan passed.
+1. Confirm CI restore, build, publish, container build, tests, vulnerability scan and secret scan passed.
 2. Confirm `GET /health` is `ok`.
 3. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
 4. Create and preview a backup.
@@ -52,4 +73,4 @@ Before deploying:
 
 ## Current Limits
 
-The MVP deployment baseline does not yet provide container image hardening, external secret management, managed database migrations, blue/green deployment or tenant-isolated production storage. Those remain Phase 9 follow-up work.
+The MVP deployment baseline does not yet provide image signing, SBOM export, external secret management, managed database migrations, blue/green deployment or tenant-isolated production storage. Those remain Phase 9 follow-up work.

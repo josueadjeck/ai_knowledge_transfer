@@ -37,6 +37,12 @@ jobs:
       - name: Publish Web artifact
         run: dotnet publish src/AiKnowledgeTransfer.Web/AiKnowledgeTransfer.Web.csproj --configuration Release --no-build --output artifacts/web
 
+      - name: Build API container image
+        run: docker build --file Dockerfile.api --tag ai-knowledge-transfer-api:ci .
+
+      - name: Build Web container image
+        run: docker build --file Dockerfile.web --tag ai-knowledge-transfer-web:ci .
+
       - name: Test
         run: dotnet test AiKnowledgeTransfer.slnx --configuration Release --no-build --logger trx --results-directory TestResults
 

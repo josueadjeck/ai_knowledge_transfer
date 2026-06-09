@@ -1,0 +1,11 @@
+.git
+.github
+.vs
+.idea
+artifacts
+App_Data
+**/bin
+**/obj
+**/*.user
+**/*.suo
+**/*.log
