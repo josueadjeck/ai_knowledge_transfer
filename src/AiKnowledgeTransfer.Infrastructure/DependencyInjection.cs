@@ -3,6 +3,7 @@ namespace AiKnowledgeTransfer.Infrastructure;
 using AiKnowledgeTransfer.Application.Abstractions;
 using AiKnowledgeTransfer.Application.Diagnostics;
 using AiKnowledgeTransfer.Application.Documents;
+using AiKnowledgeTransfer.Application.Knowledge;
 using AiKnowledgeTransfer.Application.Operations;
 using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Infrastructure.Audit;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         var databaseProviderName = Environment.GetEnvironmentVariable("AKT_DB_PROVIDER");
         var authentication = AuthenticationOptions.FromEnvironment();
         var documentAnalysisOptions = DocumentAnalysisOptions.FromEnvironment();
+        var knowledgeExtractionOptions = KnowledgeExtractionOptions.FromEnvironment();
 
         var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         var model = Environment.GetEnvironmentVariable("OPENAI_MODEL");
@@ -56,12 +58,15 @@ public static class DependencyInjection
             !string.IsNullOrWhiteSpace(apiKey),
             documentAnalysisOptions.MaxChunksPerDocument,
             documentAnalysisOptions.MaxTotalExtractedCharacters,
+            knowledgeExtractionOptions.MaxChunksPerExtraction,
+            knowledgeExtractionOptions.MaxTotalChunkCharacters,
             authentication.Mode,
             authentication.Authority,
             authentication.ClientId,
             authentication.RoleClaimType));
         services.AddSingleton(authentication);
         services.AddSingleton(documentAnalysisOptions);
+        services.AddSingleton(knowledgeExtractionOptions);
         services.AddSingleton(new PersistenceBackupOptions(
             appDataPath,
             uploadStoragePath,

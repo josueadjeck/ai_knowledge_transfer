@@ -40,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<UserIdentityService>();
         services.AddScoped<TraceabilityService>();
         services.AddSingleton(DocumentAnalysisOptions.Default);
+        services.AddSingleton(KnowledgeExtractionOptions.Default);
 
         return services;
     }

@@ -22,6 +22,8 @@ public sealed class OperationalHealthServiceTests
             AiApiKeyConfigured: false,
             MaxAnalysisChunksPerDocument: 250,
             MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
             "Demo",
             null,
             null,
@@ -39,6 +41,10 @@ public sealed class OperationalHealthServiceTests
             component.Name == "analysisLimits"
             && component.Metadata["maxChunksPerDocument"] == "250"
             && component.Metadata["maxExtractedCharacters"] == "500000");
+        Assert.Contains(health.Components, component =>
+            component.Name == "extractionLimits"
+            && component.Metadata["maxChunksPerExtraction"] == "80"
+            && component.Metadata["maxChunkCharacters"] == "120000");
     }
 
     [Fact]
@@ -59,6 +65,8 @@ public sealed class OperationalHealthServiceTests
             AiApiKeyConfigured: true,
             MaxAnalysisChunksPerDocument: 250,
             MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
             "Demo",
             null,
             null,
@@ -91,6 +99,8 @@ public sealed class OperationalHealthServiceTests
             AiApiKeyConfigured: false,
             MaxAnalysisChunksPerDocument: 250,
             MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
             "Demo",
             null,
             null,
@@ -126,6 +136,8 @@ public sealed class OperationalHealthServiceTests
             AiApiKeyConfigured: false,
             MaxAnalysisChunksPerDocument: 250,
             MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
             "Oidc",
             null,
             null,

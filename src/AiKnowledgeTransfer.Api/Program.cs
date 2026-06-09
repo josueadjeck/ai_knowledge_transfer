@@ -162,6 +162,10 @@ projects.MapPost("/{projectId:guid}/documents/{documentId:guid}/extract-knowledg
         var result = await service.ExtractAsync(projectId, documentId, cancellationToken);
         return result is null ? ApiResponses.NotFound("Project or document was not found.") : Results.Ok(result);
     }
+    catch (KnowledgeExtractionLimitExceededException exception)
+    {
+        return ApiResponses.BadRequest("knowledge_extraction_limit_exceeded", exception.Message);
+    }
     catch (InvalidOperationException exception)
     {
         return ApiResponses.BadRequest(exception.Message);

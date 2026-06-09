@@ -76,6 +76,8 @@ public sealed class ReleaseReadinessServiceTests
             aiApiKeyConfigured,
             MaxAnalysisChunksPerDocument: 250,
             MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
             authentication.Mode,
             authentication.Authority,
             authentication.ClientId,

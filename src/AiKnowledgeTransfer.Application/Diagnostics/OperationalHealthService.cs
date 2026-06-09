@@ -21,7 +21,8 @@ public sealed class OperationalHealthService
             GetAuditLogComponent(),
             GetAuthComponent(),
             GetAiProviderComponent(),
-            GetAnalysisLimitsComponent()
+            GetAnalysisLimitsComponent(),
+            GetExtractionLimitsComponent()
         };
 
         var status = components.Any(component => component.Status == "error")
@@ -188,6 +189,19 @@ public sealed class OperationalHealthService
             {
                 ["maxChunksPerDocument"] = _options.MaxAnalysisChunksPerDocument.ToString(),
                 ["maxExtractedCharacters"] = _options.MaxAnalysisExtractedCharacters.ToString()
+            });
+    }
+
+    private HealthComponentResponse GetExtractionLimitsComponent()
+    {
+        return new HealthComponentResponse(
+            "extractionLimits",
+            "ok",
+            "Knowledge extraction guardrails are configured.",
+            new Dictionary<string, string>
+            {
+                ["maxChunksPerExtraction"] = _options.MaxExtractionChunks.ToString(),
+                ["maxChunkCharacters"] = _options.MaxExtractionChunkCharacters.ToString()
             });
     }
 }

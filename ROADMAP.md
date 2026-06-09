@@ -180,6 +180,7 @@ Aktueller Implementierungsstand:
 - Performance-Grundlage ist gestartet: Dokumentanalysen haben konfigurierbare Schutzgrenzen fuer maximale Chunk-Anzahl und extrahierte Gesamtzeichen pro Dokument.
 - Betriebs-Grundlage ist erweitert: Health und Blazor-Operationsbereich zeigen die aktiven Analyse-Schutzgrenzen fuer grosse Dokumente.
 - UX-/API-Haertung ist erweitert: Analyseabbrueche durch Schutzgrenzen liefern einen stabilen Fehlercode und klare Handlungshinweise in API und Blazor-UI.
+- Performance-Grundlage ist erweitert: Knowledge Extraction hat konfigurierbare Schutzgrenzen vor AI-Provider-Aufrufen und meldet Limitverletzungen mit stabilem API-Fehlercode.
 
 ### Phase 0: Produktklaerung
 

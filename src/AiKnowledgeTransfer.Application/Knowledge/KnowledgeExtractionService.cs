@@ -7,9 +7,11 @@ using AiKnowledgeTransfer.Contracts.Projects;
 public sealed class KnowledgeExtractionService(
     IProjectRepository projects,
     IKnowledgeExtractor extractor,
-    IAuditLog? auditLog = null)
+    IAuditLog? auditLog = null,
+    KnowledgeExtractionOptions? options = null)
 {
     private readonly IAuditLog _auditLog = auditLog ?? NullAuditLog.Instance;
+    private readonly KnowledgeExtractionOptions _options = options ?? KnowledgeExtractionOptions.Default;
 
     public async Task<ExtractKnowledgeResponse?> ExtractAsync(Guid projectId, Guid documentId, CancellationToken cancellationToken)
     {
@@ -25,6 +27,7 @@ public sealed class KnowledgeExtractionService(
             throw new InvalidOperationException("Document must be analyzed before knowledge can be extracted.");
         }
 
+        ValidateExtractionInput(document.Id, document.Chunks);
         var extraction = await extractor.ExtractAsync(document.Chunks, cancellationToken);
         var createdItems = extraction.Items
             .Select(item => project.AddKnowledgeItem(
@@ -61,5 +64,27 @@ public sealed class KnowledgeExtractionService(
         }
 
         return extraction.UsedFallback ? "FallbackReview" : "ProviderSuggested";
+    }
+
+    private void ValidateExtractionInput(Guid documentId, IReadOnlyCollection<Domain.Documents.DocumentChunk> chunks)
+    {
+        if (chunks.Count > _options.MaxChunksPerExtraction)
+        {
+            throw new KnowledgeExtractionLimitExceededException(
+                documentId,
+                "chunks",
+                chunks.Count,
+                _options.MaxChunksPerExtraction);
+        }
+
+        var totalChunkCharacters = chunks.Sum(chunk => chunk.Text.Length);
+        if (totalChunkCharacters > _options.MaxTotalChunkCharacters)
+        {
+            throw new KnowledgeExtractionLimitExceededException(
+                documentId,
+                "chunk characters",
+                totalChunkCharacters,
+                _options.MaxTotalChunkCharacters);
+        }
     }
 }

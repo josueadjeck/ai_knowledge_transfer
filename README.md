@@ -25,6 +25,8 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Document analysis responses and the Blazor workflow show parser name, chunk count and parser detail.
 - PDF analysis reports that scanned PDFs need OCR when no extractable text is available.
 - Provider-independent knowledge extraction with OpenAI as the first AI provider and heuristic fallback.
+- Knowledge extraction has configurable guardrails before AI provider calls.
+- Knowledge extraction limit violations return a stable `knowledge_extraction_limit_exceeded` API error code.
 - Knowledge extraction responses and the Blazor workflow show the active provider and whether fallback was used.
 - Extracted knowledge items retain source chunk, provider, model, fallback and quality metadata for review, traceability and export.
 - Review workflow for extracted knowledge items.
@@ -57,6 +59,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Health endpoint with local storage, persistence and AI provider configuration status.
 - Health output reports active persistence mode and database provider configuration.
 - Health output reports the active document analysis guardrails.
+- Health output reports the active knowledge extraction guardrails.
 - Blazor operations panel shows health components for storage, persistence and AI provider status.
 - Runtime metrics endpoint and Blazor operations panel show uptime, process and memory indicators.
 - Structured operational logs for backup, restore, backup preview and release-readiness checks.
@@ -177,6 +180,19 @@ $env:AKT_ANALYSIS_MAX_CHARACTERS="500000"
 ```
 
 Invalid or missing values fall back to the defaults above.
+
+## Knowledge extraction limits
+
+Knowledge extraction is additionally capped before provider calls, so large documents do not accidentally create oversized OpenAI, Azure OpenAI, customer-AI or local-model requests.
+
+Optional environment variables:
+
+```powershell
+$env:AKT_EXTRACTION_MAX_CHUNKS="80"
+$env:AKT_EXTRACTION_MAX_CHARACTERS="120000"
+```
+
+If a document exceeds these limits, the API returns `knowledge_extraction_limit_exceeded`. Invalid or missing values fall back to the defaults above.
 
 ## Authentication configuration
 

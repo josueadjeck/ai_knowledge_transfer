@@ -14,6 +14,8 @@ public sealed record OperationalHealthOptions(
     bool AiApiKeyConfigured,
     int MaxAnalysisChunksPerDocument,
     int MaxAnalysisExtractedCharacters,
+    int MaxExtractionChunks,
+    int MaxExtractionChunkCharacters,
     string AuthMode,
     string? AuthAuthority,
     string? AuthClientId,
