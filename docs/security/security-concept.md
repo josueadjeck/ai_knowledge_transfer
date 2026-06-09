@@ -66,6 +66,7 @@ Release readiness requires manual review of:
 - Container image inventory.
 - Security and data protection concepts.
 - Secret management review.
+- Deployment strategy review.
 - Human release approval.
 
 ## Auditability

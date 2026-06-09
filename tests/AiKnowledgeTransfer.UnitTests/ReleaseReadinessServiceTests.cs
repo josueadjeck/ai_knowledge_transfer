@@ -42,6 +42,7 @@ public sealed class ReleaseReadinessServiceTests
         Assert.Contains(readiness.Checks, check => check.Name == "Container image inventory" && check.Status == "Manual");
         Assert.Contains(readiness.Checks, check => check.Name == "Security and data protection review" && check.Status == "Manual");
         Assert.Contains(readiness.Checks, check => check.Name == "Secret management review" && check.Status == "Manual");
+        Assert.Contains(readiness.Checks, check => check.Name == "Deployment strategy" && check.Status == "Manual");
     }
 
     [Fact]
@@ -152,6 +153,41 @@ public sealed class ReleaseReadinessServiceTests
             && check.Required
             && check.Status == "Pass"
             && check.Evidence.Contains("provider configured: True", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_blocks_release_when_blue_green_approval_owner_is_missing()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            deployment: new DeploymentOptions("BlueGreen", null))
+            .GetStatus("TestService");
+
+        Assert.Equal("Blocked", readiness.Status);
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Deployment strategy"
+            && check.Required
+            && check.Status == "Fail"
+            && check.Evidence.Contains("approval owner configured: False", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_passes_deployment_strategy_when_blue_green_is_configured()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            deployment: new DeploymentOptions("BlueGreen", "Release Owner"))
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Deployment strategy"
+            && check.Required
+            && check.Status == "Pass"
+            && check.Evidence.Contains("approval owner configured: True", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -394,6 +430,7 @@ public sealed class ReleaseReadinessServiceTests
         AuthenticationOptions? authentication = null,
         TenantOptions? tenancy = null,
         SecretManagementOptions? secretManagement = null,
+        DeploymentOptions? deployment = null,
         string persistenceProvider = "Json",
         string? databaseProvider = null,
         string? databaseConnectionString = null,
@@ -402,6 +439,7 @@ public sealed class ReleaseReadinessServiceTests
         authentication ??= new AuthenticationOptions("Demo", null, null, "role");
         tenancy ??= TenantOptions.Default;
         secretManagement ??= SecretManagementOptions.Default;
+        deployment ??= DeploymentOptions.Default;
         var health = new OperationalHealthService(new OperationalHealthOptions(
             root,
             Path.Combine(root, "uploads"),
@@ -428,7 +466,9 @@ public sealed class ReleaseReadinessServiceTests
             tenancy.DefaultTenantId,
             secretManagement.Mode,
             secretManagement.Provider,
-            secretManagement.RotationOwner));
+            secretManagement.RotationOwner,
+            deployment.Strategy,
+            deployment.ApprovalOwner));
         var backups = new PersistenceBackupService(CreateBackupOptions(root));
 
         return new ReleaseReadinessService(
@@ -436,6 +476,7 @@ public sealed class ReleaseReadinessServiceTests
             backups,
             authentication,
             secretManagement,
+            deployment,
             tenantIsolationReview: new TenantIsolationReviewService(tenancy));
     }
 

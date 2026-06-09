@@ -190,6 +190,7 @@ Aktueller Implementierungsstand:
 - Performance-Grundlage ist erweitert: Knowledge Extraction hat konfigurierbare Schutzgrenzen vor AI-Provider-Aufrufen und meldet Limitverletzungen mit stabilem API-Fehlercode.
 - Mandantenfaehigkeit ist operationalisiert geplant: Tenancy-Modus, Tenant-Claim und Default-Tenant sind sichtbar; Tenant-Isolation-Review macht offene Isolationsbereiche fuer Persistenz, Storage, Audit, Backup, API, UI und Exporte release-relevant.
 - Deployment-Grundlage ist gestartet: CI veroeffentlicht API- und Web-Release-Artefakte und die Deployment-Dokumentation beschreibt Runtime-Konfiguration, Checks und aktuelle Grenzen.
+- Deployment-Grundlage ist erweitert: `AKT_DEPLOYMENT_STRATEGY=BlueGreen` und `AKT_DEPLOYMENT_APPROVAL_OWNER` machen Blue/Green-Deployment in Health und Release-Readiness pruefbar.
 - Container-Grundlage ist gestartet: API und Web haben eigene Dockerfiles; CI baut beide Images ohne Push als Runtime-Haertungscheck.
 - Datenbank-Betrieb ist erweitert: Health und Release-Readiness zeigen den aktuellen Schema-Modus `EnsureCreated` und warnen, dass produktionsnahe EF-Migrations noch fehlen.
 - EF-Migrations-Grundlage ist gestartet: Eine initiale SQLite/EF-Migration ist vorhanden und `AKT_DB_SCHEMA_MODE=Migrations` wendet sie beim Start kontrolliert an.

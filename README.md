@@ -194,6 +194,15 @@ $env:AKT_SECRET_ROTATION_OWNER="Operations"
 
 `SecretStore` mode requires a provider name and rotation owner before release readiness can pass the secret-management check.
 
+Deployment strategy configuration:
+
+```powershell
+$env:AKT_DEPLOYMENT_STRATEGY="BlueGreen" # or SingleSlot for local runs
+$env:AKT_DEPLOYMENT_APPROVAL_OWNER="Release Owner"
+```
+
+`BlueGreen` mode requires an approval owner before release readiness can pass the deployment strategy check.
+
 ## Document analysis limits
 
 Uploads are capped at 10 MB. Parsed analysis output is additionally limited so unexpectedly large or noisy documents cannot create oversized analysis jobs.

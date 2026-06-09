@@ -31,6 +31,7 @@ public static class DependencyInjection
         var authentication = AuthenticationOptions.FromEnvironment();
         var tenancy = TenantOptions.FromEnvironment();
         var secretManagement = SecretManagementOptions.FromEnvironment();
+        var deployment = DeploymentOptions.FromEnvironment();
         var documentAnalysisOptions = DocumentAnalysisOptions.FromEnvironment();
         var knowledgeExtractionOptions = KnowledgeExtractionOptions.FromEnvironment();
 
@@ -73,10 +74,13 @@ public static class DependencyInjection
             tenancy.DefaultTenantId,
             secretManagement.Mode,
             secretManagement.Provider,
-            secretManagement.RotationOwner));
+            secretManagement.RotationOwner,
+            deployment.Strategy,
+            deployment.ApprovalOwner));
         services.AddSingleton(authentication);
         services.AddSingleton(tenancy);
         services.AddSingleton(secretManagement);
+        services.AddSingleton(deployment);
         services.AddSingleton(documentAnalysisOptions);
         services.AddSingleton(knowledgeExtractionOptions);
         services.AddSingleton(new PersistenceBackupOptions(

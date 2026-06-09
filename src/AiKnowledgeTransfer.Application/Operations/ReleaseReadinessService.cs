@@ -12,6 +12,7 @@ public sealed class ReleaseReadinessService(
     PersistenceBackupService backups,
     AuthenticationOptions authentication,
     SecretManagementOptions? secretManagement = null,
+    DeploymentOptions? deployment = null,
     RolePermissionService? rolePermissions = null,
     TenantIsolationReviewService? tenantIsolationReview = null,
     ILogger<ReleaseReadinessService>? logger = null)
@@ -19,6 +20,7 @@ public sealed class ReleaseReadinessService(
     private readonly RolePermissionService _rolePermissions = rolePermissions ?? new RolePermissionService();
     private readonly TenantIsolationReviewService? _tenantIsolationReview = tenantIsolationReview;
     private readonly SecretManagementOptions _secretManagement = secretManagement ?? SecretManagementOptions.Default;
+    private readonly DeploymentOptions _deployment = deployment ?? DeploymentOptions.Default;
 
     public ReleaseReadinessResponse GetStatus(string serviceName)
     {
@@ -61,6 +63,7 @@ public sealed class ReleaseReadinessService(
                 "Confirm the security concept and data protection concept were reviewed for this release.",
                 "Review docs/security/security-concept.md and docs/security/data-protection-concept.md."),
             BuildSecretManagementCheck(_secretManagement),
+            BuildDeploymentStrategyCheck(_deployment),
             new(
                 "Release approval",
                 "Manual",
@@ -389,5 +392,45 @@ public sealed class ReleaseReadinessService(
             Required: true,
             "Confirm runtime secrets are injected through an approved environment or secret store and rotation is documented.",
             "Review docs/security/secret-management.md; required sensitive settings include OPENAI_API_KEY and AKT_DB_CONNECTION_STRING when used.");
+    }
+
+    private static ReleaseReadinessCheckResponse BuildDeploymentStrategyCheck(DeploymentOptions options)
+    {
+        if (options.IsBlueGreen && options.IsConfigured)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Deployment strategy",
+                "Pass",
+                Required: true,
+                "Blue/green deployment strategy is configured for this release.",
+                $"Strategy: {options.Strategy}, approval owner configured: True, docs: docs/operations/deployment.md");
+        }
+
+        if (options.IsBlueGreen)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Deployment strategy",
+                "Fail",
+                Required: true,
+                "Blue/green deployment strategy is selected but approval owner metadata is missing.",
+                $"Strategy: {options.Strategy}, approval owner configured: {(!string.IsNullOrWhiteSpace(options.ApprovalOwner)).ToString()}");
+        }
+
+        if (options.IsSingleSlot)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Deployment strategy",
+                "Manual",
+                Required: false,
+                "Single-slot deployment is active; confirm downtime and rollback risk are accepted for this release.",
+                $"Strategy: {options.Strategy}");
+        }
+
+        return new ReleaseReadinessCheckResponse(
+            "Deployment strategy",
+            "Fail",
+            Required: true,
+            "Unsupported deployment strategy.",
+            $"Strategy: {options.Strategy}");
     }
 }

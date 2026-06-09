@@ -14,6 +14,7 @@ This runbook describes the MVP operating flow for local or pilot deployments.
 8. Resolve every `Fail` readiness check.
 9. Review every `Manual` or `Warning` readiness check with the release owner.
 10. Approve the deployment only after runtime health, persistence and backup checks are acceptable.
+11. For `AKT_DEPLOYMENT_STRATEGY=BlueGreen`, validate the green slot before switching traffic and keep rollback ownership explicit.
 
 ## Runtime health
 
@@ -72,6 +73,7 @@ The `Tenant isolation review` check is manual. Review `GET /api/operations/tenan
 The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `build-artifact-inventory.json`, `dotnet-package-inventory.json`, `sbom.spdx.json`, `vulnerable-packages.json`, `static-source-scan.json`, `container-policy-scan.json`, `container-vulnerability-scan-api.json`, `container-vulnerability-scan-web.json`, `container-images.json` and `container-provenance.json` are present for the release candidate.
 The `Security and data protection review` check is manual. Review the concepts under `docs/security` and document accepted residual risks for the target deployment.
 The `Secret management review` check is manual for environment-based local runs. In `SecretStore` mode it passes only when provider and rotation-owner metadata are configured, and fails if either is missing.
+The `Deployment strategy` check is manual for `SingleSlot`, passes for `BlueGreen` with an approval owner and fails when blue/green metadata is incomplete.
 
 ## Deployment baseline
 

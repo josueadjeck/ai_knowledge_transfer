@@ -22,6 +22,7 @@ public sealed class OperationalHealthService
             GetAuthComponent(),
             GetTenancyComponent(),
             GetSecretManagementComponent(),
+            GetDeploymentComponent(),
             GetAiProviderComponent(),
             GetAnalysisLimitsComponent(),
             GetExtractionLimitsComponent()
@@ -241,6 +242,28 @@ public sealed class OperationalHealthService
                 ["mode"] = _options.SecretStoreMode,
                 ["providerConfigured"] = providerConfigured.ToString(),
                 ["rotationOwnerConfigured"] = rotationOwnerConfigured.ToString()
+            });
+    }
+
+    private HealthComponentResponse GetDeploymentComponent()
+    {
+        var isBlueGreen = _options.DeploymentStrategy.Equals("BlueGreen", StringComparison.OrdinalIgnoreCase);
+        var isSingleSlot = _options.DeploymentStrategy.Equals("SingleSlot", StringComparison.OrdinalIgnoreCase);
+        var approvalOwnerConfigured = !string.IsNullOrWhiteSpace(_options.DeploymentApprovalOwner);
+        var isConfigured = (isSingleSlot || isBlueGreen) && (!isBlueGreen || approvalOwnerConfigured);
+
+        return new HealthComponentResponse(
+            "deployment",
+            isConfigured ? "ok" : "error",
+            isBlueGreen
+                ? "Blue/green deployment strategy is selected."
+                : isSingleSlot
+                    ? "Single-slot deployment strategy is active."
+                    : "Deployment strategy is invalid.",
+            new Dictionary<string, string>
+            {
+                ["strategy"] = _options.DeploymentStrategy,
+                ["approvalOwnerConfigured"] = approvalOwnerConfigured.ToString()
             });
     }
 

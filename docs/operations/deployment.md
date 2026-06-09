@@ -55,6 +55,8 @@ $env:AKT_AUTH_ROLE_CLAIM="roles"
 $env:AKT_SECRET_STORE_MODE="SecretStore"
 $env:AKT_SECRET_STORE_PROVIDER="AzureKeyVault"
 $env:AKT_SECRET_ROTATION_OWNER="Operations"
+$env:AKT_DEPLOYMENT_STRATEGY="BlueGreen"
+$env:AKT_DEPLOYMENT_APPROVAL_OWNER="Release Owner"
 ```
 
 For a SQL Server backed pilot or production-like deployment, use `AKT_DB_PROVIDER=SqlServer` and provide a SQL Server connection string through the approved secret manager or hosting platform:
@@ -97,6 +99,14 @@ Before deploying:
 
 Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the managed EF initial migration. `EnsureCreated` remains available for local MVP runs but is reported as a release-readiness warning in database mode. Release readiness warns for SQLite and passes SQL Server or PostgreSQL as production-capable relational providers.
 
+## Blue/Green Release Mode
+
+`AKT_DEPLOYMENT_STRATEGY=SingleSlot` is the local default and remains a manual release review item because downtime and rollback risk must be accepted.
+
+`AKT_DEPLOYMENT_STRATEGY=BlueGreen` is the production-oriented mode. It requires `AKT_DEPLOYMENT_APPROVAL_OWNER` so the release-readiness check can confirm that a human owner is accountable for slot switch, validation and rollback approval.
+
+The concrete slot implementation remains platform-specific. Use the target hosting platform's blue/green, deployment-slot or traffic-switching mechanism, validate `GET /health`, `GET /api/operations/monitoring-summary` and smoke-test the Web UI on the green slot before switching traffic.
+
 ## Current Limits
 
-The MVP deployment baseline generates build artifact file hashes and container provenance and validates secret-store release metadata, but does not yet provide registry-backed image signing enforcement, standards-complete CycloneDX/SPDX SBOM attestation, automated provider-specific secret retrieval, blue/green deployment or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.
+The MVP deployment baseline generates build artifact file hashes and container provenance, validates secret-store release metadata and supports a blue/green release-readiness mode, but does not yet provide registry-backed image signing enforcement, standards-complete CycloneDX/SPDX SBOM attestation, automated provider-specific secret retrieval or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.

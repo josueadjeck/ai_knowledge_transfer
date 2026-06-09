@@ -57,6 +57,10 @@ public sealed class OperationalHealthServiceTests
             component.Name == "secretManagement"
             && component.Status == "ok"
             && component.Metadata["mode"] == "Environment");
+        Assert.Contains(health.Components, component =>
+            component.Name == "deployment"
+            && component.Status == "ok"
+            && component.Metadata["strategy"] == "SingleSlot");
     }
 
     [Fact]
@@ -293,5 +297,47 @@ public sealed class OperationalHealthServiceTests
             component.Name == "secretManagement"
             && component.Status == "error"
             && component.Metadata["providerConfigured"] == "False");
+    }
+
+    [Fact]
+    public void GetStatus_reports_blue_green_deployment_configuration()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ai-knowledge-transfer-health-tests", Guid.NewGuid().ToString("N"));
+        var options = new OperationalHealthOptions(
+            root,
+            Path.Combine(root, "uploads"),
+            Path.Combine(root, "projects.json"),
+            Path.Combine(root, "audit-log.json"),
+            "Json",
+            null,
+            null,
+            "EnsureCreated",
+            "OpenAI",
+            "gpt-5.4-mini",
+            "https://api.openai.com/v1/",
+            AiApiKeyConfigured: false,
+            MaxAnalysisChunksPerDocument: 250,
+            MaxAnalysisExtractedCharacters: 500_000,
+            MaxExtractionChunks: 80,
+            MaxExtractionChunkCharacters: 120_000,
+            "Demo",
+            null,
+            null,
+            "role",
+            "SingleTenant",
+            "tenant_id",
+            "default",
+            DeploymentStrategy: "BlueGreen",
+            DeploymentApprovalOwner: "Release Owner");
+        var service = new OperationalHealthService(options);
+
+        var health = service.GetStatus("TestService");
+
+        Assert.Equal("ok", health.Status);
+        Assert.Contains(health.Components, component =>
+            component.Name == "deployment"
+            && component.Status == "ok"
+            && component.Metadata["strategy"] == "BlueGreen"
+            && component.Metadata["approvalOwnerConfigured"] == "True");
     }
 }
