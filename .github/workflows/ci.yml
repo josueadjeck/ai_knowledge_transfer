@@ -37,6 +37,10 @@ jobs:
       - name: Publish Web artifact
         run: dotnet publish src/AiKnowledgeTransfer.Web/AiKnowledgeTransfer.Web.csproj --configuration Release --no-build --output artifacts/web
 
+      - name: Generate build artifact inventory
+        shell: pwsh
+        run: ./scripts/security/generate-build-artifact-inventory.ps1 -ArtifactPaths artifacts/api,artifacts/web -OutputPath artifacts/security/build-artifact-inventory.json
+
       - name: Generate dependency inventory
         run: |
           mkdir -p artifacts/security

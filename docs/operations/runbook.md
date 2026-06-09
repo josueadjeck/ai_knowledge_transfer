@@ -4,7 +4,7 @@ This runbook describes the MVP operating flow for local or pilot deployments.
 
 ## Pre-release checklist
 
-1. Run the CI workflow on `main` and confirm restore, build, publish, dependency inventory, SPDX SBOM generation, container policy scan, container image vulnerability scan, container image inventory, container image provenance, container build, tests, vulnerability check, static source security scan and secret scan passed.
+1. Run the CI workflow on `main` and confirm restore, build, publish, build artifact inventory, dependency inventory, SPDX SBOM generation, container policy scan, container image vulnerability scan, container image inventory, container image provenance, container build, tests, vulnerability check, static source security scan and secret scan passed.
 2. Confirm API, Web and `security-inventory` artifacts were produced by CI.
 3. Review `docs/security/security-concept.md` and `docs/security/data-protection-concept.md` for the target deployment.
 4. Confirm runtime secrets are injected by an approved secret manager or platform secret store.
@@ -69,7 +69,7 @@ Database mode with `AKT_DB_SCHEMA_MODE=Migrations` applies managed EF migrations
 
 The `Role permission review` check is manual. Review `GET /api/security/role-review` and confirm critical permissions, non-admin assignments and identity-provider role-claim mapping are accepted for the release.
 The `Tenant isolation review` check is manual. Review `GET /api/operations/tenant-isolation-review`; `MultiTenant` mode must not serve multiple customers until persistence, storage, audit, backup, API, UI and export isolation are verified.
-The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `dotnet-package-inventory.json`, `sbom.spdx.json`, `vulnerable-packages.json`, `static-source-scan.json`, `container-policy-scan.json`, `container-vulnerability-scan-api.json`, `container-vulnerability-scan-web.json`, `container-images.json` and `container-provenance.json` are present for the release candidate.
+The `Security inventory` and `Container image inventory` release checks are manual. Review the uploaded `security-inventory` artifact and confirm `build-artifact-inventory.json`, `dotnet-package-inventory.json`, `sbom.spdx.json`, `vulnerable-packages.json`, `static-source-scan.json`, `container-policy-scan.json`, `container-vulnerability-scan-api.json`, `container-vulnerability-scan-web.json`, `container-images.json` and `container-provenance.json` are present for the release candidate.
 The `Security and data protection review` check is manual. Review the concepts under `docs/security` and document accepted residual risks for the target deployment.
 The `Secret management review` check is manual. Confirm runtime secrets are stored outside source control and images, injected at runtime and have documented rotation ownership.
 
