@@ -103,24 +103,32 @@ public sealed class ReleaseReadinessService(
 
     private static ReleaseReadinessCheckResponse BuildAuthenticationCheck(AuthenticationOptions authentication)
     {
-        if (authentication.IsConfigured)
+        if (!authentication.IsConfigured)
         {
             return new ReleaseReadinessCheckResponse(
                 "Authentication configuration",
-                "Pass",
+                "Fail",
                 Required: true,
-                authentication.IsOidc
-                    ? "OIDC authentication settings are configured."
-                    : "Demo authentication mode is active.",
+                "OIDC mode requires authority and client id before release.",
+                $"Mode: {authentication.Mode}");
+        }
+
+        if (!authentication.IsOidc)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Authentication configuration",
+                "Warning",
+                Required: true,
+                "Demo authentication mode is active; use OIDC for enterprise deployment.",
                 $"Mode: {authentication.Mode}, role claim: {authentication.RoleClaimType}");
         }
 
         return new ReleaseReadinessCheckResponse(
             "Authentication configuration",
-            "Fail",
+            "Pass",
             Required: true,
-            "OIDC mode requires authority and client id before release.",
-            $"Mode: {authentication.Mode}");
+            "OIDC authentication settings are configured.",
+            $"Mode: {authentication.Mode}, role claim: {authentication.RoleClaimType}");
     }
 
     private static ReleaseReadinessCheckResponse BuildAiProviderCheck(HealthResponse healthStatus)

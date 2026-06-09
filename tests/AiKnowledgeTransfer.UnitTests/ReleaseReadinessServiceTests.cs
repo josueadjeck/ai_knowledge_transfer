@@ -56,6 +56,34 @@ public sealed class ReleaseReadinessServiceTests
             && check.Status == "Fail");
     }
 
+    [Fact]
+    public void GetStatus_warns_when_demo_authentication_is_active()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(root, aiApiKeyConfigured: true).GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Authentication configuration"
+            && check.Status == "Warning"
+            && check.Detail.Contains("Demo authentication mode", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_passes_when_oidc_authentication_is_configured()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(
+            root,
+            aiApiKeyConfigured: true,
+            new AuthenticationOptions("Oidc", "https://login.example.test/tenant/v2.0", "client-id", "roles"))
+            .GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Authentication configuration"
+            && check.Status == "Pass"
+            && check.Detail.Contains("OIDC authentication settings", StringComparison.Ordinal));
+    }
+
     private static ReleaseReadinessService CreateService(
         string root,
         bool aiApiKeyConfigured,

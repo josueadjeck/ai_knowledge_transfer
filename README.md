@@ -65,7 +65,7 @@ MVP foundation for an AI-assisted knowledge transfer, onboarding and compliance 
 - Structured operational logs for backup, restore, backup preview and release-readiness checks.
 - JSON persistence backup and restore endpoints for local MVP operation.
 - Backup preview before restore, including manifest, entries, warnings and upload counts.
-- Release readiness endpoint and dashboard check for runtime health, backups, persistence and manual release gates.
+- Release readiness endpoint and dashboard check for runtime health, backups, persistence, authentication mode and manual release gates.
 - GitHub Actions CI for restore, build, tests, vulnerability checks and basic secret scanning.
 - Unit and architecture tests.
 
@@ -208,6 +208,7 @@ $env:AKT_AUTH_ROLE_CLAIM="roles"
 ```
 
 When `AKT_AUTH_MODE=Oidc`, health and release-readiness checks require authority and client id to be configured. The API enables JWT bearer authentication in OIDC mode and validates issuer, audience and the configured role claim. Anonymous requests are denied by permission gates in OIDC mode; demo mode keeps the local Viewer fallback for workflow testing.
+Release readiness treats demo authentication as a warning: useful for local MVP work, but not sufficient for an enterprise deployment without a conscious release decision.
 The Blazor workflow shows the active authentication mode. The demo role selector is only available in demo mode; in OIDC mode, Web permissions are evaluated through the same authorization service as API permission gates. The Web app exposes `/auth/login` and `/auth/logout` for cookie-backed OIDC sign-in and sign-out.
 
 ## API examples

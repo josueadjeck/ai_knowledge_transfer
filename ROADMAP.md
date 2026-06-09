@@ -177,6 +177,7 @@ Aktueller Implementierungsstand:
 - Auth-/Rollenhaertung ist erweitert: Die API aktiviert im OIDC-Modus JWT-Bearer-Validierung und blockiert anonyme Zugriffe an Permission-Gates.
 - Auth-/Rollenhaertung ist erweitert: Die Blazor-UI zeigt den aktiven Auth-Modus, nutzt Demo-Rollen nur im Demo-Modus und prueft Aktionen ueber denselben Authorization-Service wie die API.
 - Auth-/Rollenhaertung ist erweitert: Die Web-App aktiviert im OIDC-Modus Cookie- und OpenID-Connect-Redirect-Login mit Login-/Logout-Endpunkten.
+- Release-/Security-Haertung ist erweitert: Release-Readiness warnt bei aktivem Demo-Auth-Modus und bewertet konfigurierte OIDC-Authentifizierung explizit als release-tauglich.
 - Performance-Grundlage ist gestartet: Dokumentanalysen haben konfigurierbare Schutzgrenzen fuer maximale Chunk-Anzahl und extrahierte Gesamtzeichen pro Dokument.
 - Betriebs-Grundlage ist erweitert: Health und Blazor-Operationsbereich zeigen die aktiven Analyse-Schutzgrenzen fuer grosse Dokumente.
 - UX-/API-Haertung ist erweitert: Analyseabbrueche durch Schutzgrenzen liefern einen stabilen Fehlercode und klare Handlungshinweise in API und Blazor-UI.
