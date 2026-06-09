@@ -50,6 +50,10 @@ jobs:
         shell: pwsh
         run: ./scripts/security/generate-spdx-sbom.ps1 -InventoryPath artifacts/security/dotnet-package-inventory.json -OutputPath artifacts/security/sbom.spdx.json
 
+      - name: Generate CycloneDX build SBOM
+        shell: pwsh
+        run: ./scripts/security/generate-cyclonedx-build-sbom.ps1 -PackageInventoryPath artifacts/security/dotnet-package-inventory.json -ArtifactInventoryPath artifacts/security/build-artifact-inventory.json -OutputPath artifacts/security/cyclonedx-build-sbom.json
+
       - name: Container policy scan
         shell: pwsh
         run: ./scripts/security/container-policy-scan.ps1 -OutputPath artifacts/security/container-policy-scan.json

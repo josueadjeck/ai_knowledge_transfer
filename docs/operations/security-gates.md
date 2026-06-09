@@ -14,6 +14,7 @@ Required checks:
 - Generate a build artifact file inventory with SHA256 hashes for API and Web publish outputs.
 - Generate a transitive .NET package inventory artifact.
 - Generate an SPDX 2.3 JSON SBOM baseline from the .NET package inventory.
+- Generate a CycloneDX 1.6 JSON build SBOM from the package inventory and build artifact file inventory.
 - Run a deterministic Dockerfile container policy scan.
 - Build API and Web container images without pushing them.
 - Scan built API and Web container images for high and critical vulnerabilities.
@@ -27,14 +28,14 @@ Required checks:
 
 ## Current limits
 
-The SPDX JSON SBOM is a dependency baseline generated from `dotnet list package --include-transitive`. The build artifact inventory adds file-level SHA256 hashes for API and Web publish outputs, but it is not yet a standards-complete CycloneDX/SPDX build attestation with retention policy. The container policy scan checks Dockerfile rules such as non-root runtime user, approved versioned .NET base images and predictable COPY usage. The built image vulnerability scan uses Trivy and blocks high or critical fixed vulnerabilities in API and Web images. Container provenance records image ids, expected tags, GitHub commit/run context and runtime metadata so a release owner can connect a deployment image back to the CI run. The signing policy scan blocks promotion when registry-backed signing metadata or provenance subjects are missing; actual registry push/sign/verify remains platform-specific release automation. The static source security scan is a deterministic baseline for obvious dangerous release-code patterns, not a full SAST engine. The secret scan is intentionally simple and deterministic. It is not a replacement for a dedicated enterprise secret scanner.
+The SPDX JSON SBOM is a dependency baseline generated from `dotnet list package --include-transitive`. The build artifact inventory adds file-level SHA256 hashes for API and Web publish outputs. The CycloneDX build SBOM combines NuGet package components and publish-output file components with SHA256 hashes, but retention and external attestation storage still depend on the release platform. The container policy scan checks Dockerfile rules such as non-root runtime user, approved versioned .NET base images and predictable COPY usage. The built image vulnerability scan uses Trivy and blocks high or critical fixed vulnerabilities in API and Web images. Container provenance records image ids, expected tags, GitHub commit/run context and runtime metadata so a release owner can connect a deployment image back to the CI run. The signing policy scan blocks promotion when registry-backed signing metadata or provenance subjects are missing; actual registry push/sign/verify remains platform-specific release automation. The static source security scan is a deterministic baseline for obvious dangerous release-code patterns, not a full SAST engine. The secret scan is intentionally simple and deterministic. It is not a replacement for a dedicated enterprise secret scanner.
 Release readiness includes manual `Security inventory` and `Container image inventory` checks so release owners confirm the uploaded artifact exists and was reviewed.
 
 Recommended production additions:
 
 - GitHub Advanced Security or an equivalent secret scanning tool.
 - CodeQL or another enterprise SAST engine.
-- Standards-complete CycloneDX or SPDX SBOM attestation with retention policy.
+- External SBOM attestation storage and retention policy.
 - Dependency review for pull requests.
 - Registry push/sign/verify automation using the approved registry and signer.
 - Direct integration with the customer's approved secret manager.

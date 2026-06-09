@@ -89,7 +89,7 @@ $env:OPENAI_BASE_URL="https://api.openai.com/v1/"
 
 Before deploying:
 
-1. Confirm CI restore, build, publish, build artifact inventory, dependency inventory, SPDX SBOM generation, container policy scan, container image vulnerability scan, container image inventory, container image provenance, container signing policy scan, container build, tests, vulnerability scan, static source security scan and secret scan passed.
+1. Confirm CI restore, build, publish, build artifact inventory, dependency inventory, SPDX SBOM generation, CycloneDX build SBOM generation, container policy scan, container image vulnerability scan, container image inventory, container image provenance, container signing policy scan, container build, tests, vulnerability scan, static source security scan and secret scan passed.
 2. Confirm `GET /health` is `ok`.
 3. Confirm `GET /api/operations/monitoring-summary` is `ok` or contains only accepted manual release-review signals.
 4. Confirm `GET /api/operations/release-readiness` has no `Fail` checks.
@@ -109,4 +109,4 @@ The concrete slot implementation remains platform-specific. Use the target hosti
 
 ## Current Limits
 
-The MVP deployment baseline generates build artifact file hashes and container provenance, validates registry-backed image signing policy metadata, validates secret-store release metadata and supports a blue/green release-readiness mode, but does not yet provide platform-specific registry push/sign/verify automation, standards-complete CycloneDX/SPDX SBOM attestation, automated provider-specific secret retrieval or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.
+The MVP deployment baseline generates build artifact file hashes, SPDX dependency SBOM, CycloneDX build SBOM and container provenance, validates registry-backed image signing policy metadata, validates secret-store release metadata and supports a blue/green release-readiness mode, but does not yet provide platform-specific registry push/sign/verify automation, external SBOM attestation storage and retention, automated provider-specific secret retrieval or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.

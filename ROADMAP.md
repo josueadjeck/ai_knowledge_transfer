@@ -202,6 +202,7 @@ Aktueller Implementierungsstand:
 - Security-Gates sind erweitert: CI fuehrt einen deterministischen Static-Source-Security-Scan fuer gefaehrliche Release-Code-Muster aus und archiviert `static-source-scan.json` im Security-Inventar.
 - SBOM-Grundlage ist gestartet: CI erzeugt aus dem transitive .NET Dependency Inventory ein SPDX-2.3-JSON-SBOM-Artefakt `sbom.spdx.json` fuer Release-Nachvollziehbarkeit.
 - SBOM-/Artefakt-Grundlage ist erweitert: CI erzeugt ein `build-artifact-inventory.json` mit Dateipfaden, Groessen und SHA256-Hashes der API- und Web-Publish-Artefakte.
+- SBOM-/Artefakt-Grundlage ist erweitert: CI erzeugt ein `cyclonedx-build-sbom.json` mit NuGet-Package-Komponenten und Datei-Komponenten inklusive SHA256-Hashes.
 - Container-Security-Grundlage ist erweitert: CI prueft Dockerfiles per Policy-Scan auf nicht-root Runtime-User, versionierte .NET-Basisimages, Production-Umgebung und stabile COPY-/Port-Regeln.
 - Container-Supply-Chain-Grundlage ist erweitert: CI erzeugt ein `container-provenance.json` aus Image-Inventar, erwarteten Tags und GitHub-Run-Kontext als Vorstufe fuer registry-backed Image Signing.
 - Container-Supply-Chain-Grundlage ist erweitert: CI erzwingt ein `container-signing-policy.json` mit Registry, Signer Identity, Verification Policy und Provenance-Subjects als registry-backed Signing-Promotion-Gate.

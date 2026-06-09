@@ -123,14 +123,14 @@ public sealed class RoadmapReadinessService
             NeedsWork(
                 9,
                 "Betrieb, Sicherheit und Skalierung",
-                9,
                 10,
+                11,
                 [
-                    "Monitoring, backups, release readiness, DB providers, deployment strategy gates, security gates, dependency SBOM, build artifact file hashes, container checks, container provenance, container signing policy gate, secret-store release metadata, role review and tenant isolation review are implemented.",
+                    "Monitoring, backups, release readiness, DB providers, deployment strategy gates, security gates, SPDX dependency SBOM, CycloneDX build SBOM, build artifact file hashes, container checks, container provenance, container signing policy gate, secret-store release metadata, role review and tenant isolation review are implemented.",
                     "SQL Server and PostgreSQL are configurable production-capable database providers."
                 ],
                 [
-                    "Enterprise-hardening follow-ups remain: platform-specific registry push/sign/verify automation, standards-complete CycloneDX/SPDX SBOM attestation, automated provider-specific secret retrieval and complete tenant isolation."
+                    "Enterprise-hardening follow-ups remain: platform-specific registry push/sign/verify automation, external SBOM attestation retention, automated provider-specific secret retrieval and complete tenant isolation."
                 ])
         ];
     }
