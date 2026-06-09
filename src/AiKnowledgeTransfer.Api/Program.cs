@@ -501,6 +501,12 @@ operations.MapGet("/monitoring-summary", (MonitoringSummaryService service) =>
 })
 .RequirePermission(Permission.ManageUsers);
 
+operations.MapGet("/tenant-isolation-review", (TenantIsolationReviewService service) =>
+{
+    return Results.Ok(service.GetReview());
+})
+.RequirePermission(Permission.ManageUsers);
+
 operations.MapGet("/backups/{fileName}/preview", async Task<IResult> (
     string fileName,
     PersistenceBackupService service,

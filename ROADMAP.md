@@ -185,7 +185,7 @@ Aktueller Implementierungsstand:
 - Betriebs-Grundlage ist erweitert: Health und Blazor-Operationsbereich zeigen die aktiven Analyse-Schutzgrenzen fuer grosse Dokumente.
 - UX-/API-Haertung ist erweitert: Analyseabbrueche durch Schutzgrenzen liefern einen stabilen Fehlercode und klare Handlungshinweise in API und Blazor-UI.
 - Performance-Grundlage ist erweitert: Knowledge Extraction hat konfigurierbare Schutzgrenzen vor AI-Provider-Aufrufen und meldet Limitverletzungen mit stabilem API-Fehlercode.
-- Mandantenfaehigkeit ist geplant: Tenancy-Modus, Tenant-Claim und Default-Tenant sind als Betriebsoptionen sichtbar; Health und Release-Readiness bewerten Single-/Multi-Tenant-Konfiguration.
+- Mandantenfaehigkeit ist operationalisiert geplant: Tenancy-Modus, Tenant-Claim und Default-Tenant sind sichtbar; Tenant-Isolation-Review macht offene Isolationsbereiche fuer Persistenz, Storage, Audit, Backup, API, UI und Exporte release-relevant.
 - Deployment-Grundlage ist gestartet: CI veroeffentlicht API- und Web-Release-Artefakte und die Deployment-Dokumentation beschreibt Runtime-Konfiguration, Checks und aktuelle Grenzen.
 - Container-Grundlage ist gestartet: API und Web haben eigene Dockerfiles; CI baut beide Images ohne Push als Runtime-Haertungscheck.
 - Datenbank-Betrieb ist erweitert: Health und Release-Readiness zeigen den aktuellen Schema-Modus `EnsureCreated` und warnen, dass produktionsnahe EF-Migrations noch fehlen.

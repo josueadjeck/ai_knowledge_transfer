@@ -12,9 +12,11 @@ public sealed class ReleaseReadinessService(
     PersistenceBackupService backups,
     AuthenticationOptions authentication,
     RolePermissionService? rolePermissions = null,
+    TenantIsolationReviewService? tenantIsolationReview = null,
     ILogger<ReleaseReadinessService>? logger = null)
 {
     private readonly RolePermissionService _rolePermissions = rolePermissions ?? new RolePermissionService();
+    private readonly TenantIsolationReviewService? _tenantIsolationReview = tenantIsolationReview;
 
     public ReleaseReadinessResponse GetStatus(string serviceName)
     {
@@ -29,6 +31,7 @@ public sealed class ReleaseReadinessService(
             BuildAuthenticationCheck(authentication),
             BuildRolePermissionReviewCheck(_rolePermissions.GetReview()),
             BuildTenancyCheck(healthStatus),
+            BuildTenantIsolationReviewCheck(_tenantIsolationReview?.GetReview(), healthStatus),
             BuildBackupCheck(backupList),
             BuildAiProviderCheck(healthStatus),
             new(
@@ -303,9 +306,9 @@ public sealed class ReleaseReadinessService(
         {
             return new ReleaseReadinessCheckResponse(
                 "Tenancy configuration",
-                "Pass",
+                "Manual",
                 Required: false,
-                "Multi-tenant mode is configured.",
+                "Multi-tenant mode is configured; complete isolation still requires manual release review.",
                 $"Mode: {mode}");
         }
 
@@ -315,6 +318,35 @@ public sealed class ReleaseReadinessService(
             Required: false,
             "Single-tenant MVP mode is active; multi-tenant isolation must be designed before serving multiple customers.",
             $"Mode: {mode}");
+    }
+
+    private static ReleaseReadinessCheckResponse BuildTenantIsolationReviewCheck(
+        TenantIsolationReviewResponse? review,
+        HealthResponse healthStatus)
+    {
+        var tenancy = healthStatus.Components.FirstOrDefault(component => component.Name == "tenancy");
+        var mode = tenancy?.Metadata.TryGetValue("mode", out var configuredMode) == true
+            ? configuredMode
+            : "unknown";
+
+        if (review is null)
+        {
+            return new ReleaseReadinessCheckResponse(
+                "Tenant isolation review",
+                "Manual",
+                Required: true,
+                "Confirm tenant isolation assumptions before release.",
+                $"Mode: {mode}, endpoint: /api/operations/tenant-isolation-review");
+        }
+
+        return new ReleaseReadinessCheckResponse(
+            "Tenant isolation review",
+            review.Status == "Blocked" ? "Fail" : "Manual",
+            Required: true,
+            review.Status == "SingleTenant"
+                ? "Single-tenant MVP mode is accepted only for one customer or one isolated deployment."
+                : "Review tenant isolation areas before release.",
+            $"Status: {review.Status}, manual areas: {review.ManualAreaCount}, endpoint: /api/operations/tenant-isolation-review");
     }
 
     private static ReleaseReadinessCheckResponse BuildAiProviderCheck(HealthResponse healthStatus)

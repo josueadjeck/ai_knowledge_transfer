@@ -96,4 +96,4 @@ Database deployments can use `AKT_DB_SCHEMA_MODE=Migrations` to apply the manage
 
 ## Current Limits
 
-The MVP deployment baseline does not yet provide image signing, full CycloneDX/SPDX SBOM export, direct secret-manager integration, blue/green deployment or tenant-isolated production storage. Those remain Phase 9 follow-up work.
+The MVP deployment baseline does not yet provide image signing, full CycloneDX/SPDX SBOM export, direct secret-manager integration, blue/green deployment or complete tenant-isolated production storage. Tenant-isolation review makes the gap explicit, but implementation remains Phase 9 follow-up work.

@@ -58,9 +58,9 @@ Backups contain project data, audit logs and uploaded files. They must be stored
 
 ## Tenancy
 
-The MVP defaults to `SingleTenant`. Multi-tenant mode is visible as configuration and release-readiness metadata, but complete tenant isolation still requires dedicated implementation across persistence, storage, audit, backup, API authorization and UI filtering.
+The MVP defaults to `SingleTenant`. Multi-tenant mode is visible as configuration and release-readiness metadata, but complete tenant isolation still requires dedicated implementation across persistence, storage, audit, backup, API authorization, UI filtering and exports.
 
-Until that work is complete, one deployment should serve one customer or one agreed data boundary.
+Use `GET /api/operations/tenant-isolation-review` before release. Until all isolation areas are implemented and verified, one deployment should serve one customer or one agreed data boundary.
 
 ## Data Protection Review Checklist
 

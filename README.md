@@ -233,7 +233,7 @@ $env:AKT_TENANT_CLAIM="tenant_id"
 $env:AKT_DEFAULT_TENANT_ID="default"
 ```
 
-Health reports the active tenancy mode. Release readiness warns on `SingleTenant` and fails on invalid tenancy configuration.
+Health reports the active tenancy mode. Release readiness warns on `SingleTenant`, requires tenant-isolation review for `MultiTenant` and fails on invalid tenancy configuration. Review `GET /api/operations/tenant-isolation-review` before serving more than one tenant.
 
 ## API examples
 
@@ -451,6 +451,12 @@ Get monitoring summary:
 
 ```http
 GET http://localhost:5256/api/operations/monitoring-summary
+```
+
+Get tenant isolation review:
+
+```http
+GET http://localhost:5256/api/operations/tenant-isolation-review
 ```
 
 Create, list and restore local JSON persistence backups:

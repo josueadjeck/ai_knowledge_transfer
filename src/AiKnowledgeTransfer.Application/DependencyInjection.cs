@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<MonitoringSummaryService>();
         services.AddScoped<ReleaseReadinessService>();
         services.AddScoped<RuntimeMetricsService>();
+        services.AddScoped<TenantIsolationReviewService>();
         services.AddScoped<RoadmapService>();
         services.AddScoped<OnboardingReadinessService>();
         services.AddScoped<OnboardingStartPackageService>();

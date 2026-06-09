@@ -174,7 +174,7 @@ public sealed class ReleaseReadinessServiceTests
     }
 
     [Fact]
-    public void GetStatus_passes_when_multi_tenant_mode_is_configured()
+    public void GetStatus_requires_manual_review_when_multi_tenant_mode_is_configured()
     {
         var root = CreateRoot();
         var readiness = CreateService(
@@ -185,8 +185,21 @@ public sealed class ReleaseReadinessServiceTests
 
         Assert.Contains(readiness.Checks, check =>
             check.Name == "Tenancy configuration"
-            && check.Status == "Pass"
+            && check.Status == "Manual"
             && check.Detail.Contains("Multi-tenant mode", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetStatus_requires_tenant_isolation_review()
+    {
+        var root = CreateRoot();
+        var readiness = CreateService(root, aiApiKeyConfigured: true).GetStatus("TestService");
+
+        Assert.Contains(readiness.Checks, check =>
+            check.Name == "Tenant isolation review"
+            && check.Required
+            && check.Status == "Manual"
+            && check.Evidence.Contains("/api/operations/tenant-isolation-review", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -376,7 +389,11 @@ public sealed class ReleaseReadinessServiceTests
             tenancy.DefaultTenantId));
         var backups = new PersistenceBackupService(CreateBackupOptions(root));
 
-        return new ReleaseReadinessService(health, backups, authentication);
+        return new ReleaseReadinessService(
+            health,
+            backups,
+            authentication,
+            tenantIsolationReview: new TenantIsolationReviewService(tenancy));
     }
 
     private static PersistenceBackupOptions CreateBackupOptions(string root)

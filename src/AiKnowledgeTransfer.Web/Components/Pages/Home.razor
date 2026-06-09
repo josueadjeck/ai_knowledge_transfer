@@ -45,6 +45,7 @@
 @inject AuditLogService Audit
 @inject PersistenceBackupService Backups
 @inject ReleaseReadinessService ReleaseReadiness
+@inject TenantIsolationReviewService TenantIsolationReview
 @inject OperationalHealthService Health
 @inject RuntimeMetricsService RuntimeMetrics
 @inject MonitoringSummaryService MonitoringSummary
@@ -797,6 +798,7 @@
             <button @onclick="LoadHealthAsync" disabled="@(!CanOperateBackups)">Status laden</button>
             <button @onclick="LoadRuntimeMetricsAsync" disabled="@(!CanOperateBackups)">Metriken laden</button>
             <button @onclick="LoadRolePermissionReviewAsync" disabled="@(!CanOperateBackups)">Rollenreview</button>
+            <button @onclick="LoadTenantIsolationReviewAsync" disabled="@(!CanOperateBackups)">Tenant-Review</button>
             <button @onclick="CreateBackupAsync" disabled="@(!CanOperateBackups)">Backup erstellen</button>
             <button @onclick="LoadBackupsAsync" disabled="@(!CanOperateBackups)">Backups laden</button>
             <button @onclick="PreviewBackupAsync" disabled="@(!CanPreviewBackup)">Backup pruefen</button>
@@ -984,6 +986,38 @@
             </div>
         }
 
+        @if (_tenantIsolationReview is not null)
+        {
+            <div class="health-overview">
+                <div>
+                    <span>Tenant-Review</span>
+                    <strong class="@ReadinessStatusClass(_tenantIsolationReview.Status)">@_tenantIsolationReview.Status</strong>
+                </div>
+                <div>
+                    <span>Modus</span>
+                    <strong>@_tenantIsolationReview.TenancyMode</strong>
+                </div>
+                <div>
+                    <span>Tenant Claim</span>
+                    <strong>@_tenantIsolationReview.TenantClaimType</strong>
+                </div>
+                <div>
+                    <span>Manuell</span>
+                    <strong>@_tenantIsolationReview.ManualAreaCount / @_tenantIsolationReview.RequiredAreaCount</strong>
+                </div>
+            </div>
+            <div class="readiness-list">
+                @foreach (var area in _tenantIsolationReview.Areas)
+                {
+                    <div>
+                        <strong>@area.Area</strong>
+                        <span class="@ReadinessStatusClass(area.Status)">@area.Status</span>
+                        <p>@area.Detail</p>
+                    </div>
+                }
+            </div>
+        }
+
         @if (_backups.Count > 0)
         {
             <label class="select-label">
@@ -1094,6 +1128,7 @@
     private RuntimeMetricsResponse? _runtimeMetrics;
     private MonitoringSummaryResponse? _monitoringSummary;
     private RolePermissionReviewResponse? _rolePermissionReview;
+    private TenantIsolationReviewResponse? _tenantIsolationReview;
     private IReadOnlyCollection<AuditEventResponse> _auditEvents = [];
     private IReadOnlyCollection<BackupResponse> _backups = [];
     private IReadOnlyCollection<DocumentParserCapabilityResponse> _parserCapabilities = [];
@@ -1627,6 +1662,13 @@
     {
         _rolePermissionReview = RolePermissions.GetReview();
         SetStatus("Rollenreview geladen", $"{_rolePermissionReview.Status}, {_rolePermissionReview.NonAdminCriticalAssignmentCount} kritische Nicht-Admin-Zuordnungen");
+        return Task.CompletedTask;
+    }
+
+    private Task LoadTenantIsolationReviewAsync()
+    {
+        _tenantIsolationReview = TenantIsolationReview.GetReview();
+        SetStatus("Tenant-Review geladen", $"{_tenantIsolationReview.Status}, {_tenantIsolationReview.ManualAreaCount} manuelle Bereiche");
         return Task.CompletedTask;
     }
 
