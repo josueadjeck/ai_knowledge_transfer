@@ -173,7 +173,7 @@ $env:AKT_AUTH_ROLE_CLAIM="roles"
 ```
 
 When `AKT_AUTH_MODE=Oidc`, health and release-readiness checks require authority and client id to be configured. The API enables JWT bearer authentication in OIDC mode and validates issuer, audience and the configured role claim. Anonymous requests are denied by permission gates in OIDC mode; demo mode keeps the local Viewer fallback for workflow testing.
-The Blazor workflow shows the active authentication mode. The demo role selector is only available in demo mode; in OIDC mode, Web permissions are evaluated through the same authorization service as API permission gates.
+The Blazor workflow shows the active authentication mode. The demo role selector is only available in demo mode; in OIDC mode, Web permissions are evaluated through the same authorization service as API permission gates. The Web app exposes `/auth/login` and `/auth/logout` for cookie-backed OIDC sign-in and sign-out.
 
 ## API examples
 

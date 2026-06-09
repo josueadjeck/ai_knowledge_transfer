@@ -1,9 +1,12 @@
 using AiKnowledgeTransfer.Application;
+using AiKnowledgeTransfer.Application.Security;
 using AiKnowledgeTransfer.Infrastructure;
+using AiKnowledgeTransfer.Web;
 using AiKnowledgeTransfer.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 var storageRootPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "uploads");
+var authentication = AuthenticationOptions.FromEnvironment();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -11,7 +14,8 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure(storageRootPath);
+    .AddInfrastructure(storageRootPath)
+    .AddConfiguredWebAuthentication(authentication);
 
 var app = builder.Build();
 
@@ -26,9 +30,11 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+app.UseConfiguredWebAuthentication(authentication);
 
 app.UseAntiforgery();
 
+app.MapConfiguredWebAuthenticationEndpoints(authentication);
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

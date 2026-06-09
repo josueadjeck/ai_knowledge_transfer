@@ -84,6 +84,12 @@ a, .btn-link {
     margin-top: .4rem;
 }
 
+.auth-actions a {
+    color: #244f8f;
+    font-size: .86rem;
+    font-weight: 700;
+}
+
 .metric-grid {
     display: grid;
     gap: 1rem;

@@ -65,7 +65,20 @@
         <span class="@StatusCssClass">@StatusDetail</span>
         <span>@CurrentUser.DisplayName | @CurrentUser.Source</span>
         <span>Auth: @AuthOptions.Mode</span>
-        @if (!AuthOptions.IsOidc)
+        @if (AuthOptions.IsOidc)
+        {
+            <div class="auth-actions">
+                @if (CurrentUser.IsAuthenticated)
+                {
+                    <a href="/auth/logout">Abmelden</a>
+                }
+                else
+                {
+                    <a href="/auth/login">Anmelden</a>
+                }
+            </div>
+        }
+        else
         {
             <label class="role-select">
                 Rolle
